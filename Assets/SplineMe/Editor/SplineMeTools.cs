@@ -16,7 +16,7 @@ namespace SplineMe.Editor
 		public bool showMainTransformGizmo;
 	}
 
-	public class LineEditorTools
+	public class SplineMeTools
 	{
 
 		public static Color LineStartPointColor => Color.green;
@@ -27,6 +27,7 @@ namespace SplineMe.Editor
 
 		public const float HandlePointSize = 0.04f;
 		public const float PickPointSize = 0.06f;
+		public const float DirectionScale = 0.5f;
 
 		private const string ShowMainHandleKey = "ShowMainHandle";
 		
@@ -77,7 +78,7 @@ namespace SplineMe.Editor
 
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			GUILayout.Label("Line Editor");
+			GUILayout.Label("Spline Me");
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 

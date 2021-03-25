@@ -16,7 +16,7 @@ namespace SplineMe
 		}
 	}
 
-	public class Line : MonoBehaviour
+	public class Polyline : MonoBehaviour
 	{
 		[SerializeField, NonReorderableAttribute]
 		protected List<LinePoint> inspectorPoints;
@@ -89,6 +89,11 @@ namespace SplineMe
 					reversedPoints.Insert(0, newPoint);
 					index++;
 				}
+			}
+
+			for(var i=0; i< reversedPoints.Count; i++)
+			{
+				reversedPoints[i].position = inspectorPoints[inspectorPoints.Count-i-1].position;
 			}
 
 
