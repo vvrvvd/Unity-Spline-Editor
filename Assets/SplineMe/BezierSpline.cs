@@ -4,8 +4,11 @@ using UnityEngine;
 namespace SplineMe
 {
 
-    public class BezierCurve : Polyline
+    public class BezierSpline : Polyline
     {
+
+		public int CurveCount => (PointsCount - 1) / 3;
+
 		protected override void Reset()
 		{
 			reversedPoints = new List<LinePoint>();
@@ -24,19 +27,65 @@ namespace SplineMe
 
 		public Vector3 GetPoint(float t)
 		{
-			return transform.TransformPoint(GetPoint(Points[0].position, Points[1].position, Points[2].position, Points[3].position, t));
+			var i = 0;
+			if (t >= 1f)
+			{
+				t = 1f;
+				i = PointsCount - 4;
+			}
+			else
+			{
+				t = Mathf.Clamp01(t) * CurveCount;
+				i = (int)t;
+				t -= i;
+				i *= 3;
+			}
+
+			return transform.TransformPoint(GetPoint(Points[i].position, Points[i+1].position, Points[i+2].position, Points[i+3].position, t));
 		}
 
 		public Vector3 GetVelocity(float t)
 		{
-			return transform.TransformPoint(GetFirstDerivative(Points[0].position, Points[1].position, Points[2].position, Points[3].position, t)) -
-				transform.position;
+			var i = 0;
+			if (t >= 1f)
+			{
+				t = 1f;
+				i = PointsCount - 4;
+			}
+			else
+			{
+				t = Mathf.Clamp01(t) * CurveCount;
+				i = (int)t;
+				t -= i;
+				i *= 3;
+			}
+
+			return transform.TransformPoint(GetFirstDerivative(Points[i].position, Points[i+1].position, Points[i+2].position, Points[i+3].position, t)) - transform.position;
 		}
 		
 		public Vector3 GetDirection(float t)
 		{
 			return GetVelocity(t).normalized;
 		}
+		public void AddCurve()
+		{
+			var point = Points[PointsCount - 1].position;
+			point.x += 1f;
+			AddPoint(point);
+			point.x += 1f;
+			AddPoint(point);
+			point.x += 1f;
+			AddPoint(point);
+		}
+
+		public void RemoveCurve(int curveIndex)
+		{
+			var startCurveIndex = curveIndex * 3;
+			RemovePoint(startCurveIndex + 3);
+			RemovePoint(startCurveIndex + 2);
+			RemovePoint(startCurveIndex + 1);
+		}
+
 
 		public static Vector3 GetPoint(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
 		{

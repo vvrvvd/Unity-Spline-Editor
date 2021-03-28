@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 520551467}
   - component: {fileID: 520551466}
   m_Layer: 0
-  m_Name: Line
+  m_Name: Polyline
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -153,13 +153,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inspectorPoints:
-  - position: {x: -0.27119052, y: 0, z: 0.10751343}
-  - position: {x: -0.8383703, y: -0.13033491, z: -0.053950742}
-  - position: {x: -1.2664196, y: -0.13334808, z: -0.26349902}
+  - position: {x: 0.12057328, y: 0, z: 0.08984375}
+  - position: {x: 0.4908228, y: 0, z: 0.014637947}
+  - position: {x: 0.7655699, y: 0, z: 0.33276176}
   reversedPoints:
-  - position: {x: -1.2664196, y: -0.13334808, z: -0.26349902}
-  - position: {x: -0.8383703, y: -0.13033491, z: -0.053950742}
-  - position: {x: -0.27119052, y: 0, z: 0.10751343}
+  - position: {x: 0.7655699, y: 0, z: 0.33276176}
+  - position: {x: 0.4908228, y: 0, z: 0.014637947}
+  - position: {x: 0.12057328, y: 0, z: 0.08984375}
 --- !u!4 &520551467
 Transform:
   m_ObjectHideFlags: 0
@@ -167,13 +167,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 520551465}
-  m_LocalRotation: {x: -0.15648855, y: 0.18146026, z: -0.11875027, w: 0.9635777}
-  m_LocalPosition: {x: -1.7657641, y: -0.18916997, z: -10.82816}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.334, y: -0.20734453, z: -10.839178}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: -14.98, y: 23.608, z: -17.199}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -350,7 +350,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2096626406
+--- !u!1 &1334839308
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -358,40 +358,50 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2096626408}
-  - component: {fileID: 2096626407}
+  - component: {fileID: 1334839310}
+  - component: {fileID: 1334839309}
   m_Layer: 0
-  m_Name: Bezier Curve
+  m_Name: Bezier Spline
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2096626407
+--- !u!114 &1334839309
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2096626406}
+  m_GameObject: {fileID: 1334839308}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3e1473df0cd907e4f971d62018ce5e96, type: 3}
+  m_Script: {fileID: 11500000, guid: 176021bd4033d974f878e8cd0f3a3f95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   inspectorPoints:
-  - position: {x: 0, y: 0, z: 0}
-  - position: {x: -1, y: 0, z: 0}
+  - position: {x: 6.809655, y: 0, z: 0.45054054}
+  - position: {x: 6.1821337, y: 0, z: 1.8275032}
+  - position: {x: 4.451778, y: 0, z: 1.5451574}
+  - position: {x: 3.809655, y: 0, z: 0.45054054}
+  - position: {x: 2.8590498, y: 0, z: -0.9699154}
+  - position: {x: 2.0277243, y: 0, z: -1.1406784}
+  - position: {x: 1.8042115, y: 0, z: 0.4088316}
   reversedPoints:
-  - position: {x: -1, y: 0, z: 0}
-  - position: {x: 0, y: 0, z: 0}
---- !u!4 &2096626408
+  - position: {x: 1.8042115, y: 0, z: 0.4088316}
+  - position: {x: 2.0277243, y: 0, z: -1.1406784}
+  - position: {x: 2.8590498, y: 0, z: -0.9699154}
+  - position: {x: 3.809655, y: 0, z: 0.45054054}
+  - position: {x: 4.451778, y: 0, z: 1.5451574}
+  - position: {x: 6.1821337, y: 0, z: 1.8275032}
+  - position: {x: 6.809655, y: 0, z: 0.45054054}
+--- !u!4 &1334839310
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2096626406}
+  m_GameObject: {fileID: 1334839308}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -2.334, y: -0.20734453, z: -10.839178}
   m_LocalScale: {x: 1, y: 1, z: 1}

@@ -25,8 +25,9 @@ namespace SplineMe.Editor
 		
 		private void OnEnable()
 		{
-			SplineMeTools.InitializeGUI(ref editorState);
+			LineMeTools.InitializeGUI(ref editorState);
 
+			editorState.title = "LineMe Tools";
 			editorState.AddPointAction = AddPoint;
 			editorState.RemovePointAction = RemoveSelectedPoint;
 			editorState.isAnyPointSelected = IsAnyPointSelected;
@@ -34,7 +35,7 @@ namespace SplineMe.Editor
 
 		private void OnDisable()
 		{
-			SplineMeTools.ReleaseGUI(ref editorState);
+			LineMeTools.ReleaseGUI(ref editorState);
 		}
 
 		private void OnSceneGUI()
@@ -51,7 +52,7 @@ namespace SplineMe.Editor
 				SelectIndex(line.PointsCount - 1);
 			}
 
-			SplineMeTools.DrawGUI(ref editorState);
+			LineMeTools.DrawGUI(ref editorState);
 
 			DrawLine();
 		}
@@ -135,13 +136,14 @@ namespace SplineMe.Editor
 				return;
 			}
 
-			var endLineColor = line.PointsCount == 1 ? SplineMeTools.LineStartPointColor : SplineMeTools.LineEndPointColor;
+			var endLineColor = line.PointsCount == 1 ? LineMeTools.LineStartPointColor : LineMeTools.LineEndPointColor;
 			lineStart = DrawPoint(0, endLineColor); //Line end
 			for (var i = 1; i < line.PointsCount; i++)
 			{
 				var pointColor = i == line.PointsCount - 1
-										? SplineMeTools.LineStartPointColor //Line beginning
-										: SplineMeTools.LineMidPointColor;
+										? LineMeTools.LineStartPointColor //Line beginning
+										: LineMeTools.LineMidPointColor;
+
 
 				lineEnd = DrawPoint(i, pointColor);
 				DrawLine(lineStart, lineEnd);
@@ -151,8 +153,8 @@ namespace SplineMe.Editor
 
 		private void DrawLine(Vector3 p0, Vector3 p1)
 		{
-			Handles.color = SplineMeTools.LineColor;
-			Handles.DrawLine(p0, p1);
+			Handles.color = LineMeTools.LineColor;
+			Handles.DrawLine(p0, p1, LineMeTools.LineWidth);
 		}
 
 		private Vector3 DrawPoint(int index, Color pointColor)
@@ -160,7 +162,7 @@ namespace SplineMe.Editor
 			var point = handleTransform.TransformPoint(line.Points[index].position);
 			float size = HandleUtility.GetHandleSize(point);
 			Handles.color = pointColor;
-			if (Handles.Button(point, handleRotation, size * SplineMeTools.HandlePointSize, size * SplineMeTools.PickPointSize, Handles.DotHandleCap))
+			if (Handles.Button(point, handleRotation, size * LineMeTools.HandlePointSize, size * LineMeTools.PickPointSize, Handles.DotHandleCap))
 			{
 				SelectIndex(index);
 				Repaint();

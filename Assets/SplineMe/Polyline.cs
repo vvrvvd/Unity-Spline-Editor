@@ -36,7 +36,7 @@ namespace SplineMe
 
 		public void AddPoint(Vector3 point)
 		{
-			var nextIndex = PointsCount > 0 ? PointsCount - 1 : 0;
+			var nextIndex = PointsCount > 0 ? PointsCount : 0;
 			AddPoint(point, nextIndex);
 		}
 
