@@ -29,7 +29,13 @@ namespace SplineMe.Editor
 		public static Color LineColor => Color.white;
 		public static Color TangentLineColor => Color.grey;
 		public static Color DirectionLineColor => Color.green;
+		public static Color SegmentsColor => Color.blue;
 
+		public static Color[] ModeColors = {
+			Color.white,	//Free
+			Color.yellow,	//Aligned
+			Color.cyan		//Mirrored
+		};
 
 		public const float LineWidth = 2f;
 		public const float HandlePointSize = 0.04f;
@@ -110,7 +116,7 @@ namespace SplineMe.Editor
 			GUI.backgroundColor = Color.white;
 
 			var prevValue = state.showMainTransformGizmo;
-			var newValue = GUILayout.Toggle(prevValue, "Show main handle");
+			var newValue = GUILayout.Toggle(prevValue, "Show Main Handle");
 			if (newValue != prevValue)
 			{
 				if (newValue)

@@ -20,7 +20,7 @@ namespace SplineMe.Editor
 		private HashSet<KeyCode> pressedKeys = new HashSet<KeyCode>();
 
 		private bool IsAnyPointSelected => selectedIndex != -1;
-		private bool IsAnyCurveSelected => selectedCurveIndex > 0;
+		private bool IsAnyCurveSelected => spline.CurveCount > 1;
 
 		private SplineEditorState editorState;
 
@@ -28,7 +28,7 @@ namespace SplineMe.Editor
 		{
 			SplineMeTools.InitializeGUI(ref editorState);
 			
-			editorState.title = "Spline Me";
+			editorState.title = "Spline Tools";
 			editorState.AddCurveAction = AddCurve;
 			editorState.RemoveCurveAction = RemoveSelectedCurve;
 			editorState.isAnyCurveSelected = IsAnyPointSelected;
@@ -41,12 +41,44 @@ namespace SplineMe.Editor
 		
 		public override void OnInspectorGUI()
 		{
-			DrawDefaultInspector();
 			spline = target as BezierSpline;
-			if (GUILayout.Button("Add Curve"))
+			EditorGUI.BeginChangeCheck();
+			var prevEnabled = GUI.enabled;
+			GUI.enabled = IsAnyCurveSelected;
+			bool loop = EditorGUILayout.Toggle("Loop", spline.IsLoop);
+			if (EditorGUI.EndChangeCheck())
 			{
-				Undo.RecordObject(spline, "Add Curve");
-				spline.AddCurve();
+				Undo.RecordObject(spline, "Toggle Loop");
+				EditorUtility.SetDirty(spline);
+				spline.IsLoop = loop;
+			}
+
+			GUI.enabled = prevEnabled;
+
+			if (IsAnyPointSelected)
+			{
+				DrawSelectedPointInspector();
+			}
+		}
+
+		private void DrawSelectedPointInspector()
+		{
+			GUILayout.Label("Selected Point");
+			EditorGUI.BeginChangeCheck();
+			Vector3 point = EditorGUILayout.Vector3Field("Position", spline.Points[selectedIndex].position);
+			if (EditorGUI.EndChangeCheck())
+			{
+				Undo.RecordObject(spline, "Move Point");
+				EditorUtility.SetDirty(spline);
+				spline.UpdatePoint(selectedIndex, point);
+			}
+
+			EditorGUI.BeginChangeCheck();
+			BezierControlPointMode mode = (BezierControlPointMode) EditorGUILayout.EnumPopup("Mode", spline.GetControlPointMode(selectedIndex));
+			if (EditorGUI.EndChangeCheck())
+			{
+				Undo.RecordObject(spline, "Change Point Mode");
+				spline.SetControlPointMode(selectedIndex, mode);
 				EditorUtility.SetDirty(spline);
 			}
 		}
@@ -108,12 +140,10 @@ namespace SplineMe.Editor
 			for (var i = 0; i < spline.CurveCount; i++)
 			{
 				var curveStartIndex = i * 3;
-				var endCurveColor = curveStartIndex + 3 == spline.PointsCount - 1 ? SplineMeTools.LineEndPointColor : SplineMeTools.LineMidPointColor;
-				var startSplineColor = curveStartIndex == 0 ? SplineMeTools.LineStartPointColor : SplineMeTools.LineMidPointColor;
-				var p0 = DrawPoint(curveStartIndex, startSplineColor);
-				var p1 = DrawPoint(curveStartIndex + 1, SplineMeTools.LineMidPointColor);
-				var p2 = DrawPoint(curveStartIndex + 2, SplineMeTools.LineMidPointColor);
-				var p3 = DrawPoint(curveStartIndex + 3, endCurveColor);
+				var p0 = DrawPoint(curveStartIndex);
+				var p1 = DrawPoint(curveStartIndex+1);
+				var p2 = DrawPoint(curveStartIndex+2);
+				var p3 = DrawPoint(curveStartIndex+3);
 
 				DrawLine(p0, p1, SplineMeTools.TangentLineColor);
 				DrawLine(p3, p2, SplineMeTools.TangentLineColor);
@@ -137,7 +167,7 @@ namespace SplineMe.Editor
 		private void DrawSegments()
 		{
 			var point = spline.GetPoint(1f);
-			Handles.color = Color.magenta;
+			Handles.color = SplineMeTools.SegmentsColor;
 			var curveSteps = SplineMeTools.CurveStepsCount * spline.CurveCount;
 			for (int i = curveSteps - 1; i >= 0; i--)
 			{
@@ -192,11 +222,12 @@ namespace SplineMe.Editor
 			Undo.RecordObject(spline, "Add Curve");
 			EditorUtility.SetDirty(spline);
 			spline.AddCurve();
+			UpdateSelectedIndex(selectedIndex);
 		}
 
 		private void RemoveSelectedCurve()
 		{
-			if (!IsAnyPointSelected || selectedCurveIndex ==0)
+			if (!IsAnyPointSelected)
 			{
 				return;
 			}
@@ -204,7 +235,8 @@ namespace SplineMe.Editor
 			Undo.RecordObject(spline, "Remove Curve");
 			EditorUtility.SetDirty(spline);
 			spline.RemoveCurve(selectedCurveIndex);
-			selectedIndex = Mathf.Min(selectedIndex, spline.PointsCount - 1);
+			var nextSelectedIndex = Mathf.Min(selectedIndex, spline.PointsCount - 1);
+			UpdateSelectedIndex(nextSelectedIndex);
 		}
 
 		private void DrawLine(Vector3 p0, Vector3 p1, Color color)
@@ -213,10 +245,24 @@ namespace SplineMe.Editor
 			Handles.DrawLine(p0, p1);
 		}
 
+		private Vector3 DrawPoint(int index)
+		{
+			var mode = spline.GetControlPointMode(index);
+			var pointColor = SplineMeTools.ModeColors[(int)mode];
+
+			return DrawPoint(index, pointColor);
+		}
+
 		private Vector3 DrawPoint(int index, Color pointColor)
 		{
 			var point = handleTransform.TransformPoint(spline.Points[index].position);
 			var size = HandleUtility.GetHandleSize(point);
+
+			if(index==0 || index == spline.PointsCount-1)
+			{
+				size *= 2f;
+			}
+
 			Handles.color = pointColor;
 			if (Handles.Button(point, handleRotation, size * SplineMeTools.HandlePointSize, size * SplineMeTools.PickPointSize, Handles.DotHandleCap))
 			{
@@ -246,11 +292,19 @@ namespace SplineMe.Editor
 				return;
 			}
 
-			selectedIndex = index;
-			selectedCurveIndex = index / 3;
-			editorState.isAnyCurveSelected = IsAnyCurveSelected;
+			UpdateSelectedIndex(index);
 		}
 
+		private void UpdateSelectedIndex(int index)
+		{
+			selectedIndex = index;
+			selectedCurveIndex = index / 3;
+			if (spline.IsLoop && selectedCurveIndex == spline.CurveCount)
+			{
+				selectedCurveIndex = 0;
+			}
+			editorState.isAnyCurveSelected = IsAnyCurveSelected;
+		}
 
 	}
 

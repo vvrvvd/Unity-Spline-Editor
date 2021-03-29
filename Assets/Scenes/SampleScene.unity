@@ -379,22 +379,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 176021bd4033d974f878e8cd0f3a3f95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inspectorPoints:
-  - position: {x: 6.809655, y: 0, z: 0.45054054}
-  - position: {x: 6.1821337, y: 0, z: 1.8275032}
-  - position: {x: 4.451778, y: 0, z: 1.5451574}
-  - position: {x: 3.809655, y: 0, z: 0.45054054}
-  - position: {x: 2.8590498, y: 0, z: -0.9699154}
-  - position: {x: 2.0277243, y: 0, z: -1.1406784}
-  - position: {x: 1.8042115, y: 0, z: 0.4088316}
-  reversedPoints:
-  - position: {x: 1.8042115, y: 0, z: 0.4088316}
-  - position: {x: 2.0277243, y: 0, z: -1.1406784}
-  - position: {x: 2.8590498, y: 0, z: -0.9699154}
-  - position: {x: 3.809655, y: 0, z: 0.45054054}
-  - position: {x: 4.451778, y: 0, z: 1.5451574}
-  - position: {x: 6.1821337, y: 0, z: 1.8275032}
-  - position: {x: 6.809655, y: 0, z: 0.45054054}
+  points:
+  - position: {x: 2.1569343, y: 0, z: -2.2955284}
+  - position: {x: 0.7301369, y: 0, z: -2.0285769}
+  - position: {x: 3, y: 0, z: 0}
+  - position: {x: 4, y: 0, z: 0}
+  - position: {x: 5, y: 0, z: 0}
+  - position: {x: 5.2472763, y: 0, z: -3.050394}
+  - position: {x: 2.1569343, y: 0, z: -2.2955284}
+  isLoop: 1
+  modes: 000000000000000000000000
 --- !u!4 &1334839310
 Transform:
   m_ObjectHideFlags: 0

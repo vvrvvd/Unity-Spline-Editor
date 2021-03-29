@@ -2,7 +2,7 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace SplineMe.Editor
+namespace LineMe.Editor
 {
 	public struct LineEditorState
 	{
@@ -95,7 +95,7 @@ namespace SplineMe.Editor
 			GUI.backgroundColor = Color.white;
 
 			var prevValue = state.showMainTransformGizmo;
-			var newValue = GUILayout.Toggle(prevValue, "Show main handle");
+			var newValue = GUILayout.Toggle(prevValue, "Show Main Handle");
 			if (newValue != prevValue)
 			{
 				if (newValue)

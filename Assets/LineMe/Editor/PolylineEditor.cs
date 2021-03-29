@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace SplineMe.Editor
+namespace LineMe.Editor
 {
 	[CustomEditor(typeof(Polyline))]
 	public class PolylineEditor : UnityEditor.Editor
@@ -27,7 +27,7 @@ namespace SplineMe.Editor
 		{
 			LineMeTools.InitializeGUI(ref editorState);
 
-			editorState.title = "LineMe Tools";
+			editorState.title = "Line Tools";
 			editorState.AddPointAction = AddPoint;
 			editorState.RemovePointAction = RemoveSelectedPoint;
 			editorState.isAnyPointSelected = IsAnyPointSelected;

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SplineMe
+namespace LineMe
 {
 
 	[Serializable]
@@ -95,7 +95,6 @@ namespace SplineMe
 			{
 				reversedPoints[i].position = inspectorPoints[inspectorPoints.Count-i-1].position;
 			}
-
 
 		}
 
