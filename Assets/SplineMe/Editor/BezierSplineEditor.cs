@@ -11,11 +11,11 @@ namespace SplineMe.Editor
 		private int selectedIndex = -1; 
 		private int selectedCurveIndex = -1;
 
-		private Quaternion handleRotation;
-
-		private BezierSpline spline;
-		private Event currentEvent;
-		private Transform handleTransform;
+		//TODO: Change to static editor
+		private static Quaternion handleRotation;
+		private static BezierSpline spline;
+		private static Event currentEvent;
+		private static Transform handleTransform;
 
 		private HashSet<KeyCode> pressedKeys = new HashSet<KeyCode>();
 
@@ -59,6 +59,13 @@ namespace SplineMe.Editor
 			{
 				DrawSelectedPointInspector();
 			}
+
+			if(GUILayout.Button("Cast Curve Points"))
+			{
+				Undo.RecordObject(spline, "Cast Curve Points");
+				spline.CastCurve();
+				EditorUtility.SetDirty(spline);
+			}
 		}
 
 		private void DrawSelectedPointInspector()
@@ -81,6 +88,16 @@ namespace SplineMe.Editor
 				spline.SetControlPointMode(selectedIndex, mode);
 				EditorUtility.SetDirty(spline);
 			}
+		}
+
+		//TODO: Change to static methods
+		[DrawGizmo(GizmoType.InSelectionHierarchy | GizmoType.NotInSelectionHierarchy)]
+		private static void RenderCustomGizmo(BezierSpline curve, GizmoType gizmoType)
+		{
+			spline = curve;
+			handleTransform = spline.transform;
+			handleRotation = Tools.pivotRotation == PivotRotation.Local ? handleTransform.rotation : Quaternion.identity;
+			DrawSpline();
 		}
 
 		private void OnSceneGUI()
@@ -121,7 +138,7 @@ namespace SplineMe.Editor
 			}
 		}
 
-		private void DrawSpline()
+		private static void DrawSpline()
 		{
 			for (var i = 0; i < spline.CurveCount; i++)
 			{

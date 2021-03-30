@@ -248,9 +248,9 @@ namespace SplineMe
 			isRemovingCurve = false;
 		}
 
-		public void UpdatePoint(int index, Vector3 position)
+		public void UpdatePoint(int index, Vector3 position, bool applyConstraints = true)
 		{
-			if (index % 3 == 0)
+			if (applyConstraints && index % 3 == 0)
 			{
 				var delta = position - Points[index].position;
 				if (IsLoop)
@@ -288,7 +288,10 @@ namespace SplineMe
 
 			Points[index].position = position;
 			
-			ApplyContraints(index);
+			if(applyConstraints)
+			{
+				ApplyContraints(index);
+			}
 		}
 
 		private void ApplyContraints(int index)
@@ -345,21 +348,52 @@ namespace SplineMe
 			Points[enforcedIndex].position = middle + enforcedTangent;
 		}
 
-		public void AddPoint(Vector3 point)
+		private void AddPoint(Vector3 point)
 		{
 			var nextIndex = PointsCount > 0 ? PointsCount : 0;
 			AddPoint(point, nextIndex);
 		}
 
-		public void AddPoint(Vector3 point, int index)
+		private void AddPoint(Vector3 point, int index)
 		{
 			var linePoint = new SplinePoint(point);
 			Points.Insert(index, linePoint);
 		}
 
-		public void RemovePoint(int index)
+		private void RemovePoint(int index)
 		{
 			Points.RemoveAt(index);
+		}
+
+		public void CastCurve()
+		{
+			for(var i=0; i<modes.Count; i++)
+			{
+				modes[i] = BezierControlPointMode.Free;
+			}
+
+			var newPointsPositions = new Vector3[PointsCount];
+			for (var i=0; i<PointsCount; i++)
+			{
+				var isCorrectPosition = TryCastPoint(i, -transform.up, out newPointsPositions[i]);
+				if(!isCorrectPosition)
+				{
+					continue;
+				}
+				
+				UpdatePoint(i, newPointsPositions[i], false);
+			}
+
+		}
+
+		public bool TryCastPoint(int index, Vector3 direction, out Vector3 castedPoint)
+		{
+			var point = Points[index];
+			var worldPosition = transform.TransformPoint(point.position);
+			var isCorrectPosition = Physics.Raycast(worldPosition, direction, out var hit, SplineMeTools.MaxRaycastDistance, Physics.AllLayers);
+			
+			castedPoint = isCorrectPosition ? transform.InverseTransformPoint(hit.point) : Vector3.zero;
+			return isCorrectPosition;
 		}
 
 	}

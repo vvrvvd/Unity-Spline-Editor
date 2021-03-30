@@ -2,7 +2,7 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace SplineMe.Editor
+namespace SplineMe
 {
 	public struct SplineEditorState
 	{
@@ -22,6 +22,7 @@ namespace SplineMe.Editor
 	{
 
 		public const int CurveStepsCount = 10;
+		public const float MaxRaycastDistance = 100;
 
 		public static Color LineStartPointColor => Color.green;
 		public static Color LineMidPointColor => Color.white;
