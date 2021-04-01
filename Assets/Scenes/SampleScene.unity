@@ -222,8 +222,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   points:
-  - position: {x: 0.77677786, y: -0.69529897, z: -0.22346696}
-  - position: {x: 1.776778, y: -0.941902, z: -0.22346684}
+  - position: {x: 0.77677786, y: -1.16, z: -0.22346696}
+  - position: {x: 1.776778, y: -1.16, z: -0.22346684}
   - position: {x: 0.96077347, y: -1.16, z: 2.1150947}
   - position: {x: 1.9607735, y: -1.16, z: 2.1150947}
   isLoop: 0
@@ -587,7 +587,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1599175453}
   m_LocalRotation: {x: -0, y: -0.58399844, z: -0, w: 0.81175476}
-  m_LocalPosition: {x: 3.34, y: 1.292, z: -1.21}
+  m_LocalPosition: {x: 2.685, y: 1.292, z: -3.164}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 622267113}

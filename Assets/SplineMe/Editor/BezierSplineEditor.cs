@@ -19,8 +19,9 @@ namespace SplineMe.Editor
 
 		private HashSet<KeyCode> pressedKeys = new HashSet<KeyCode>();
 
-		private bool IsAnyPointSelected => selectedIndex != -1;
-		private bool IsAnyCurveSelected => spline.CurveCount > 1;
+		private bool IsAnyPointSelected => selectedIndex != -1 && spline !=null && selectedIndex < spline.PointsCount;
+		private bool IsAnyCurveSelected => selectedCurveIndex != -1 && spline != null && selectedCurveIndex < spline.CurveCount;
+		private bool IsMoreThanOneCurve => spline.CurveCount > 1;
 
 		private SplineEditorState editorState;
 
@@ -44,7 +45,7 @@ namespace SplineMe.Editor
 			spline = target as BezierSpline;
 			EditorGUI.BeginChangeCheck();
 			var prevEnabled = GUI.enabled;
-			GUI.enabled = IsAnyCurveSelected;
+			GUI.enabled = IsMoreThanOneCurve;
 			bool loop = EditorGUILayout.Toggle("Loop", spline.IsLoop);
 			if (EditorGUI.EndChangeCheck())
 			{
@@ -66,6 +67,28 @@ namespace SplineMe.Editor
 				spline.CastCurve();
 				EditorUtility.SetDirty(spline);
 			}
+
+			GUI.enabled = IsAnyCurveSelected;
+			if (GUILayout.Button("Add Mid Curve"))
+			{
+				Undo.RecordObject(spline, "Add Mid Curve");
+				var wasLastPoint = selectedIndex == spline.PointsCount - 1;
+				spline.AddMidCurveAndApplyConstraints(selectedCurveIndex);
+				if(wasLastPoint)
+				{
+					SelectIndex(spline.PointsCount - 4);
+				}
+				else if(selectedIndex!=0)
+				{
+					SelectIndex(selectedIndex+3);
+				}
+				else
+				{
+					SelectIndex(3);
+				}
+				EditorUtility.SetDirty(spline);
+			}
+			GUI.enabled = prevEnabled;
 		}
 
 		private void DrawSelectedPointInspector()
@@ -304,7 +327,7 @@ namespace SplineMe.Editor
 
 		private void SelectIndex(int index)
 		{
-			if(selectedIndex==index)
+			if(index == -1 && selectedIndex == -1)
 			{
 				return;
 			}
@@ -315,11 +338,12 @@ namespace SplineMe.Editor
 		private void UpdateSelectedIndex(int index)
 		{
 			selectedIndex = index;
-			selectedCurveIndex = index / 3;
-			if (spline.IsLoop && selectedCurveIndex == spline.CurveCount)
+			selectedCurveIndex = index!=-1 ? index / 3 : -1;
+			if (selectedCurveIndex == spline.CurveCount)
 			{
-				selectedCurveIndex = 0;
+				selectedCurveIndex = spline.IsLoop ? 0 : spline.CurveCount-1;
 			}
+			editorState.isMoreThanOneCurve = IsMoreThanOneCurve;
 			editorState.isAnyCurveSelected = IsAnyCurveSelected;
 		}
 

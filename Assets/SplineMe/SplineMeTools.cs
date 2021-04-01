@@ -12,6 +12,7 @@ namespace SplineMe
 		public Action RemoveCurveAction;
 
 		public bool isAnyCurveSelected;
+		public bool isMoreThanOneCurve;
 		public bool showMainTransformGizmo;
 		public bool showPointsHandles;
 		public bool showSegmentsPoints;
@@ -172,7 +173,7 @@ namespace SplineMe
 			}
 
 			var prevEnabled = GUI.enabled;
-			GUI.enabled = state.isAnyCurveSelected;
+			GUI.enabled = state.isMoreThanOneCurve;
 			if (GUILayout.Button("Remove Curve"))
 			{
 				state.RemoveCurveAction();
