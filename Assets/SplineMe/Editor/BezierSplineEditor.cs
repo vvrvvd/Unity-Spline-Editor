@@ -74,11 +74,11 @@ namespace SplineMe.Editor
 				Undo.RecordObject(spline, "Add Mid Curve");
 				var wasLastPoint = selectedIndex == spline.PointsCount - 1;
 				spline.AddMidCurveAndApplyConstraints(selectedCurveIndex);
-				if(wasLastPoint)
+				if(wasLastPoint && !spline.IsLoop)
 				{
 					SelectIndex(spline.PointsCount - 4);
 				}
-				else if(selectedIndex!=0)
+				else if(selectedIndex!=0 && !(wasLastPoint && spline.IsLoop))
 				{
 					SelectIndex(selectedIndex+3);
 				}
@@ -88,6 +88,33 @@ namespace SplineMe.Editor
 				}
 				EditorUtility.SetDirty(spline);
 			}
+			GUI.enabled = prevEnabled;
+
+			if (GUILayout.Button("Factor Curve"))
+			{
+				Undo.RecordObject(spline, "Factor Curve");
+				var wasLastPoint = selectedIndex == spline.PointsCount - 1;
+				spline.FactorCurve();
+				if(selectedIndex!=-1)
+				{
+					SelectIndex(selectedIndex * 2);
+				}
+				EditorUtility.SetDirty(spline);
+			}
+
+			GUI.enabled = IsMoreThanOneCurve && (!spline.IsLoop || spline.CurveCount > 2);
+			if (GUILayout.Button("Simplify Curve"))
+			{
+				Undo.RecordObject(spline, "Simplify Curve");
+				var wasLastPoint = selectedIndex == spline.PointsCount - 1;
+				spline.SimplifyCurve();
+				if (selectedIndex != -1)
+				{
+					SelectIndex(selectedIndex/2);
+				}
+				EditorUtility.SetDirty(spline);
+			}
+
 			GUI.enabled = prevEnabled;
 		}
 

@@ -262,7 +262,7 @@ namespace SplineMe
 				return;
 			}
 
-			var nextPointIndex = isLastCurve ? PointsCount - 1 : startCurveIndex;
+			var nextPointIndex = (isLastCurve || startCurveIndex >= PointsCount) ? PointsCount - 1 : startCurveIndex;
 
 			var wasLoop = IsLoop;
 			if (IsLoop && CurveCount == 1)
@@ -456,6 +456,26 @@ namespace SplineMe
 			modes.Insert(modeIndex, BezierControlPointMode.Free);
 		}
 
+		public void FactorCurve()
+		{
+			for(var i=0; i<CurveCount; i+=2)
+			{
+				AddMidCurveAndApplyConstraints(i);
+			}
+		}
+
+		public void SimplifyCurve()
+		{
+			for (var i = 1; i < CurveCount; i++)
+			{
+				RemoveCurveAndApplyConstraints(i);
+				if (i == CurveCount - 1)
+				{
+					return;
+				}
+			}
+		}
+
 		public void AddMidCurveAndApplyConstraints(int curveIndex)
 		{
 			var startPointIndex = curveIndex * 3;
@@ -499,6 +519,30 @@ namespace SplineMe
 
 			var modeIndex = (startPointIndex + 3) / 3;
 			modes.Insert(modeIndex, BezierControlPointMode.Free);
+		}
+
+		public void RemoveCurveAndApplyConstraints(int curveIndex)
+		{
+			var startPointIndex = curveIndex * 3;
+			var p0Index = startPointIndex - 3;
+			var p3Index = startPointIndex + 3;
+
+			var p0 = points[p0Index].position;
+			var p3 = points[p3Index].position;
+
+			var t = (curveIndex - 0.5f) / CurveCount;
+			var pointOnCurve1 = transform.InverseTransformPoint(GetPoint(t));
+
+			t = (curveIndex + 0.5f) / CurveCount;
+			var pointOnCurve2 = transform.InverseTransformPoint(GetPoint(t));
+
+			GetInverseControlPoints(p0, p3, pointOnCurve1, pointOnCurve2, 0.25f, 0.75f, out var p1, out var p2);
+			SetControlPointMode(p0Index, BezierControlPointMode.Free);
+			SetControlPointMode(p3Index, BezierControlPointMode.Free);
+			UpdatePoint(p0Index + 1, p1);
+			UpdatePoint(p3Index - 1, p2);
+
+			RemoveCurve(curveIndex);
 		}
 
 
