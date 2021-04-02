@@ -25,6 +25,10 @@ namespace SplineMe.Editor
 
 		private SplineEditorState editorState;
 
+		private bool isRotating;
+		private Quaternion lastRotation;
+
+
 		private void OnEnable()
 		{
 			SplineMeTools.InitializeGUI(ref editorState);
@@ -340,16 +344,64 @@ namespace SplineMe.Editor
 			if (selectedIndex == index)
 			{
 				EditorGUI.BeginChangeCheck();
-				point = Handles.DoPositionHandle(point, handleRotation);
-				if (EditorGUI.EndChangeCheck())
+				if(Tools.current == Tool.None || Tools.current == Tool.Move)
 				{
-					Undo.RecordObject(spline, "Move Line Point");
-					EditorUtility.SetDirty(spline);
-					spline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
+					point = Handles.DoPositionHandle(point, handleRotation);
+					if (EditorGUI.EndChangeCheck())
+					{
+						Undo.RecordObject(spline, "Move Line Point");
+						EditorUtility.SetDirty(spline);
+						spline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
+					}
+				} else if(Tools.current == Tool.Rotate && index % 3 == 0)
+				{
+					var rotation = Handles.DoRotationHandle(handleRotation, point);
+					if (EditorGUI.EndChangeCheck())
+					{
+						if(!isRotating)
+						{
+							lastRotation = rotation;
+							isRotating = true;
+						}
+
+						var rotationDiff = rotation * Quaternion.Inverse(lastRotation);
+
+						Undo.RecordObject(spline, "Rotate Line Point");
+						EditorUtility.SetDirty(spline);
+						var point1Index = index == spline.PointsCount-1 && spline.IsLoop ? 1 : index + 1;
+						var point2Index = index == 0 && spline.IsLoop ? spline.PointsCount - 2 : index - 1;
+
+						if(point1Index >= 0 && point2Index < spline.PointsCount)
+						{
+							var point1 = handleTransform.TransformPoint(spline.Points[point1Index].position);
+							var rotatedPoint1 = RotateAround(point1, point, rotationDiff);
+							spline.UpdatePoint(point1Index, handleTransform.InverseTransformPoint(rotatedPoint1));
+						}
+
+						if(point2Index >= 0 && point2Index < spline.PointsCount)
+						{
+							var point2 = handleTransform.TransformPoint(spline.Points[point2Index].position);
+							var rotatedPoint2 = RotateAround(point2, point, rotationDiff);
+							spline.UpdatePoint(point2Index, handleTransform.InverseTransformPoint(rotatedPoint2));
+						}
+
+						lastRotation = rotation;
+					}
+					else if(isRotating && currentEvent.type == EventType.MouseUp)
+					{
+						lastRotation = handleRotation;
+						isRotating = false; 
+					}
 				}
+				
 			}
 
 			return point;
+		}
+
+		private static Vector3 RotateAround(Vector3 target, Vector3 pivotPoint, Quaternion rot)
+		{
+			return rot * (target - pivotPoint) + pivotPoint;
 		}
 
 		private void SelectIndex(int index)

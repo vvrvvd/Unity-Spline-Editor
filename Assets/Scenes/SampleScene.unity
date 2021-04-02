@@ -223,17 +223,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   points:
   - position: {x: 1, y: 0, z: 0}
-  - position: {x: -0.16105458, y: 0, z: 1.2830577}
-  - position: {x: 0.12973459, y: 0, z: 3.2601397}
-  - position: {x: 0.9992292, y: 0, z: 4.2320275}
-  - position: {x: 1.8687238, y: 0, z: 5.2039084}
-  - position: {x: 3.3169117, y: 0, z: 5.1706}
+  - position: {x: -0.46254146, y: 0, z: 0.9247949}
+  - position: {x: 0.5382197, y: 0, z: 3.0121427}
+  - position: {x: 0.9992256, y: 0, z: 4.232024}
+  - position: {x: 1.4602735, y: 0, z: 5.4518003}
+  - position: {x: 4.5761995, y: 0.386796, z: 3.9270985}
   - position: {x: 4.470678, y: 0, z: 2.432866}
-  - position: {x: 5.6457934, y: 0, z: -0.53262216}
-  - position: {x: 2.8930686, y: 0, z: -2.7225387}
+  - position: {x: 3.5811791, y: -0.41585982, z: 1.176157}
+  - position: {x: 4.8341446, y: 0, z: -0.7169671}
+  - position: {x: 3.8859081, y: 0, z: -0.9165759}
+  - position: {x: 2.937605, y: 0, z: -1.1161761}
+  - position: {x: 2.2768443, y: 0, z: -1.0576639}
   - position: {x: 1, y: 0, z: 0}
   isLoop: 1
-  modes: 00000000000000000000000000000000
+  modes: 0000000000000000000000000000000000000000
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
