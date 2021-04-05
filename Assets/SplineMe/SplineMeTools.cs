@@ -45,6 +45,11 @@ namespace SplineMe
 		public const float PickPointSize = 0.06f;
 		public const float DirectionScale = 0.5f;
 
+		public const float DrawCurveSphereSize = 0.30f;
+		public const float DrawCurveSegmentLength = 1f;
+		public const float DrawCurveFirstControlPoint = 0.25f;
+		public const float DrawCurveSecondControlPoint = 0.75f;
+
 		private const string ShowMainHandleKey = "ShowMainHandle";
 		private const string ShowPointsHandlesKey = "ShowPointsHandles";
 		private const string ShowSegmentsHandleKey = "ShowSegmentsHandle";

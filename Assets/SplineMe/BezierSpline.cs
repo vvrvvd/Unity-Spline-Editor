@@ -217,6 +217,23 @@ namespace SplineMe
 			}
 		}
 
+		public void AddCurve(Vector3 p1, Vector3 p2, Vector3 p3, BezierControlPointMode mode)
+		{
+			AddPoint(p1);
+			AddPoint(p2);
+			AddPoint(p3);
+
+			modes.Add(mode);
+			ApplyContraints(PointsCount - 4);
+
+			if (IsLoop)
+			{
+				Points[PointsCount - 1].position = Points[0].position;
+				modes[modes.Count - 1] = modes[0];
+				ApplyContraints(0);
+			}
+		}
+
 		public void RemoveCurve(int curveIndex)
 		{
 			var wasRemovingCurve = isRemovingCurve;
@@ -546,7 +563,7 @@ namespace SplineMe
 		}
 
 
-		private void GetInverseControlPoints(Vector3 p0, Vector3 p3, Vector3 f, Vector3 g, float u, float v, out Vector3 p1, out Vector3 p2)
+		public void GetInverseControlPoints(Vector3 p0, Vector3 p3, Vector3 f, Vector3 g, float u, float v, out Vector3 p1, out Vector3 p2)
 		{
 			p1 = Vector3.zero;
 			p2 = Vector3.zero;

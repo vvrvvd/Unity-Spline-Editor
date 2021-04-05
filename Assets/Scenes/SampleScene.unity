@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481694, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -203,7 +203,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 622267112}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.558}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1599175454}
@@ -222,21 +222,36 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   points:
-  - position: {x: 1, y: 0, z: 0}
-  - position: {x: -0.46254146, y: 0, z: 0.9247949}
-  - position: {x: 0.5382197, y: 0, z: 3.0121427}
-  - position: {x: 0.9992256, y: 0, z: 4.232024}
-  - position: {x: 1.4602735, y: 0, z: 5.4518003}
-  - position: {x: 4.5761995, y: 0.386796, z: 3.9270985}
-  - position: {x: 4.470678, y: 0, z: 2.432866}
-  - position: {x: 3.5811791, y: -0.41585982, z: 1.176157}
-  - position: {x: 4.8341446, y: 0, z: -0.7169671}
-  - position: {x: 3.8859081, y: 0, z: -0.9165759}
-  - position: {x: 2.937605, y: 0, z: -1.1161761}
-  - position: {x: 2.2768443, y: 0, z: -1.0576639}
-  - position: {x: 1, y: 0, z: 0}
-  isLoop: 1
-  modes: 0000000000000000000000000000000000000000
+  - position: {x: 13.817398, y: 0, z: -8.962045}
+  - position: {x: 12.810165, y: -0.5570651, z: -12.118937}
+  - position: {x: 5.285179, y: -0.040575862, z: -7.6819363}
+  - position: {x: 5.8541393, y: -0.16511178, z: -7.304183}
+  - position: {x: 5.868762, y: -0.16511178, z: -6.9722447}
+  - position: {x: 5.687713, y: -0.16511178, z: -6.637254}
+  - position: {x: 5.854844, y: -0.16511178, z: -6.311465}
+  - position: {x: 5.9525094, y: -0.16511178, z: -5.991951}
+  - position: {x: 6.1540713, y: -0.16511178, z: -5.7105937}
+  - position: {x: 6.3377366, y: -0.16511178, z: -5.43947}
+  - position: {x: 6.5508385, y: -0.16511178, z: -5.1864047}
+  - position: {x: 6.7619386, y: -0.16511178, z: -4.914123}
+  - position: {x: 7.0587635, y: -0.16511178, z: -4.754403}
+  - position: {x: 7.3597403, y: -0.16511178, z: -4.5851593}
+  - position: {x: 7.7092295, y: -0.16511178, z: -4.6434174}
+  - position: {x: 8.048293, y: -0.16511178, z: -4.680412}
+  - position: {x: 8.1474495, y: -0.16511178, z: -5.010845}
+  - position: {x: 8.496912, y: -0.16511178, z: -5.1836486}
+  - position: {x: 8.723163, y: -0.16511178, z: -5.4056754}
+  - position: {x: 9.012672, y: -0.16511178, z: -5.569611}
+  - position: {x: 9.232512, y: -0.16511178, z: -5.851167}
+  - position: {x: 9.593249, y: -0.16511178, z: -5.8958178}
+  - position: {x: 9.890002, y: -0.16511178, z: -6.06947}
+  - position: {x: 10.2374735, y: -0.16511178, z: -6.029081}
+  - position: {x: 10.572308, y: -0.16511178, z: -6.0966015}
+  - position: {x: 10.887218, y: -0.16511178, z: -6.044754}
+  - position: {x: 11.300349, y: -0.16511178, z: -6.2800913}
+  - position: {x: 11.517041, y: -0.16511178, z: -5.941055}
+  isLoop: 0
+  modes: 00000000000000000000000000000000000000000000000000000000000000000000000000000000
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0

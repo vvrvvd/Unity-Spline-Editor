@@ -8,7 +8,7 @@ namespace SplineMe.Editor
 	public class BezierSplineEditor : UnityEditor.Editor
 	{
 
-		private int selectedIndex = -1; 
+		private int selectedIndex = -1;
 		private int selectedCurveIndex = -1;
 
 		//TODO: Change to static editor
@@ -19,7 +19,7 @@ namespace SplineMe.Editor
 
 		private HashSet<KeyCode> pressedKeys = new HashSet<KeyCode>();
 
-		private bool IsAnyPointSelected => selectedIndex != -1 && spline !=null && selectedIndex < spline.PointsCount;
+		private bool IsAnyPointSelected => selectedIndex != -1 && spline != null && selectedIndex < spline.PointsCount;
 		private bool IsAnyCurveSelected => selectedCurveIndex != -1 && spline != null && selectedCurveIndex < spline.CurveCount;
 		private bool IsMoreThanOneCurve => spline.CurveCount > 1;
 
@@ -28,11 +28,18 @@ namespace SplineMe.Editor
 		private bool isRotating;
 		private Quaternion lastRotation;
 
+		private bool isCurveDrawerMode;
+		private Vector3 curveDrawerPosition = Vector3.zero;
+		private Vector3[] newCurvePoints = new Vector3[4];
+		private bool isDraggingNewCurve = false;
+		private bool firstControlPointSet = false;
+		private bool secondControlPointSet = false;
+
 
 		private void OnEnable()
 		{
 			SplineMeTools.InitializeGUI(ref editorState);
-			
+
 			editorState.title = "Spline Tools";
 			editorState.AddCurveAction = AddCurve;
 			editorState.RemoveCurveAction = RemoveSelectedCurve;
@@ -43,7 +50,7 @@ namespace SplineMe.Editor
 		{
 			SplineMeTools.ReleaseGUI(ref editorState);
 		}
-		
+
 		public override void OnInspectorGUI()
 		{
 			spline = target as BezierSpline;
@@ -65,7 +72,7 @@ namespace SplineMe.Editor
 				DrawSelectedPointInspector();
 			}
 
-			if(GUILayout.Button("Cast Curve Points"))
+			if (GUILayout.Button("Cast Curve Points"))
 			{
 				Undo.RecordObject(spline, "Cast Curve Points");
 				spline.CastCurve();
@@ -78,13 +85,13 @@ namespace SplineMe.Editor
 				Undo.RecordObject(spline, "Add Mid Curve");
 				var wasLastPoint = selectedIndex == spline.PointsCount - 1;
 				spline.AddMidCurveAndApplyConstraints(selectedCurveIndex);
-				if(wasLastPoint && !spline.IsLoop)
+				if (wasLastPoint && !spline.IsLoop)
 				{
 					SelectIndex(spline.PointsCount - 4);
 				}
-				else if(selectedIndex!=0 && !(wasLastPoint && spline.IsLoop))
+				else if (selectedIndex != 0 && !(wasLastPoint && spline.IsLoop))
 				{
-					SelectIndex(selectedIndex+3);
+					SelectIndex(selectedIndex + 3);
 				}
 				else
 				{
@@ -97,9 +104,8 @@ namespace SplineMe.Editor
 			if (GUILayout.Button("Factor Curve"))
 			{
 				Undo.RecordObject(spline, "Factor Curve");
-				var wasLastPoint = selectedIndex == spline.PointsCount - 1;
 				spline.FactorCurve();
-				if(selectedIndex!=-1)
+				if (selectedIndex != -1)
 				{
 					SelectIndex(selectedIndex * 2);
 				}
@@ -110,11 +116,10 @@ namespace SplineMe.Editor
 			if (GUILayout.Button("Simplify Curve"))
 			{
 				Undo.RecordObject(spline, "Simplify Curve");
-				var wasLastPoint = selectedIndex == spline.PointsCount - 1;
 				spline.SimplifyCurve();
 				if (selectedIndex != -1)
 				{
-					SelectIndex(selectedIndex/2);
+					SelectIndex(selectedIndex / 2);
 				}
 				EditorUtility.SetDirty(spline);
 			}
@@ -135,7 +140,7 @@ namespace SplineMe.Editor
 			}
 
 			EditorGUI.BeginChangeCheck();
-			BezierControlPointMode mode = (BezierControlPointMode) EditorGUILayout.EnumPopup("Mode", spline.GetControlPointMode(selectedIndex));
+			BezierControlPointMode mode = (BezierControlPointMode)EditorGUILayout.EnumPopup("Mode", spline.GetControlPointMode(selectedIndex));
 			if (EditorGUI.EndChangeCheck())
 			{
 				Undo.RecordObject(spline, "Change Point Mode");
@@ -167,12 +172,12 @@ namespace SplineMe.Editor
 			{
 				SelectIndex(spline.PointsCount - 1);
 			}
-			
+
 			SplineMeTools.DrawGUI(ref editorState);
 
 			DrawSpline();
 
-			if(editorState.showDirectionsLines)
+			if (editorState.showDirectionsLines)
 			{
 				DrawDirections();
 			}
@@ -182,7 +187,7 @@ namespace SplineMe.Editor
 				DrawSegments();
 			}
 
-			if(editorState.showPointsHandles)
+			if (editorState.showPointsHandles)
 			{
 				DrawPoints();
 			}
@@ -190,6 +195,129 @@ namespace SplineMe.Editor
 			{
 				SelectIndex(-1);
 			}
+
+			if (isCurveDrawerMode)
+			{
+				DrawCurveMode();
+			}
+
+		}
+
+		private void DrawCurveMode()
+		{
+			var curveDrawerPointLocal = curveDrawerPosition;
+			var curveDrawerPointWorld = spline.transform.TransformPoint(curveDrawerPointLocal);
+			var size = HandleUtility.GetHandleSize(curveDrawerPointWorld);
+			Handles.color = Color.green;
+			Handles.Button(curveDrawerPointWorld, handleRotation, size * SplineMeTools.DrawCurveSphereSize, size * SplineMeTools.DrawCurveSphereSize, Handles.SphereHandleCap);
+
+			EditorGUI.BeginChangeCheck();
+			var newEndPositionGlobal = Handles.DoPositionHandle(curveDrawerPointWorld, handleRotation);
+			if (EditorGUI.EndChangeCheck())
+			{
+				Undo.RecordObject(spline, "Move Drawer Point");
+				EditorUtility.SetDirty(spline);
+				isDraggingNewCurve = true;
+				curveDrawerPosition = spline.transform.InverseTransformPoint(newEndPositionGlobal);
+				UpdateNewDrawCurvePainterPosition(curveDrawerPosition);
+			}
+			else if ((isDraggingNewCurve && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
+			{
+				var defaultDrawerPosition = spline.Points[spline.PointsCount - 1].position;
+				InitializeDrawCurveMode(defaultDrawerPosition);
+				isDraggingNewCurve = false;
+			}
+		}
+
+		private void UpdateNewDrawCurvePainterPosition(Vector3 newEndPosition)
+		{
+			float distance;
+			if (secondControlPointSet)
+			{
+				distance = Vector3.Distance(newCurvePoints[0], newCurvePoints[1]) + Vector3.Distance(newCurvePoints[1], newCurvePoints[2]) + Vector3.Distance(newCurvePoints[2], newEndPosition);
+			}
+			else if (firstControlPointSet)
+			{
+				distance = Vector3.Distance(newCurvePoints[0], newCurvePoints[1]) + Vector3.Distance(newCurvePoints[1], newEndPosition);
+			}
+			else
+			{
+				distance = Vector3.Distance(newCurvePoints[0], newEndPosition);
+			}
+
+			var firstPointDistance = SplineMeTools.DrawCurveFirstControlPoint * SplineMeTools.DrawCurveSegmentLength;
+			var secondPointDistance = SplineMeTools.DrawCurveSecondControlPoint * SplineMeTools.DrawCurveSegmentLength;
+
+			if (distance < firstPointDistance)
+			{
+				firstControlPointSet = false;
+				newCurvePoints[1] = newEndPosition;
+			}
+			else if (distance < secondPointDistance)
+			{
+				secondControlPointSet = false;
+				newCurvePoints[2] = newEndPosition;
+
+				if (!firstControlPointSet)
+				{
+					var prevFirstPointNormalizedDistance = Vector3.Distance(newCurvePoints[0], newCurvePoints[1]) / SplineMeTools.DrawCurveSegmentLength;
+					var normalizedCurrentDistance = distance / SplineMeTools.DrawCurveSegmentLength;
+					var normalizedDistancesDiff = normalizedCurrentDistance - prevFirstPointNormalizedDistance;
+					newCurvePoints[1] = Vector3.Lerp(newCurvePoints[1], newEndPosition, (SplineMeTools.DrawCurveFirstControlPoint - prevFirstPointNormalizedDistance) / normalizedDistancesDiff);
+					firstControlPointSet = true;
+				}
+
+			}
+			else if (distance < SplineMeTools.DrawCurveSegmentLength)
+			{
+				newCurvePoints[3] = newEndPosition;
+
+				if (!secondControlPointSet)
+				{
+					var prevSecondPointNormalizedDistance = Vector3.Distance(newCurvePoints[0], newCurvePoints[2]) / SplineMeTools.DrawCurveSegmentLength;
+					var normalizedCurrentDistance = distance / SplineMeTools.DrawCurveSegmentLength;
+					var normalizedDistancesDiff = normalizedCurrentDistance - prevSecondPointNormalizedDistance;
+					newCurvePoints[2] = Vector3.Lerp(newCurvePoints[2], newEndPosition, (SplineMeTools.DrawCurveSecondControlPoint - prevSecondPointNormalizedDistance) / normalizedDistancesDiff);
+					secondControlPointSet = true;
+				}
+			}
+			else
+			{
+				var prevLastPointNormalizedDistance = Vector3.Distance(newCurvePoints[0], newCurvePoints[3]) / SplineMeTools.DrawCurveSegmentLength;
+				var normalizedCurrentDistance = distance / SplineMeTools.DrawCurveSegmentLength;
+				var normalizedDistancesDiff = normalizedCurrentDistance - prevLastPointNormalizedDistance;
+				newCurvePoints[3] = Vector3.Lerp(newCurvePoints[3], newEndPosition, (1f - prevLastPointNormalizedDistance) / normalizedDistancesDiff);
+				SpawnDrawCurveModeSpline();
+				InitializeDrawCurveMode(newCurvePoints[3]);
+				UpdateNewDrawCurvePainterPosition(newEndPosition);
+			}
+
+		}
+
+		private void SpawnDrawCurveModeSpline()
+		{
+			var p3 = newCurvePoints[3];
+			spline.GetInverseControlPoints(newCurvePoints[0], newCurvePoints[3], newCurvePoints[1], newCurvePoints[2], SplineMeTools.DrawCurveFirstControlPoint, SplineMeTools.DrawCurveSecondControlPoint, out var p1, out var p2);
+			spline.AddCurve(p1, p2, p3, BezierControlPointMode.Free);
+		}
+
+		private void InitializeDrawCurveMode(Vector3 newPoint)
+		{
+			for (var i = 0; i < newCurvePoints.Length; i++)
+			{
+				newCurvePoints[i] = newPoint;
+			}
+
+			curveDrawerPosition = newPoint;
+			firstControlPointSet = false;
+			secondControlPointSet = false;
+		}
+
+		public static float InverseLerp(Vector3 a, Vector3 b, Vector3 value)
+		{
+			Vector3 AB = b - a;
+			Vector3 AV = value - a;
+			return Vector3.Dot(AV, AB) / Vector3.Dot(AB, AB);
 		}
 
 		private static void DrawSpline()
@@ -212,12 +340,20 @@ namespace SplineMe.Editor
 			{
 				var curveStartIndex = i * 3;
 				var p0 = DrawPoint(curveStartIndex);
-				var p1 = DrawPoint(curveStartIndex+1);
-				var p2 = DrawPoint(curveStartIndex+2);
-				var p3 = DrawPoint(curveStartIndex+3);
+				var p1 = DrawPoint(curveStartIndex + 1);
+				var p2 = handleTransform.TransformPoint(spline.Points[curveStartIndex + 2].position);
+				var p3 = handleTransform.TransformPoint(spline.Points[curveStartIndex + 3].position);
+				if (!isCurveDrawerMode || i < spline.CurveCount - 1)
+				{
+					p2 = DrawPoint(curveStartIndex + 2);
+					p3 = DrawPoint(curveStartIndex + 3);
+				}
 
 				DrawLine(p0, p1, SplineMeTools.TangentLineColor);
-				DrawLine(p3, p2, SplineMeTools.TangentLineColor);
+				if (!isCurveDrawerMode || i < spline.CurveCount - 1)
+				{
+					DrawLine(p3, p2, SplineMeTools.TangentLineColor);
+				}
 			}
 		}
 
@@ -282,6 +418,10 @@ namespace SplineMe.Editor
 			{
 				RemoveSelectedCurve();
 			}
+			else if (pressedKey == KeyCode.C)
+			{
+				ToggleDrawCurveMode();
+			}
 		}
 
 		private void OnKeyHeld(KeyCode heldKey) { }
@@ -310,6 +450,23 @@ namespace SplineMe.Editor
 			UpdateSelectedIndex(nextSelectedIndex);
 		}
 
+		private void ToggleDrawCurveMode()
+		{
+			ToggleDrawCurveMode(!isCurveDrawerMode);
+		}
+
+		private void ToggleDrawCurveMode(bool state)
+		{
+			isCurveDrawerMode = state;
+		
+			if (state)
+			{
+				var lastPoint = spline.Points[spline.PointsCount - 1];
+				InitializeDrawCurveMode(lastPoint.position);
+				SelectIndex(-1);
+			}
+		}
+
 		private void DrawLine(Vector3 p0, Vector3 p1, Color color)
 		{
 			Handles.color = color;
@@ -329,7 +486,7 @@ namespace SplineMe.Editor
 			var point = handleTransform.TransformPoint(spline.Points[index].position);
 			var size = HandleUtility.GetHandleSize(point);
 
-			if(index==0 || index == spline.PointsCount-1)
+			if (index == 0 || index == spline.PointsCount - 1)
 			{
 				size *= 2f;
 			}
@@ -344,7 +501,11 @@ namespace SplineMe.Editor
 			if (selectedIndex == index)
 			{
 				EditorGUI.BeginChangeCheck();
-				if(Tools.current == Tool.None || Tools.current == Tool.Move)
+				if (Tools.current == Tool.Rotate && index % 3 == 0)
+				{
+					RotateLocal(index, point);
+				}
+				else
 				{
 					point = Handles.DoPositionHandle(point, handleRotation);
 					if (EditorGUI.EndChangeCheck())
@@ -353,50 +514,51 @@ namespace SplineMe.Editor
 						EditorUtility.SetDirty(spline);
 						spline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
 					}
-				} else if(Tools.current == Tool.Rotate && index % 3 == 0)
-				{
-					var rotation = Handles.DoRotationHandle(handleRotation, point);
-					if (EditorGUI.EndChangeCheck())
-					{
-						if(!isRotating)
-						{
-							lastRotation = rotation;
-							isRotating = true;
-						}
-
-						var rotationDiff = rotation * Quaternion.Inverse(lastRotation);
-
-						Undo.RecordObject(spline, "Rotate Line Point");
-						EditorUtility.SetDirty(spline);
-						var point1Index = index == spline.PointsCount-1 && spline.IsLoop ? 1 : index + 1;
-						var point2Index = index == 0 && spline.IsLoop ? spline.PointsCount - 2 : index - 1;
-
-						if(point1Index >= 0 && point2Index < spline.PointsCount)
-						{
-							var point1 = handleTransform.TransformPoint(spline.Points[point1Index].position);
-							var rotatedPoint1 = RotateAround(point1, point, rotationDiff);
-							spline.UpdatePoint(point1Index, handleTransform.InverseTransformPoint(rotatedPoint1));
-						}
-
-						if(point2Index >= 0 && point2Index < spline.PointsCount)
-						{
-							var point2 = handleTransform.TransformPoint(spline.Points[point2Index].position);
-							var rotatedPoint2 = RotateAround(point2, point, rotationDiff);
-							spline.UpdatePoint(point2Index, handleTransform.InverseTransformPoint(rotatedPoint2));
-						}
-
-						lastRotation = rotation;
-					}
-					else if(isRotating && currentEvent.type == EventType.MouseUp)
-					{
-						lastRotation = handleRotation;
-						isRotating = false; 
-					}
 				}
-				
 			}
 
 			return point;
+		}
+
+		private void RotateLocal(int index, Vector3 point)
+		{
+			var rotation = Handles.DoRotationHandle(handleRotation, point);
+			if (EditorGUI.EndChangeCheck())
+			{
+				if (!isRotating)
+				{
+					lastRotation = rotation;
+					isRotating = true;
+				}
+
+				var rotationDiff = rotation * Quaternion.Inverse(lastRotation);
+
+				Undo.RecordObject(spline, "Rotate Line Point");
+				EditorUtility.SetDirty(spline);
+				var point1Index = index == spline.PointsCount - 1 && spline.IsLoop ? 1 : index + 1;
+				var point2Index = index == 0 && spline.IsLoop ? spline.PointsCount - 2 : index - 1;
+
+				if (point1Index >= 0 && point1Index < spline.PointsCount)
+				{
+					var point1 = handleTransform.TransformPoint(spline.Points[point1Index].position);
+					var rotatedPoint1 = RotateAround(point1, point, rotationDiff);
+					spline.UpdatePoint(point1Index, handleTransform.InverseTransformPoint(rotatedPoint1));
+				}
+
+				if (point2Index >= 0 && point2Index < spline.PointsCount)
+				{
+					var point2 = handleTransform.TransformPoint(spline.Points[point2Index].position);
+					var rotatedPoint2 = RotateAround(point2, point, rotationDiff);
+					spline.UpdatePoint(point2Index, handleTransform.InverseTransformPoint(rotatedPoint2));
+				}
+
+				lastRotation = rotation;
+			}
+			else if (isRotating && currentEvent.type == EventType.MouseUp)
+			{
+				lastRotation = handleRotation;
+				isRotating = false;
+			}
 		}
 
 		private static Vector3 RotateAround(Vector3 target, Vector3 pivotPoint, Quaternion rot)
@@ -406,7 +568,7 @@ namespace SplineMe.Editor
 
 		private void SelectIndex(int index)
 		{
-			if(index == -1 && selectedIndex == -1)
+			if (index == -1 && selectedIndex == -1)
 			{
 				return;
 			}
@@ -417,13 +579,18 @@ namespace SplineMe.Editor
 		private void UpdateSelectedIndex(int index)
 		{
 			selectedIndex = index;
-			selectedCurveIndex = index!=-1 ? index / 3 : -1;
+			selectedCurveIndex = index != -1 ? index / 3 : -1;
 			if (selectedCurveIndex == spline.CurveCount)
 			{
-				selectedCurveIndex = spline.IsLoop ? 0 : spline.CurveCount-1;
+				selectedCurveIndex = spline.IsLoop ? 0 : spline.CurveCount - 1;
 			}
 			editorState.isMoreThanOneCurve = IsMoreThanOneCurve;
 			editorState.isAnyCurveSelected = IsAnyCurveSelected;
+
+			if (index != -1)
+			{
+				ToggleDrawCurveMode(false);
+			}
 		}
 
 	}
