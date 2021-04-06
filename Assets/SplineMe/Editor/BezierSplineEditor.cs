@@ -409,13 +409,15 @@ namespace SplineMe.Editor
 				var p0 = DrawPoint(curveStartIndex);
 				var p1 = DrawPoint(curveStartIndex + 1);
 				var p2 = DrawPoint(curveStartIndex + 2);
-				var p3 = DrawPoint(curveStartIndex + 3);
-
-				DrawLine(p0, p1, SplineMeTools.TangentLineColor);
+				var p3 = handleTransform.TransformPoint(spline.Points[curveStartIndex + 3].position);
+					
 				if (!isCurveDrawerMode || i < spline.CurveCount - 1)
 				{
-					DrawLine(p3, p2, SplineMeTools.TangentLineColor);
+					p3 = DrawPoint(curveStartIndex + 3);
 				}
+
+				DrawLine(p0, p1, SplineMeTools.TangentLineColor);
+				DrawLine(p3, p2, SplineMeTools.TangentLineColor);
 			}
 		}
 

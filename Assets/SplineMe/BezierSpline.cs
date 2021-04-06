@@ -290,9 +290,9 @@ namespace SplineMe
 			isRemovingCurve = false;
 		}
 
-		public void UpdatePoint(int index, Vector3 position, bool applyConstraints = true)
+		public void UpdatePoint(int index, Vector3 position, bool applyConstraints = true, bool applyToSidePoints = true)
 		{
-			if (applyConstraints && index % 3 == 0)
+			if (applyToSidePoints && index % 3 == 0)
 			{
 				var delta = position - Points[index].position;
 				if (IsLoop)
@@ -423,13 +423,27 @@ namespace SplineMe
 			var newPointsPositions = new Vector3[PointsCount];
 			for (var i = 0; i < PointsCount; i++)
 			{
-				var isCorrectPosition = TryCastPoint(i, -transform.up, out newPointsPositions[i]);
-				if (!isCorrectPosition)
+				TryCastPoint(i, -transform.up, out newPointsPositions[i]);
+			}
+
+			for (var i = 0; i < PointsCount; i+=3)
+			{
+				var prevPoint = i > 0 ? points[i - 1].position : Vector3.zero;
+				var nextPoint = i < PointsCount - 1 ? points[i + 1].position : Vector3.zero;
+
+				UpdatePoint(i, newPointsPositions[i], false, true);
+
+				var isPreviousPointCasted = i > 0 && newPointsPositions[i - 1] != prevPoint;
+				if (isPreviousPointCasted)
 				{
-					continue;
+					UpdatePoint(i - 1, newPointsPositions[i - 1], false, false);
 				}
 
-				UpdatePoint(i, newPointsPositions[i], false);
+				var isNextPointCasted = i < PointsCount - 1 && newPointsPositions[i + 1] != nextPoint;
+				if (isNextPointCasted)
+				{
+					UpdatePoint(i + 1, newPointsPositions[i + 1], false, false);
+				}
 			}
 
 		}
@@ -440,7 +454,7 @@ namespace SplineMe
 			var worldPosition = transform.TransformPoint(point.position);
 			var isCorrectPosition = Physics.Raycast(worldPosition, direction, out var hit, SplineMeTools.MaxRaycastDistance, Physics.AllLayers);
 
-			castedPoint = isCorrectPosition ? transform.InverseTransformPoint(hit.point) : Vector3.zero;
+			castedPoint = isCorrectPosition ? transform.InverseTransformPoint(hit.point) : point.position;
 			return isCorrectPosition;
 		}
 
