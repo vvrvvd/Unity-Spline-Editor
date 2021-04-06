@@ -33,6 +33,7 @@ namespace SplineMe
 		public static Color DirectionLineColor => Color.green;
 		public static Color SegmentsColor => Color.blue;
 
+
 		public static Color[] ModeColors = {
 			Color.white,	//Free
 			Color.yellow,	//Aligned
@@ -46,16 +47,17 @@ namespace SplineMe
 		public const float DirectionScale = 0.5f;
 
 		public const float DrawCurveSphereSize = 0.30f;
-		public const float DrawCurveSegmentLength = 1f;
-		public const float DrawCurveFirstControlPoint = 0.25f;
-		public const float DrawCurveSecondControlPoint = 0.75f;
+		public const float DrawCurveSegmentLength = 0.5f;
+		public const float DrawCurveFirstControlPoint = 0.33f;
+		public const float DrawCurveSecondControlPoint = 0.66f;
+		public static Color DrawCurvePointColor => Color.blue;
 
 		private const string ShowMainHandleKey = "ShowMainHandle";
 		private const string ShowPointsHandlesKey = "ShowPointsHandles";
 		private const string ShowSegmentsHandleKey = "ShowSegmentsHandle";
 		private const string ShowDirectionsHandleKey = "ShowDirectionsHandle";
 		
-		private static Tool savedTool = Tool.None;
+		public static Tool savedTool = Tool.None;
 
 		#region GUI
 
@@ -94,6 +96,15 @@ namespace SplineMe
 
 		public static void DrawGUI(ref SplineEditorState state)
 		{
+			if (state.showMainTransformGizmo)
+			{
+				savedTool = Tools.current;
+			}
+			else if(Tools.current != Tool.None)
+			{
+				HideTools();
+			}
+
 			Handles.BeginGUI();
 
 			GUILayout.BeginArea(new Rect(20, 20, 180, 150));

@@ -179,7 +179,7 @@ namespace SplineMe
 		private void Reset()
 		{
 			modes = new List<BezierControlPointMode>();
-			points = new List<SplinePoint>();
+			points = new List<SplinePoint>(1000);
 
 			var p0 = new Vector3(1f, 0f, 0f);
 			var p1 = new Vector3(2f, 0f, 0f);
@@ -255,17 +255,17 @@ namespace SplineMe
 			}
 			else if (isLastCurve)
 			{
-				startCurveIndex -= 1;
+				startCurveIndex = PointsCount - 2;
 			}
 			else if (isMidCurve)
 			{
 				startCurveIndex += 2;
 			}
 
+			
 			RemovePoint(startCurveIndex + 1);
 			RemovePoint(startCurveIndex);
 			RemovePoint(startCurveIndex - 1);
-
 			var modeIndex = (beginCurveIndex + 2) / 3;
 			modes.RemoveAt(modeIndex);
 
@@ -281,7 +281,6 @@ namespace SplineMe
 
 			var nextPointIndex = (isLastCurve || startCurveIndex >= PointsCount) ? PointsCount - 1 : startCurveIndex;
 
-			var wasLoop = IsLoop;
 			if (IsLoop && CurveCount == 1)
 			{
 				IsLoop = false;
@@ -400,7 +399,13 @@ namespace SplineMe
 		private void AddPoint(Vector3 point, int index)
 		{
 			var linePoint = new SplinePoint(point);
-			Points.Insert(index, linePoint);
+			if(index!=PointsCount)
+			{
+				Points.Insert(index, linePoint);
+			} else
+			{
+				Points.Add(linePoint);
+			}
 		}
 
 		private void RemovePoint(int index)

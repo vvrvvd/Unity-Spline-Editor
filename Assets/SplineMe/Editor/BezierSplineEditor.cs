@@ -63,6 +63,11 @@ namespace SplineMe.Editor
 				Undo.RecordObject(spline, "Toggle Loop");
 				EditorUtility.SetDirty(spline);
 				spline.IsLoop = loop;
+
+				if (spline.IsLoop)
+				{
+					ToggleDrawCurveMode(false);
+				}
 			}
 
 			GUI.enabled = prevEnabled;
@@ -163,6 +168,12 @@ namespace SplineMe.Editor
 		{
 			currentEvent = Event.current;
 			spline = target as BezierSpline;
+
+			if (spline == null)
+			{
+				return;
+			}
+
 			handleTransform = spline.transform;
 			handleRotation = Tools.pivotRotation == PivotRotation.Local ? handleTransform.rotation : Quaternion.identity;
 
@@ -173,18 +184,25 @@ namespace SplineMe.Editor
 				SelectIndex(spline.PointsCount - 1);
 			}
 
-			SplineMeTools.DrawGUI(ref editorState);
-
-			DrawSpline();
-
-			if (editorState.showDirectionsLines)
+			if (Event.current.type == EventType.Repaint)
 			{
-				DrawDirections();
+				DrawSpline();
+
+				if (editorState.showDirectionsLines)
+				{
+					DrawDirections();
+				}
+
+				if (editorState.showSegmentsPoints)
+				{
+					DrawSegments();
+				}
+			
 			}
 
-			if (editorState.showSegmentsPoints)
+			if (isCurveDrawerMode)
 			{
-				DrawSegments();
+				DrawCurveMode();
 			}
 
 			if (editorState.showPointsHandles)
@@ -196,11 +214,7 @@ namespace SplineMe.Editor
 				SelectIndex(-1);
 			}
 
-			if (isCurveDrawerMode)
-			{
-				DrawCurveMode();
-			}
-
+			SplineMeTools.DrawGUI(ref editorState);
 		}
 
 		private void DrawCurveMode()
@@ -208,6 +222,12 @@ namespace SplineMe.Editor
 			var curveDrawerPointLocal = curveDrawerPosition;
 			var curveDrawerPointWorld = spline.transform.TransformPoint(curveDrawerPointLocal);
 			var size = HandleUtility.GetHandleSize(curveDrawerPointWorld);
+
+			if (isDraggingNewCurve)
+			{
+				VisualizeCurveModeCurve();
+			}
+
 			Handles.color = Color.green;
 			Handles.Button(curveDrawerPointWorld, handleRotation, size * SplineMeTools.DrawCurveSphereSize, size * SplineMeTools.DrawCurveSphereSize, Handles.SphereHandleCap);
 
@@ -223,11 +243,54 @@ namespace SplineMe.Editor
 			}
 			else if ((isDraggingNewCurve && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
 			{
+				if (firstControlPointSet && secondControlPointSet)
+				{
+					SpawnDrawCurveModeSpline();
+				}
+
 				var defaultDrawerPosition = spline.Points[spline.PointsCount - 1].position;
 				InitializeDrawCurveMode(defaultDrawerPosition);
 				isDraggingNewCurve = false;
 			}
+
 		}
+
+		private void VisualizeCurveModeCurve()
+		{
+			var p0 = newCurvePoints[0];
+			var p3 = newCurvePoints[3];
+			spline.GetInverseControlPoints(p0, p3, newCurvePoints[1], newCurvePoints[2], SplineMeTools.DrawCurveFirstControlPoint, SplineMeTools.DrawCurveSecondControlPoint, out var p1, out var p2);
+
+			p0 = handleTransform.TransformPoint(p0);
+			p1 = handleTransform.TransformPoint(p1);
+			p2 = handleTransform.TransformPoint(p2);
+			p3 = handleTransform.TransformPoint(p3);
+
+			Handles.DrawBezier(p0, p3, p1, p2, SplineMeTools.LineColor, null, SplineMeTools.LineWidth * 1.5f);
+
+			if (editorState.showPointsHandles)
+			{
+				if (firstControlPointSet)
+				{
+					var f = handleTransform.TransformPoint(newCurvePoints[1]);
+					var size = HandleUtility.GetHandleSize(f);
+					Handles.color = SplineMeTools.DrawCurvePointColor;
+					Handles.CubeHandleCap(0, f, Quaternion.identity, size * 0.1f, EventType.Repaint);
+				}
+
+				if (secondControlPointSet)
+				{
+					var g = handleTransform.TransformPoint(newCurvePoints[2]);
+					var size = HandleUtility.GetHandleSize(g);
+					Handles.color = SplineMeTools.DrawCurvePointColor;
+					Handles.CubeHandleCap(0, g, Quaternion.identity, size * 0.1f, EventType.Repaint);
+				}
+
+			}
+
+		}
+
+
 
 		private void UpdateNewDrawCurvePainterPosition(Vector3 newEndPosition)
 		{
@@ -248,36 +311,39 @@ namespace SplineMe.Editor
 			var firstPointDistance = SplineMeTools.DrawCurveFirstControlPoint * SplineMeTools.DrawCurveSegmentLength;
 			var secondPointDistance = SplineMeTools.DrawCurveSecondControlPoint * SplineMeTools.DrawCurveSegmentLength;
 
-			if (distance < firstPointDistance)
+			if (!firstControlPointSet && distance < firstPointDistance)
 			{
-				firstControlPointSet = false;
 				newCurvePoints[1] = newEndPosition;
 			}
-			else if (distance < secondPointDistance)
+			
+			if (distance < secondPointDistance)
 			{
-				secondControlPointSet = false;
-				newCurvePoints[2] = newEndPosition;
+				if(!secondControlPointSet)
+				{
+					newCurvePoints[2] = newEndPosition;
+				}
 
-				if (!firstControlPointSet)
+				if (distance >= firstPointDistance && !firstControlPointSet)
 				{
 					var prevFirstPointNormalizedDistance = Vector3.Distance(newCurvePoints[0], newCurvePoints[1]) / SplineMeTools.DrawCurveSegmentLength;
 					var normalizedCurrentDistance = distance / SplineMeTools.DrawCurveSegmentLength;
-					var normalizedDistancesDiff = normalizedCurrentDistance - prevFirstPointNormalizedDistance;
-					newCurvePoints[1] = Vector3.Lerp(newCurvePoints[1], newEndPosition, (SplineMeTools.DrawCurveFirstControlPoint - prevFirstPointNormalizedDistance) / normalizedDistancesDiff);
+					var normalizedDistancesDiff = Mathf.Abs(normalizedCurrentDistance - prevFirstPointNormalizedDistance);
+					newCurvePoints[1] = Vector3.Lerp(newCurvePoints[1], newEndPosition, Mathf.Abs(SplineMeTools.DrawCurveFirstControlPoint - prevFirstPointNormalizedDistance) / normalizedDistancesDiff);
 					firstControlPointSet = true;
 				}
 
 			}
-			else if (distance < SplineMeTools.DrawCurveSegmentLength)
+
+			if (distance < SplineMeTools.DrawCurveSegmentLength)
 			{
 				newCurvePoints[3] = newEndPosition;
 
-				if (!secondControlPointSet)
+				if (distance >= secondPointDistance && !secondControlPointSet)
 				{
 					var prevSecondPointNormalizedDistance = Vector3.Distance(newCurvePoints[0], newCurvePoints[2]) / SplineMeTools.DrawCurveSegmentLength;
 					var normalizedCurrentDistance = distance / SplineMeTools.DrawCurveSegmentLength;
-					var normalizedDistancesDiff = normalizedCurrentDistance - prevSecondPointNormalizedDistance;
-					newCurvePoints[2] = Vector3.Lerp(newCurvePoints[2], newEndPosition, (SplineMeTools.DrawCurveSecondControlPoint - prevSecondPointNormalizedDistance) / normalizedDistancesDiff);
+					var normalizedDistancesDiff = Mathf.Abs(normalizedCurrentDistance - prevSecondPointNormalizedDistance);
+					newCurvePoints[2] = Vector3.Lerp(newCurvePoints[2], newEndPosition, Mathf.Abs(SplineMeTools.DrawCurveSecondControlPoint - prevSecondPointNormalizedDistance) / normalizedDistancesDiff);
 					secondControlPointSet = true;
 				}
 			}
@@ -285,8 +351,8 @@ namespace SplineMe.Editor
 			{
 				var prevLastPointNormalizedDistance = Vector3.Distance(newCurvePoints[0], newCurvePoints[3]) / SplineMeTools.DrawCurveSegmentLength;
 				var normalizedCurrentDistance = distance / SplineMeTools.DrawCurveSegmentLength;
-				var normalizedDistancesDiff = normalizedCurrentDistance - prevLastPointNormalizedDistance;
-				newCurvePoints[3] = Vector3.Lerp(newCurvePoints[3], newEndPosition, (1f - prevLastPointNormalizedDistance) / normalizedDistancesDiff);
+				var normalizedDistancesDiff = Mathf.Abs(normalizedCurrentDistance - prevLastPointNormalizedDistance);
+				newCurvePoints[3] = Vector3.Lerp(newCurvePoints[3], newEndPosition, Mathf.Abs(1f - prevLastPointNormalizedDistance) / normalizedDistancesDiff);
 				SpawnDrawCurveModeSpline();
 				InitializeDrawCurveMode(newCurvePoints[3]);
 				UpdateNewDrawCurvePainterPosition(newEndPosition);
@@ -296,8 +362,9 @@ namespace SplineMe.Editor
 
 		private void SpawnDrawCurveModeSpline()
 		{
+			var p0 = newCurvePoints[0];
 			var p3 = newCurvePoints[3];
-			spline.GetInverseControlPoints(newCurvePoints[0], newCurvePoints[3], newCurvePoints[1], newCurvePoints[2], SplineMeTools.DrawCurveFirstControlPoint, SplineMeTools.DrawCurveSecondControlPoint, out var p1, out var p2);
+			spline.GetInverseControlPoints(p0, p3, newCurvePoints[1], newCurvePoints[2], SplineMeTools.DrawCurveFirstControlPoint, SplineMeTools.DrawCurveSecondControlPoint, out var p1, out var p2);
 			spline.AddCurve(p1, p2, p3, BezierControlPointMode.Free);
 		}
 
@@ -341,13 +408,8 @@ namespace SplineMe.Editor
 				var curveStartIndex = i * 3;
 				var p0 = DrawPoint(curveStartIndex);
 				var p1 = DrawPoint(curveStartIndex + 1);
-				var p2 = handleTransform.TransformPoint(spline.Points[curveStartIndex + 2].position);
-				var p3 = handleTransform.TransformPoint(spline.Points[curveStartIndex + 3].position);
-				if (!isCurveDrawerMode || i < spline.CurveCount - 1)
-				{
-					p2 = DrawPoint(curveStartIndex + 2);
-					p3 = DrawPoint(curveStartIndex + 3);
-				}
+				var p2 = DrawPoint(curveStartIndex + 2);
+				var p3 = DrawPoint(curveStartIndex + 3);
 
 				DrawLine(p0, p1, SplineMeTools.TangentLineColor);
 				if (!isCurveDrawerMode || i < spline.CurveCount - 1)
@@ -445,20 +507,21 @@ namespace SplineMe.Editor
 
 			Undo.RecordObject(spline, "Remove Curve");
 			EditorUtility.SetDirty(spline);
-			spline.RemoveCurve(selectedCurveIndex);
+			var curveToRemove = spline.PointsCount - selectedIndex < 3 ? selectedCurveIndex + 1 : selectedCurveIndex;
+			spline.RemoveCurve(curveToRemove);
 			var nextSelectedIndex = Mathf.Min(selectedIndex, spline.PointsCount - 1);
 			UpdateSelectedIndex(nextSelectedIndex);
 		}
 
 		private void ToggleDrawCurveMode()
 		{
-			ToggleDrawCurveMode(!isCurveDrawerMode);
+			ToggleDrawCurveMode(!isCurveDrawerMode && !spline.IsLoop);
 		}
 
 		private void ToggleDrawCurveMode(bool state)
 		{
 			isCurveDrawerMode = state;
-		
+
 			if (state)
 			{
 				var lastPoint = spline.Points[spline.PointsCount - 1];
@@ -501,7 +564,7 @@ namespace SplineMe.Editor
 			if (selectedIndex == index)
 			{
 				EditorGUI.BeginChangeCheck();
-				if (Tools.current == Tool.Rotate && index % 3 == 0)
+				if (SplineMeTools.savedTool == Tool.Rotate && index % 3 == 0)
 				{
 					RotateLocal(index, point);
 				}
@@ -584,13 +647,14 @@ namespace SplineMe.Editor
 			{
 				selectedCurveIndex = spline.IsLoop ? 0 : spline.CurveCount - 1;
 			}
-			editorState.isMoreThanOneCurve = IsMoreThanOneCurve;
-			editorState.isAnyCurveSelected = IsAnyCurveSelected;
 
 			if (index != -1)
 			{
 				ToggleDrawCurveMode(false);
 			}
+
+			editorState.isMoreThanOneCurve = IsMoreThanOneCurve && !isCurveDrawerMode;
+			editorState.isAnyCurveSelected = IsAnyCurveSelected;
 		}
 
 	}
