@@ -35,6 +35,7 @@ namespace SplineMe.Editor
 		private bool firstControlPointSet = false;
 		private bool secondControlPointSet = false;
 
+		private bool isDraggingPoint = false;
 
 		private void OnEnable()
 		{
@@ -197,7 +198,7 @@ namespace SplineMe.Editor
 				{
 					DrawSegments();
 				}
-			
+
 			}
 
 			if (isCurveDrawerMode)
@@ -290,8 +291,6 @@ namespace SplineMe.Editor
 
 		}
 
-
-
 		private void UpdateNewDrawCurvePainterPosition(Vector3 newEndPosition)
 		{
 			float distance;
@@ -315,10 +314,10 @@ namespace SplineMe.Editor
 			{
 				newCurvePoints[1] = newEndPosition;
 			}
-			
+
 			if (distance < secondPointDistance)
 			{
-				if(!secondControlPointSet)
+				if (!secondControlPointSet)
 				{
 					newCurvePoints[2] = newEndPosition;
 				}
@@ -410,7 +409,7 @@ namespace SplineMe.Editor
 				var p1 = DrawPoint(curveStartIndex + 1);
 				var p2 = DrawPoint(curveStartIndex + 2);
 				var p3 = handleTransform.TransformPoint(spline.Points[curveStartIndex + 3].position);
-					
+
 				if (!isCurveDrawerMode || i < spline.CurveCount - 1)
 				{
 					p3 = DrawPoint(curveStartIndex + 3);
@@ -452,16 +451,17 @@ namespace SplineMe.Editor
 		{
 			var currentKeyCode = currentEvent.keyCode;
 
+			foreach (var key in pressedKeys)
+			{
+				OnKeyHeld(key);
+			}
+
 			if (currentEvent.type == EventType.KeyDown)
 			{
-				if (!pressedKeys.Contains(currentKeyCode))
+				if (currentKeyCode!=KeyCode.None && !pressedKeys.Contains(currentKeyCode))
 				{
 					OnKeyPressed(currentKeyCode);
 					pressedKeys.Add(currentKeyCode);
-				}
-				else
-				{
-					OnKeyHeld(currentKeyCode);
 				}
 			}
 			else if (currentEvent.type == EventType.KeyUp && pressedKeys.Contains(currentKeyCode))
@@ -469,6 +469,7 @@ namespace SplineMe.Editor
 				OnKeyReleased(currentKeyCode);
 				pressedKeys.Remove(currentKeyCode);
 			}
+
 
 		}
 
@@ -488,7 +489,13 @@ namespace SplineMe.Editor
 			}
 		}
 
-		private void OnKeyHeld(KeyCode heldKey) { }
+		private void OnKeyHeld(KeyCode heldKey)
+		{
+			if (heldKey == KeyCode.U)
+			{
+				TryCastSelectedPoint();
+			}
+		}
 
 		private void OnKeyReleased(KeyCode releasedKey) { }
 
@@ -577,8 +584,14 @@ namespace SplineMe.Editor
 					{
 						Undo.RecordObject(spline, "Move Line Point");
 						EditorUtility.SetDirty(spline);
+						isDraggingPoint = true;
 						spline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
 					}
+					else if ((isDraggingPoint && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
+					{
+						isDraggingPoint = false;
+					}
+
 				}
 			}
 
@@ -657,6 +670,26 @@ namespace SplineMe.Editor
 
 			editorState.isMoreThanOneCurve = IsMoreThanOneCurve && !isCurveDrawerMode;
 			editorState.isAnyCurveSelected = IsAnyCurveSelected;
+		}
+
+		private void TryCastSelectedPoint()
+		{
+			if (!IsAnyPointSelected || !isDraggingPoint || Camera.current==null)
+			{
+				return;
+			}
+
+
+
+			var mousePosition = Event.current.mousePosition;
+			var ray = HandleUtility.GUIPointToWorldRay(mousePosition);
+			var isCorrectPosition = Physics.Raycast(ray, out var hit, SplineMeTools.MaxRaycastDistance, Physics.AllLayers);
+
+			if (isCorrectPosition)
+			{
+				var castedPosition = spline.transform.InverseTransformPoint(hit.point);
+				spline.UpdatePoint(selectedIndex, castedPosition, true, true);
+			}
 		}
 
 	}
