@@ -104,13 +104,11 @@ namespace LineMe.Editor
 			{
 				var referencePoint = line.Points[currentIndex];
 				Undo.RecordObject(line, "Add Line Point");
-				EditorUtility.SetDirty(line);
 				line.AddPoint(referencePoint.position, currentIndex);
 			}
 			else
 			{
 				Undo.RecordObject(line, "Add Line Point");
-				EditorUtility.SetDirty(line);
 				line.AddPoint(Vector3.zero);
 				SelectIndex(0);
 			}
@@ -124,7 +122,6 @@ namespace LineMe.Editor
 			}
 
 			Undo.RecordObject(line, "Remove Line Point");
-			EditorUtility.SetDirty(line);
 			line.RemovePoint(selectedIndex);
 			selectedIndex = Mathf.Min(selectedIndex, line.PointsCount - 1);
 		}
@@ -175,7 +172,6 @@ namespace LineMe.Editor
 				if (EditorGUI.EndChangeCheck())
 				{
 					Undo.RecordObject(line, "Move Line Point");
-					EditorUtility.SetDirty(line);
 					line.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
 				}
 			}

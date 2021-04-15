@@ -516,6 +516,9 @@ namespace SplineMe
 		{
 			var startPointIndex = curveIndex * 3;
 
+			SetControlPointMode(startPointIndex, BezierControlPointMode.Free);
+			SetControlPointMode(startPointIndex+3, BezierControlPointMode.Free);
+
 			var p0 = points[startPointIndex].position;
 
 			var t = (curveIndex + 0.5f) / CurveCount;

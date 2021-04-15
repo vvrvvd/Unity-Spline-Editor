@@ -33,9 +33,10 @@ namespace SplineMe
 		public static Color DirectionLineColor => Color.green;
 		public static Color SegmentsColor => Color.blue;
 
+		public static Color CurvePointColor => Color.white;
 
 		public static Color[] ModeColors = {
-			Color.white,	//Free
+			Color.green,	//Free
 			Color.yellow,	//Aligned
 			Color.cyan		//Mirrored
 		};
@@ -47,7 +48,7 @@ namespace SplineMe
 		public const float DirectionScale = 0.5f;
 
 		public const float DrawCurveSphereSize = 0.30f;
-		public const float DrawCurveSegmentLength = 0.5f;
+		public const float DrawCurveSegmentLength = 2f;
 		public const float DrawCurveFirstControlPoint = 0.33f;
 		public const float DrawCurveSecondControlPoint = 0.66f;
 		public static Color DrawCurvePointColor => Color.blue;

@@ -8,8 +8,8 @@ namespace SplineMe.Editor
 	public class BezierSplineEditor : UnityEditor.Editor
 	{
 
-		private int selectedIndex = -1;
-		private int selectedCurveIndex = -1;
+		public static int selectedIndex = -1;
+		public static int selectedCurveIndex = -1;
 
 		//TODO: Change to static editor
 		private static Quaternion handleRotation;
@@ -62,7 +62,6 @@ namespace SplineMe.Editor
 			if (EditorGUI.EndChangeCheck())
 			{
 				Undo.RecordObject(spline, "Toggle Loop");
-				EditorUtility.SetDirty(spline);
 				spline.IsLoop = loop;
 
 				if (spline.IsLoop)
@@ -73,7 +72,7 @@ namespace SplineMe.Editor
 
 			GUI.enabled = prevEnabled;
 
-			if (IsAnyPointSelected)
+			if (selectedCurveIndex!=-1)
 			{
 				DrawSelectedPointInspector();
 			}
@@ -82,7 +81,6 @@ namespace SplineMe.Editor
 			{
 				Undo.RecordObject(spline, "Cast Curve Points");
 				spline.CastCurve();
-				EditorUtility.SetDirty(spline);
 			}
 
 			GUI.enabled = IsAnyCurveSelected;
@@ -103,7 +101,6 @@ namespace SplineMe.Editor
 				{
 					SelectIndex(3);
 				}
-				EditorUtility.SetDirty(spline);
 			}
 			GUI.enabled = prevEnabled;
 
@@ -115,7 +112,6 @@ namespace SplineMe.Editor
 				{
 					SelectIndex(selectedIndex * 2);
 				}
-				EditorUtility.SetDirty(spline);
 			}
 
 			GUI.enabled = IsMoreThanOneCurve && (!spline.IsLoop || spline.CurveCount > 2);
@@ -127,7 +123,6 @@ namespace SplineMe.Editor
 				{
 					SelectIndex(selectedIndex / 2);
 				}
-				EditorUtility.SetDirty(spline);
 			}
 
 			GUI.enabled = prevEnabled;
@@ -141,7 +136,6 @@ namespace SplineMe.Editor
 			if (EditorGUI.EndChangeCheck())
 			{
 				Undo.RecordObject(spline, "Move Point");
-				EditorUtility.SetDirty(spline);
 				spline.UpdatePoint(selectedIndex, point);
 			}
 
@@ -151,7 +145,6 @@ namespace SplineMe.Editor
 			{
 				Undo.RecordObject(spline, "Change Point Mode");
 				spline.SetControlPointMode(selectedIndex, mode);
-				EditorUtility.SetDirty(spline);
 			}
 		}
 
@@ -237,7 +230,6 @@ namespace SplineMe.Editor
 			if (EditorGUI.EndChangeCheck())
 			{
 				Undo.RecordObject(spline, "Move Drawer Point");
-				EditorUtility.SetDirty(spline);
 				isDraggingNewCurve = true;
 				curveDrawerPosition = spline.transform.InverseTransformPoint(newEndPositionGlobal);
 				UpdateNewDrawCurvePainterPosition(curveDrawerPosition);
@@ -502,7 +494,6 @@ namespace SplineMe.Editor
 		private void AddCurve()
 		{
 			Undo.RecordObject(spline, "Add Curve");
-			EditorUtility.SetDirty(spline);
 			spline.AddCurve();
 			UpdateSelectedIndex(selectedIndex);
 		}
@@ -515,7 +506,6 @@ namespace SplineMe.Editor
 			}
 
 			Undo.RecordObject(spline, "Remove Curve");
-			EditorUtility.SetDirty(spline);
 			var curveToRemove = spline.PointsCount - selectedIndex < 3 ? selectedCurveIndex + 1 : selectedCurveIndex;
 			spline.RemoveCurve(curveToRemove);
 			var nextSelectedIndex = Mathf.Min(selectedIndex, spline.PointsCount - 1);
@@ -548,7 +538,7 @@ namespace SplineMe.Editor
 		private Vector3 DrawPoint(int index)
 		{
 			var mode = spline.GetControlPointMode(index);
-			var pointColor = SplineMeTools.ModeColors[(int)mode];
+			var pointColor = index%3 == 0 ? SplineMeTools.CurvePointColor : SplineMeTools.ModeColors[(int)mode];
 
 			return DrawPoint(index, pointColor);
 		}
@@ -583,7 +573,6 @@ namespace SplineMe.Editor
 					if (EditorGUI.EndChangeCheck())
 					{
 						Undo.RecordObject(spline, "Move Line Point");
-						EditorUtility.SetDirty(spline);
 						isDraggingPoint = true;
 						spline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
 					}
@@ -612,7 +601,6 @@ namespace SplineMe.Editor
 				var rotationDiff = rotation * Quaternion.Inverse(lastRotation);
 
 				Undo.RecordObject(spline, "Rotate Line Point");
-				EditorUtility.SetDirty(spline);
 				var point1Index = index == spline.PointsCount - 1 && spline.IsLoop ? 1 : index + 1;
 				var point2Index = index == 0 && spline.IsLoop ? spline.PointsCount - 2 : index - 1;
 
@@ -652,6 +640,7 @@ namespace SplineMe.Editor
 			}
 
 			UpdateSelectedIndex(index);
+			Repaint();
 		}
 
 		private void UpdateSelectedIndex(int index)
@@ -670,6 +659,8 @@ namespace SplineMe.Editor
 
 			editorState.isMoreThanOneCurve = IsMoreThanOneCurve && !isCurveDrawerMode;
 			editorState.isAnyCurveSelected = IsAnyCurveSelected;
+
+			Repaint();
 		}
 
 		private void TryCastSelectedPoint()
@@ -679,14 +670,13 @@ namespace SplineMe.Editor
 				return;
 			}
 
-
-
 			var mousePosition = Event.current.mousePosition;
 			var ray = HandleUtility.GUIPointToWorldRay(mousePosition);
 			var isCorrectPosition = Physics.Raycast(ray, out var hit, SplineMeTools.MaxRaycastDistance, Physics.AllLayers);
 
 			if (isCorrectPosition)
 			{
+				Undo.RecordObject(spline, "Cast Spline Point to Mouse");
 				var castedPosition = spline.transform.InverseTransformPoint(hit.point);
 				spline.UpdatePoint(selectedIndex, castedPosition, true, true);
 			}
