@@ -1,4 +1,4 @@
-# Spline Me
+# Unity Spline Editor
 ### Unity Package for creating and managing Bezier splines.
 
  ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/main/Gifs/BaseSpline.gif)
