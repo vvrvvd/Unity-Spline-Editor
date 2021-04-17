@@ -1,7 +1,7 @@
 # Unity Spline Editor
 ## Introduction
 Unity Package for creating and managing Bezier splines.
-## Dependencies
+## System Requirements
 Unity 2020.x or newer
 ## Examples
  ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/main/Gifs/BaseSpline.gif)
