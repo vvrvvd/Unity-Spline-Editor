@@ -23,6 +23,7 @@ namespace SplineMe
 		}
 	}
 
+	[DisallowMultipleComponent]
 	public class BezierSpline : MonoBehaviour
 	{
 
@@ -181,10 +182,10 @@ namespace SplineMe
 			modes = new List<BezierControlPointMode>();
 			points = new List<SplinePoint>(1000);
 
-			var p0 = new Vector3(1f, 0f, 0f);
-			var p1 = new Vector3(2f, 0f, 0f);
-			var p2 = new Vector3(3f, 0f, 0f);
-			var p3 = new Vector3(4f, 0f, 0f);
+			var p0 = new Vector3(1f * SplineMeTools.CreateCurveSegmentSize/6f, 0f, 0f);
+			var p1 = new Vector3(2f * SplineMeTools.CreateCurveSegmentSize/6f, 0f, 0f);
+			var p2 = new Vector3(5f * SplineMeTools.CreateCurveSegmentSize/6f, 0f, 0f);
+			var p3 = new Vector3(6f * SplineMeTools.CreateCurveSegmentSize/6f, 0f, 0f);
 
 			AddPoint(p0);
 			AddPoint(p1);
@@ -195,26 +196,15 @@ namespace SplineMe
 			modes.Add(BezierControlPointMode.Free);
 		}
 
-		public void AddCurve()
+		public void AddCurve(float segmentLength = 1f)
 		{
-			var point = Points[PointsCount - 1].position;
-			point.x += 1f;
-			AddPoint(point);
-			point.x += 1f;
-			AddPoint(point);
-			point.x += 1f;
-			AddPoint(point);
+			var deltaDir = (Points[PointsCount-1].position - Points[PointsCount - 2].position).normalized * segmentLength/3;
+			var p1 = Points[PointsCount - 1].position + deltaDir;
+			var p2 = p1 + deltaDir;
+			var p3 = p2 + deltaDir;
 
 			var prevMode = modes[modes.Count - 1];
-			modes.Add(prevMode);
-			ApplyContraints(PointsCount - 4);
-
-			if (IsLoop)
-			{
-				Points[PointsCount - 1].position = Points[0].position;
-				modes[modes.Count - 1] = modes[0];
-				ApplyContraints(0);
-			}
+			AddCurve(p1, p2, p3, prevMode);
 		}
 
 		public void AddCurve(Vector3 p1, Vector3 p2, Vector3 p3, BezierControlPointMode mode)
