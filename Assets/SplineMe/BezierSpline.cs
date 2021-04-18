@@ -39,7 +39,7 @@ namespace SplineMe
 		[SerializeField]
 		private List<BezierControlPointMode> modes;
 
-		public int CurveCount => (PointsCount - 1) / 3;
+		public int CurveCount => Mathf.Max(0 ,(PointsCount - 1) / 3);
 
 		private bool isRemovingCurve = false;
 
@@ -57,6 +57,21 @@ namespace SplineMe
 					modes[modes.Count - 1] = modes[0];
 					UpdatePoint(0, points[0].position);
 				}
+			}
+		}
+
+		public float Length
+		{
+			get
+			{
+				var lengthSum = 0f;
+				var curveCount = CurveCount;
+				for (var i = 0; i < curveCount; i++)
+				{
+					lengthSum += GetLength(points[i * 3].position, points[i * 3 + 1].position, points[i * 3 + 2].position, points[i * 3 + 3].position);
+				}
+
+				return lengthSum;
 			}
 		}
 
@@ -175,6 +190,57 @@ namespace SplineMe
 				3f * t * t * (p3 - p2);
 		}
 
+		/// <summary>
+		/// Cubic length curve based on mid point quadratic approximation.
+		/// </summary>
+		/// <param name="p0"></param>
+		/// <param name="p1"></param>
+		/// <param name="p2"></param>
+		/// <param name="p3"></param>
+		/// <returns></returns>
+		private static float GetLength(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+		{
+			var midPoint = GetPoint(p0, p1, p2, p3, 0.5f);
+			return GetLength(p0, p1, midPoint) + GetLength(midPoint, p2, p3);
+		}
+
+		/// <summary>
+		/// Quadratic Bezier Curve Length.
+		/// <remarks>
+		/// Integral calculation by Dave Eberly.
+		/// See: http://www.gamedev.net/topic/551455-length-of-a-generalized-quadratic-bezier-curve-in-3d/
+		/// </remarks>
+		/// </summary>
+		/// <param name="p0"></param>
+		/// <param name="p1"></param>
+		/// <param name="p2"></param>
+		/// <returns></returns>
+		private static float GetLength(Vector3 p0, Vector3 p1, Vector3 p2)
+		{
+			if (p0 == p2)
+			{
+				if (p0 == p1) return 0.0f;
+				return (p0 - p1).magnitude;
+			}
+			if (p1 == p0 || p1 == p2) return (p0 - p2).magnitude;
+			var A0 = p1 - p0;
+			var A1 = p0 - 2.0f * p1 + p2;
+			if (Mathf.Approximately(A1.x, 0.0f) && Mathf.Approximately(A1.y, 0.0f) && Mathf.Approximately(A1.z, 0.0f))
+			{
+				var c = 4.0f * Vector3.Dot(A1, A1);
+				var b = 8.0f * Vector3.Dot(A0, A1);
+				var a = 4.0f * Vector3.Dot(A0, A0);
+				var q = 4.0f * a * c - b * b;
+				var twoCpB = 2.0f * c + b;
+				var sumCBA = c + b + a;
+				var l0 = ((0.25f / c) * (twoCpB * Mathf.Sqrt(sumCBA) - b * Mathf.Sqrt(a)));
+				if (Mathf.Approximately(q, 0.0f)) return l0;
+				var l1 = (q / (8.0f * Mathf.Pow(c, 1.5f))) * (Mathf.Log(2.0f * Mathf.Sqrt(c * sumCBA) + twoCpB) - Mathf.Log(2.0f * Mathf.Sqrt(c * a) + b));
+				return l0 + l1;
+			}
+			else return 2.0f * A0.magnitude;
+		}
+
 		#endregion
 
 		private void Reset()
@@ -182,10 +248,10 @@ namespace SplineMe
 			modes = new List<BezierControlPointMode>();
 			points = new List<SplinePoint>(1000);
 
-			var p0 = new Vector3(1f * SplineMeTools.CreateCurveSegmentSize/6f, 0f, 0f);
-			var p1 = new Vector3(2f * SplineMeTools.CreateCurveSegmentSize/6f, 0f, 0f);
-			var p2 = new Vector3(5f * SplineMeTools.CreateCurveSegmentSize/6f, 0f, 0f);
-			var p3 = new Vector3(6f * SplineMeTools.CreateCurveSegmentSize/6f, 0f, 0f);
+			var p0 = new Vector3(1f * SplineMeTools.CreateCurveSegmentSize / 6f, 0f, 0f);
+			var p1 = new Vector3(2f * SplineMeTools.CreateCurveSegmentSize / 6f, 0f, 0f);
+			var p2 = new Vector3(5f * SplineMeTools.CreateCurveSegmentSize / 6f, 0f, 0f);
+			var p3 = new Vector3(6f * SplineMeTools.CreateCurveSegmentSize / 6f, 0f, 0f);
 
 			AddPoint(p0);
 			AddPoint(p1);
@@ -198,7 +264,7 @@ namespace SplineMe
 
 		public void AddCurve(float segmentLength = 1f)
 		{
-			var deltaDir = (Points[PointsCount-1].position - Points[PointsCount - 2].position).normalized * segmentLength/3;
+			var deltaDir = (Points[PointsCount - 1].position - Points[PointsCount - 2].position).normalized * segmentLength / 3;
 			var p1 = Points[PointsCount - 1].position + deltaDir;
 			var p2 = p1 + deltaDir;
 			var p3 = p2 + deltaDir;
@@ -252,7 +318,7 @@ namespace SplineMe
 				startCurveIndex += 2;
 			}
 
-			
+
 			RemovePoint(startCurveIndex + 1);
 			RemovePoint(startCurveIndex);
 			RemovePoint(startCurveIndex - 1);
@@ -389,10 +455,11 @@ namespace SplineMe
 		private void AddPoint(Vector3 point, int index)
 		{
 			var linePoint = new SplinePoint(point);
-			if(index!=PointsCount)
+			if (index != PointsCount)
 			{
 				Points.Insert(index, linePoint);
-			} else
+			}
+			else
 			{
 				Points.Add(linePoint);
 			}
@@ -416,7 +483,7 @@ namespace SplineMe
 				TryCastPoint(i, -transform.up, out newPointsPositions[i]);
 			}
 
-			for (var i = 0; i < PointsCount; i+=3)
+			for (var i = 0; i < PointsCount; i += 3)
 			{
 				var prevPoint = i > 0 ? points[i - 1].position : Vector3.zero;
 				var nextPoint = i < PointsCount - 1 ? points[i + 1].position : Vector3.zero;
@@ -484,7 +551,7 @@ namespace SplineMe
 
 		public void FactorCurve()
 		{
-			for(var i=0; i<CurveCount; i+=2)
+			for (var i = 0; i < CurveCount; i += 2)
 			{
 				AddMidCurveAndApplyConstraints(i);
 			}
@@ -507,7 +574,7 @@ namespace SplineMe
 			var startPointIndex = curveIndex * 3;
 
 			SetControlPointMode(startPointIndex, BezierControlPointMode.Free);
-			SetControlPointMode(startPointIndex+3, BezierControlPointMode.Free);
+			SetControlPointMode(startPointIndex + 3, BezierControlPointMode.Free);
 
 			var p0 = points[startPointIndex].position;
 
@@ -627,7 +694,7 @@ namespace SplineMe
 			p2.z = solution[1, 2];
 		}
 
-		private float[,] MultiplyMatrices(float[,] a , float[,] b)
+		private float[,] MultiplyMatrices(float[,] a, float[,] b)
 		{
 			int m = a.GetLength(0);
 			int n = a.GetLength(1);

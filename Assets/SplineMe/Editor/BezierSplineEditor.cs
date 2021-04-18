@@ -90,6 +90,8 @@ namespace SplineMe.Editor
 			spline = target as BezierSpline;
 			EditorGUI.BeginChangeCheck();
 			var prevEnabled = GUI.enabled;
+			GUI.enabled = false;
+			EditorGUILayout.FloatField("Length", spline.Length);
 			GUI.enabled = IsMoreThanOneCurve;
 			bool loop = EditorGUILayout.Toggle("Loop", spline.IsLoop);
 			if (EditorGUI.EndChangeCheck())
