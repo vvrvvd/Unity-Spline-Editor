@@ -41,8 +41,6 @@ namespace SplineMe
 
 		public int CurveCount => Mathf.Max(0 ,(PointsCount - 1) / 3);
 
-		private bool isRemovingCurve = false;
-
 		public bool IsLoop
 		{
 			get
@@ -248,10 +246,10 @@ namespace SplineMe
 			modes = new List<BezierControlPointMode>();
 			points = new List<SplinePoint>(1000);
 
-			var p0 = new Vector3(1f * SplineMeTools.CreateCurveSegmentSize / 6f, 0f, 0f);
-			var p1 = new Vector3(2f * SplineMeTools.CreateCurveSegmentSize / 6f, 0f, 0f);
-			var p2 = new Vector3(5f * SplineMeTools.CreateCurveSegmentSize / 6f, 0f, 0f);
-			var p3 = new Vector3(6f * SplineMeTools.CreateCurveSegmentSize / 6f, 0f, 0f);
+			var p0 = new Vector3(1f, 0f, 0f);
+			var p1 = new Vector3(1.5f, 0f, 0f);
+			var p2 = new Vector3(3.5f, 0f, 0f);
+			var p3 = new Vector3(4f, 0f, 0f);
 
 			AddPoint(p0);
 			AddPoint(p1);
@@ -292,15 +290,19 @@ namespace SplineMe
 
 		public void RemoveCurve(int curveIndex)
 		{
-			var wasRemovingCurve = isRemovingCurve;
-			isRemovingCurve = true;
+			RemoveCurve(curveIndex, false);
+		}
+
+		private void RemoveCurve(int curveIndex, bool isRecursiveCall)
+		{
+			var wasRemovingCurve = isRecursiveCall;
 			var isLastCurve = curveIndex == CurveCount;
 			var isStartCurve = curveIndex == 0;
 			var isMidCurve = IsLoop && curveIndex == 1 && CurveCount == 2;
 
 			if (!wasRemovingCurve && IsLoop && isStartCurve)
 			{
-				RemoveCurve(CurveCount);
+				RemoveCurve(CurveCount, true);
 			}
 
 			var beginCurveIndex = curveIndex * 3;
@@ -318,7 +320,6 @@ namespace SplineMe
 				startCurveIndex += 2;
 			}
 
-
 			RemovePoint(startCurveIndex + 1);
 			RemovePoint(startCurveIndex);
 			RemovePoint(startCurveIndex - 1);
@@ -327,7 +328,7 @@ namespace SplineMe
 
 			if (!wasRemovingCurve && IsLoop && isLastCurve)
 			{
-				RemoveCurve(0);
+				RemoveCurve(0, true);
 			}
 
 			if (wasRemovingCurve)
@@ -342,8 +343,12 @@ namespace SplineMe
 				IsLoop = false;
 			}
 
+			if (IsLoop)
+			{
+				UpdatePoint(0, Points[0].position);
+			}
+
 			UpdatePoint(nextPointIndex, Points[nextPointIndex].position);
-			isRemovingCurve = false;
 		}
 
 		public void UpdatePoint(int index, Vector3 position, bool applyConstraints = true, bool applyToSidePoints = true)
@@ -509,7 +514,7 @@ namespace SplineMe
 		{
 			var point = Points[index];
 			var worldPosition = transform.TransformPoint(point.position);
-			var isCorrectPosition = Physics.Raycast(worldPosition, direction, out var hit, SplineMeTools.MaxRaycastDistance, Physics.AllLayers);
+			var isCorrectPosition = Physics.Raycast(worldPosition, direction, out var hit, Mathf.Infinity, Physics.AllLayers);
 
 			castedPoint = isCorrectPosition ? transform.InverseTransformPoint(hit.point) : point.position;
 			return isCorrectPosition;
