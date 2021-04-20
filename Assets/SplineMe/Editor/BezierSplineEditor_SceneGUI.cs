@@ -59,7 +59,7 @@ namespace SplineMe.Editor
 
 		private void DrawPoints()
 		{
-			for (var i = 0; i < currentSpline.CurveCount; i++)
+			for (var i = 0; i < currentSpline.CurvesCount; i++)
 			{
 				var curveStartIndex = i * 3;
 				var p0 = DrawPoint(curveStartIndex);
@@ -67,7 +67,7 @@ namespace SplineMe.Editor
 				var p2 = DrawPoint(curveStartIndex + 2);
 				var p3 = handleTransform.TransformPoint(currentSpline.Points[curveStartIndex + 3].position);
 
-				if (!isCurveDrawerMode || i < currentSpline.CurveCount - 1)
+				if (!isCurveDrawerMode || i < currentSpline.CurvesCount - 1)
 				{
 					p3 = DrawPoint(curveStartIndex + 3);
 				}
@@ -177,14 +177,14 @@ namespace SplineMe.Editor
 				if (point1Index >= 0 && point1Index < currentSpline.PointsCount)
 				{
 					var point1 = handleTransform.TransformPoint(currentSpline.Points[point1Index].position);
-					var rotatedPoint1 = RotateAround(point1, point, rotationDiff);
+					var rotatedPoint1 = Vector3Utils.RotateAround(point1, point, rotationDiff);
 					currentSpline.UpdatePoint(point1Index, handleTransform.InverseTransformPoint(rotatedPoint1));
 				}
 
 				if (point2Index >= 0 && point2Index < currentSpline.PointsCount)
 				{
 					var point2 = handleTransform.TransformPoint(currentSpline.Points[point2Index].position);
-					var rotatedPoint2 = RotateAround(point2, point, rotationDiff);
+					var rotatedPoint2 = Vector3Utils.RotateAround(point2, point, rotationDiff);
 					currentSpline.UpdatePoint(point2Index, handleTransform.InverseTransformPoint(rotatedPoint2));
 				}
 
@@ -204,7 +204,7 @@ namespace SplineMe.Editor
 		private static void DrawSpline(BezierSpline spline)
 		{
 			var transformHandle = spline.transform;
-			for (var i = 0; i < spline.CurveCount; i++)
+			for (var i = 0; i < spline.CurvesCount; i++)
 			{
 				var curveStartIndex = i * 3;
 				var p0 = transformHandle.TransformPoint(spline.Points[curveStartIndex].position);
@@ -221,7 +221,7 @@ namespace SplineMe.Editor
 			var point = spline.GetPoint(1f);
 			Handles.DrawLine(point, point - spline.GetDirection(1f) * BazierSplineEditor_Consts.DirectionScale);
 
-			var curveSteps = BazierSplineEditor_Consts.CurveStepsCount * spline.CurveCount;
+			var curveSteps = BazierSplineEditor_Consts.CurveStepsCount * spline.CurvesCount;
 			for (int i = curveSteps - 1; i >= 0; i--)
 			{
 				point = spline.GetPoint(i / (float)curveSteps);
@@ -234,7 +234,7 @@ namespace SplineMe.Editor
 		{
 			var point = spline.GetPoint(1f);
 			Handles.color = BazierSplineEditor_Consts.SegmentsColor;
-			var curveSteps = BazierSplineEditor_Consts.CurveStepsCount * spline.CurveCount;
+			var curveSteps = BazierSplineEditor_Consts.CurveStepsCount * spline.CurvesCount;
 			for (int i = curveSteps - 1; i >= 0; i--)
 			{
 				var size = HandleUtility.GetHandleSize(point);

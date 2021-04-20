@@ -249,7 +249,7 @@ namespace SplineMe.Editor
 			var p0 = newCurvePoints[0];
 			var p3 = newCurvePoints[3];
 			BezierUtils.GetInverseControlPoints(p0, p3, newCurvePoints[1], newCurvePoints[2], BazierSplineEditor_Consts.DrawCurveFirstControlPoint, BazierSplineEditor_Consts.DrawCurveSecondControlPoint, out var p1, out var p2);
-			currentSpline.AddCurve(p1, p2, p3, BezierControlPointMode.Free);
+			currentSpline.AppendCurve(p1, p2, p3, BezierControlPointMode.Free);
 		}
 
 		#endregion

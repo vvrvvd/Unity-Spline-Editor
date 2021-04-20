@@ -34,10 +34,25 @@ namespace SplineMe
 
 		#region Properties
 
-		public int CurveCount => Mathf.Max(0 ,(PointsCount - 1) / 3);
+		/// <summary>
+		/// Number of curves in the splines.
+		/// </summary>
+		public int CurvesCount => Mathf.Max(0 ,(PointsCount - 1) / 3);
+
+		/// <summary>
+		/// Number of points in the spline.
+		/// </summary>
 		public int PointsCount => points.Count;
+
+		/// <summary>
+		/// List of all the spline points.
+		/// </summary>
 		public List<SplinePoint> Points => points;
 
+		/// <summary>
+		/// Returns if the spline is looped.
+		/// If true then the first and the last point are considered the same point.
+		/// </summary>
 		public bool IsLoop
 		{
 			get
@@ -55,12 +70,15 @@ namespace SplineMe
 			}
 		}
 
+		/// <summary>
+		/// Returns the entire spline length using quadratic curve approximation for every cubic spline.
+		/// </summary>
 		public float Length
 		{
 			get
 			{
 				var lengthSum = 0f;
-				var curveCount = CurveCount;
+				var curveCount = CurvesCount;
 				for (var i = 0; i < curveCount; i++)
 				{
 					lengthSum += BezierUtils.GetCubicLength(points[i * 3].position, points[i * 3 + 1].position, points[i * 3 + 2].position, points[i * 3 + 3].position);
@@ -68,78 +86,6 @@ namespace SplineMe
 
 				return lengthSum;
 			}
-		}
-
-		#endregion
-
-		#region Getters & Setters
-
-		public Vector3 GetPoint(float t)
-		{
-			int i;
-			if (t >= 1f)
-			{
-				t = 1f;
-				i = PointsCount - 4;
-			}
-			else
-			{
-				t = Mathf.Clamp01(t) * CurveCount;
-				i = (int)t;
-				t -= i;
-				i *= 3;
-			}
-
-			return transform.TransformPoint(BezierUtils.GetPoint(Points[i].position, Points[i + 1].position, Points[i + 2].position, Points[i + 3].position, t));
-		}
-
-		public Vector3 GetVelocity(float t)
-		{
-			int i;
-			if (t >= 1f)
-			{
-				t = 1f;
-				i = PointsCount - 4;
-			}
-			else
-			{
-				t = Mathf.Clamp01(t) * CurveCount;
-				i = (int)t;
-				t -= i;
-				i *= 3;
-			}
-
-			return transform.TransformPoint(BezierUtils.GetFirstDerivative(Points[i].position, Points[i + 1].position, Points[i + 2].position, Points[i + 3].position, t)) - transform.position;
-		}
-
-		public Vector3 GetDirection(float t)
-		{
-			return GetVelocity(t).normalized;
-		}
-
-		public BezierControlPointMode GetControlPointMode(int index)
-		{
-			return modes[(index + 1) / 3];
-		}
-
-		public void SetControlPointMode(int index, BezierControlPointMode mode)
-		{
-			var modeIndex = (index + 1) / 3;
-			modes[modeIndex] = mode;
-
-			if (isLoop)
-			{
-				if (modeIndex == 0)
-				{
-					modes[modes.Count - 1] = mode;
-				}
-				else if (modeIndex == modes.Count - 1)
-				{
-					modes[0] = mode;
-				}
-			}
-
-			ApplyContraints(index);
 		}
 
 		#endregion
@@ -169,18 +115,187 @@ namespace SplineMe
 
 		#region Public Methods
 
-		public void AddCurve(float segmentLength = 1f)
+		#region Getters & Setters
+
+		/// <summary>
+		/// Calculates the spline point position at given t.
+		/// </summary>
+		/// <param name="t"></param>
+		/// <param name="useWorldSpace">Transform point from local space to world space.</param>
+		/// <returns></returns>
+		public Vector3 GetPoint(float t, bool useWorldSpace = true)
 		{
-			var deltaDir = (Points[PointsCount - 1].position - Points[PointsCount - 2].position).normalized * segmentLength / 3;
+			int i;
+			if (t >= 1f)
+			{
+				t = 1f;
+				i = PointsCount - 4;
+			}
+			else
+			{
+				t = Mathf.Clamp01(t) * CurvesCount;
+				i = (int)t;
+				t -= i;
+				i *= 3;
+			}
+
+			var localSpacePosition = BezierUtils.GetPoint(Points[i].position, Points[i + 1].position, Points[i + 2].position, Points[i + 3].position, t);
+			return useWorldSpace ? transform.TransformPoint(localSpacePosition) : localSpacePosition;
+		}
+
+		/// <summary>
+		/// Calculates the spline velocity point (the first derivative) at given t.
+		/// </summary>
+		/// <param name="t"></param>
+		/// <param name="useWorldSpace">Transform point from local space to world space.</param>
+		/// <returns></returns>
+		public Vector3 GetVelocity(float t, bool useWorldSpace = true)
+		{
+			int i;
+			if (t >= 1f)
+			{
+				t = 1f;
+				i = PointsCount - 4;
+			}
+			else
+			{
+				t = Mathf.Clamp01(t) * CurvesCount;
+				i = (int)t;
+				t -= i;
+				i *= 3;
+			}
+
+			var localSpacePosition = BezierUtils.GetTheFirstDerivative(Points[i].position, Points[i + 1].position, Points[i + 2].position, Points[i + 3].position, t);
+			return useWorldSpace ? transform.TransformPoint(localSpacePosition) - transform.position : localSpacePosition;
+		}
+
+		/// <summary>
+		/// Calculates the spline direction (normalized velocity) at given t.
+		/// </summary>
+		/// <param name="t"></param>
+		/// <param name="useWorldSpace">Transform point from local space to world space.</param>
+		/// <returns></returns>
+		public Vector3 GetDirection(float t)
+		{
+			return GetVelocity(t, false).normalized;
+		}
+
+		/// <summary>
+		/// Returns control point mode for given point index.
+		/// </summary>
+		/// <param name="pointIndex"></param>
+		/// <returns></returns>
+		public BezierControlPointMode GetControlPointMode(int pointIndex)
+		{
+			return modes[(pointIndex + 1) / 3];
+		}
+
+		/// <summary>
+		/// Sets control point mode for given point index.
+		/// </summary>
+		/// <param name="pointIndex"></param>
+		/// <param name="mode"></param>
+		public void SetControlPointMode(int pointIndex, BezierControlPointMode mode)
+		{
+			var modeIndex = (pointIndex + 1) / 3;
+			modes[modeIndex] = mode;
+
+			if (isLoop)
+			{
+				if (modeIndex == 0)
+				{
+					modes[modes.Count - 1] = mode;
+				}
+				else if (modeIndex == modes.Count - 1)
+				{
+					modes[0] = mode;
+				}
+			}
+
+			ApplyContraints(pointIndex);
+		}
+
+		#endregion
+
+		#region Tools
+
+		/// <summary>
+		/// Update point position at given index.
+		/// </summary>
+		/// <param name="pointIndex">Point index.</param>
+		/// <param name="position">New local point position.</param>
+		/// <param name="applyConstraints">Updates connected control points based on BezierControlPointMode for point at given index.</param>
+		/// <param name="updateAttachedSidePoints">If the control point at pointIndex is starting or ending curve point (pointIndex % 3 == 0) and this value is set to true then control points attached to this point will also updated.</param>
+		public void UpdatePoint(int pointIndex, Vector3 position, bool applyConstraints = true, bool updateAttachedSidePoints = true)
+		{
+			if (updateAttachedSidePoints && pointIndex % 3 == 0)
+			{
+				var delta = position - Points[pointIndex].position;
+				if (IsLoop)
+				{
+					if (pointIndex == 0)
+					{
+						Points[1].position += delta;
+						Points[PointsCount - 2].position += delta;
+						Points[PointsCount - 1].position = position;
+					}
+					else if (pointIndex == PointsCount - 1)
+					{
+						Points[0].position = position;
+						Points[1].position += delta;
+						Points[pointIndex - 1].position += delta;
+					}
+					else
+					{
+						Points[pointIndex - 1].position += delta;
+						Points[pointIndex + 1].position += delta;
+					}
+				}
+				else
+				{
+					if (pointIndex > 0)
+					{
+						Points[pointIndex - 1].position += delta;
+					}
+					if (pointIndex + 1 < PointsCount)
+					{
+						Points[pointIndex + 1].position += delta;
+					}
+				}
+			}
+
+			Points[pointIndex].position = position;
+
+			if (applyConstraints)
+			{
+				ApplyContraints(pointIndex);
+			}
+		}
+
+		/// <summary>
+		/// Appends new curve of given length to the curve.
+		/// Curve is added in the direction of the last two curve points.
+		/// </summary>
+		/// <param name="length"></param>
+		public void AppendCurve(float length = 1f)
+		{
+			var deltaDir = (Points[PointsCount - 1].position - Points[PointsCount - 2].position).normalized * length / 3;
 			var p1 = Points[PointsCount - 1].position + deltaDir;
 			var p2 = p1 + deltaDir;
 			var p3 = p2 + deltaDir;
 
 			var prevMode = modes[modes.Count - 1];
-			AddCurve(p1, p2, p3, prevMode);
+			AppendCurve(p1, p2, p3, prevMode);
 		}
 
-		public void AddCurve(Vector3 p1, Vector3 p2, Vector3 p3, BezierControlPointMode mode)
+		/// <summary>
+		/// Appends new curve with given control points and control point mode.
+		/// </summary>
+		/// <param name="p1"></param>
+		/// <param name="p2"></param>
+		/// <param name="p3"></param>
+		/// <param name="mode"></param>
+		public void AppendCurve(Vector3 p1, Vector3 p2, Vector3 p3, BezierControlPointMode mode)
 		{
 			AddPoint(p1);
 			AddPoint(p2);
@@ -197,157 +312,46 @@ namespace SplineMe
 			}
 		}
 
+		/// <summary>
+		/// Removes curve at given index.
+		/// </summary>
+		/// <param name="curveIndex"></param>
 		public void RemoveCurve(int curveIndex)
 		{
 			RemoveCurve(curveIndex, false);
 		}
 
-		public void UpdatePoint(int index, Vector3 position, bool applyConstraints = true, bool applyToSidePoints = true)
+		/// <summary>
+		/// Factors the spline by adding mid curve points for every curve.
+		/// </summary>
+		public void FactorSpline()
 		{
-			if (applyToSidePoints && index % 3 == 0)
+			for (var i = 0; i < CurvesCount; i += 2)
 			{
-				var delta = position - Points[index].position;
-				if (IsLoop)
-				{
-					if (index == 0)
-					{
-						Points[1].position += delta;
-						Points[PointsCount - 2].position += delta;
-						Points[PointsCount - 1].position = position;
-					}
-					else if (index == PointsCount - 1)
-					{
-						Points[0].position = position;
-						Points[1].position += delta;
-						Points[index - 1].position += delta;
-					}
-					else
-					{
-						Points[index - 1].position += delta;
-						Points[index + 1].position += delta;
-					}
-				}
-				else
-				{
-					if (index > 0)
-					{
-						Points[index - 1].position += delta;
-					}
-					if (index + 1 < PointsCount)
-					{
-						Points[index + 1].position += delta;
-					}
-				}
-			}
-
-			Points[index].position = position;
-
-			if (applyConstraints)
-			{
-				ApplyContraints(index);
+				SplitCurve(i);
 			}
 		}
 
-		public void CastCurve()
+		/// <summary>
+		/// Simplifies the spline by removing every second curve.
+		/// </summary>
+		public void SimplifySpline()
 		{
-			for (var i = 0; i < modes.Count; i++)
+			for (var i = 1; i < CurvesCount; i++)
 			{
-				modes[i] = BezierControlPointMode.Free;
-			}
-
-			var newPointsPositions = new Vector3[PointsCount];
-			for (var i = 0; i < PointsCount; i++)
-			{
-				TryCastPoint(i, -transform.up, out newPointsPositions[i]);
-			}
-
-			for (var i = 0; i < PointsCount; i += 3)
-			{
-				var prevPoint = i > 0 ? points[i - 1].position : Vector3.zero;
-				var nextPoint = i < PointsCount - 1 ? points[i + 1].position : Vector3.zero;
-
-				UpdatePoint(i, newPointsPositions[i], false, true);
-
-				var isPreviousPointCasted = i > 0 && newPointsPositions[i - 1] != prevPoint;
-				if (isPreviousPointCasted)
-				{
-					UpdatePoint(i - 1, newPointsPositions[i - 1], false, false);
-				}
-
-				var isNextPointCasted = i < PointsCount - 1 && newPointsPositions[i + 1] != nextPoint;
-				if (isNextPointCasted)
-				{
-					UpdatePoint(i + 1, newPointsPositions[i + 1], false, false);
-				}
-			}
-
-		}
-
-		public bool TryCastPoint(int index, Vector3 direction, out Vector3 castedPoint)
-		{
-			var point = Points[index];
-			var worldPosition = transform.TransformPoint(point.position);
-			var isCorrectPosition = Physics.Raycast(worldPosition, direction, out var hit, Mathf.Infinity, Physics.AllLayers);
-
-			castedPoint = isCorrectPosition ? transform.InverseTransformPoint(hit.point) : point.position;
-			return isCorrectPosition;
-		}
-
-		public void AddMidCurve(int curveIndex)
-		{
-			var startPointIndex = curveIndex * 3;
-
-			var p0 = points[startPointIndex].position;
-			var p1 = points[startPointIndex + 1].position;
-
-			var t = (curveIndex + 0.5f) / CurveCount;
-			var newPoint = transform.InverseTransformPoint(GetPoint(t));
-
-			t = (curveIndex + 0.25f) / CurveCount;
-			var pointOnCurve = transform.InverseTransformPoint(GetPoint(t));
-
-			//Left control point
-			var leftControlPoint = BezierUtils.GetInverseCubicPointP2(p0, p1, newPoint, pointOnCurve, 0.5f);
-
-			p0 = newPoint;
-			var p2 = points[startPointIndex + 2].position;
-			var p3 = points[startPointIndex + 3].position;
-
-			t = (curveIndex + 0.75f) / CurveCount;
-			pointOnCurve = transform.InverseTransformPoint(GetPoint(t));
-
-			//Right control point
-			var rightControlPoint = BezierUtils.GetInverseCubicPointP1(newPoint, p2, p3, pointOnCurve, 0.5f);
-
-			AddPoint(leftControlPoint, startPointIndex + 2);
-			AddPoint(newPoint, startPointIndex + 3);
-			AddPoint(rightControlPoint, startPointIndex + 4);
-
-			var modeIndex = (startPointIndex + 3) / 3;
-			modes.Insert(modeIndex, BezierControlPointMode.Free);
-		}
-
-		public void FactorCurve()
-		{
-			for (var i = 0; i < CurveCount; i += 2)
-			{
-				AddMidCurveAndApplyConstraints(i);
-			}
-		}
-
-		public void SimplifyCurve()
-		{
-			for (var i = 1; i < CurveCount; i++)
-			{
-				RemoveCurveAndApplyConstraints(i);
-				if (i == CurveCount - 1)
+				RemoveCurveAndRecalculateControlPoints(i);
+				if (i == CurvesCount - 1)
 				{
 					return;
 				}
 			}
 		}
 
-		public void AddMidCurveAndApplyConstraints(int curveIndex)
+		/// <summary>
+		/// Splits curve at given index by adding new curve at midpoint of this curve.
+		/// </summary>
+		/// <param name="curveIndex"></param>
+		public void SplitCurve(int curveIndex)
 		{
 			var startPointIndex = curveIndex * 3;
 
@@ -356,14 +360,14 @@ namespace SplineMe
 
 			var p0 = points[startPointIndex].position;
 
-			var t = (curveIndex + 0.5f) / CurveCount;
-			var newPoint = transform.InverseTransformPoint(GetPoint(t));
+			var t = (curveIndex + 0.5f) / CurvesCount;
+			var newPoint = GetPoint(t, false);
 
-			t = (curveIndex + 0.16f) / CurveCount;
-			var pointOnCurve1 = transform.InverseTransformPoint(GetPoint(t));
+			t = (curveIndex + 0.16f) / CurvesCount;
+			var pointOnCurve1 = GetPoint(t, false);
 
-			t = (curveIndex + 0.33f) / CurveCount;
-			var pointOnCurve2 = transform.InverseTransformPoint(GetPoint(t));
+			t = (curveIndex + 0.33f) / CurvesCount;
+			var pointOnCurve2 = GetPoint(t, false);
 
 			//Left control point
 			BezierUtils.GetInverseControlPoints(p0, newPoint, pointOnCurve1, pointOnCurve2, 0.32f, 0.66f, out var p1, out var p2);
@@ -372,11 +376,11 @@ namespace SplineMe
 
 			var p3 = points[startPointIndex + 3].position;
 
-			t = (curveIndex + 0.66f) / CurveCount;
-			pointOnCurve1 = transform.InverseTransformPoint(GetPoint(t));
+			t = (curveIndex + 0.66f) / CurvesCount;
+			pointOnCurve1 = GetPoint(t, false);
 
-			t = (curveIndex + 0.83f) / CurveCount;
-			pointOnCurve2 = transform.InverseTransformPoint(GetPoint(t));
+			t = (curveIndex + 0.83f) / CurvesCount;
+			pointOnCurve2 = GetPoint(t, false);
 
 			//Right control point
 			BezierUtils.GetInverseControlPoints(newPoint, p3, pointOnCurve1, pointOnCurve2, 0.32f, 0.66f, out p1, out p2);
@@ -395,44 +399,41 @@ namespace SplineMe
 			modes.Insert(modeIndex, BezierControlPointMode.Free);
 		}
 
-		public void RemoveCurveAndApplyConstraints(int curveIndex)
-		{
-			var startPointIndex = curveIndex * 3;
-			var p0Index = startPointIndex - 3;
-			var p3Index = startPointIndex + 3;
-
-			var p0 = points[p0Index].position;
-			var p3 = points[p3Index].position;
-
-			var t = (curveIndex - 0.5f) / CurveCount;
-			var pointOnCurve1 = transform.InverseTransformPoint(GetPoint(t));
-
-			t = (curveIndex + 0.5f) / CurveCount;
-			var pointOnCurve2 = transform.InverseTransformPoint(GetPoint(t));
-
-			BezierUtils.GetInverseControlPoints(p0, p3, pointOnCurve1, pointOnCurve2, 0.25f, 0.75f, out var p1, out var p2);
-			SetControlPointMode(p0Index, BezierControlPointMode.Free);
-			SetControlPointMode(p3Index, BezierControlPointMode.Free);
-			UpdatePoint(p0Index + 1, p1);
-			UpdatePoint(p3Index - 1, p2);
-
-			RemoveCurve(curveIndex);
-		}
+		#endregion
 
 		#endregion
 
 		#region Private Methods
 
+		private void AddPoint(Vector3 point)
+		{
+			var nextIndex = PointsCount > 0 ? PointsCount : 0;
+			AddPoint(point, nextIndex);
+		}
+
+		private void AddPoint(Vector3 point, int index)
+		{
+			var linePoint = new SplinePoint(point);
+			if (index != PointsCount)
+			{
+				Points.Insert(index, linePoint);
+			}
+			else
+			{
+				Points.Add(linePoint);
+			}
+		}
+
 		private void RemoveCurve(int curveIndex, bool isRecursiveCall)
 		{
 			var wasRemovingCurve = isRecursiveCall;
-			var isLastCurve = curveIndex == CurveCount;
+			var isLastCurve = curveIndex == CurvesCount;
 			var isStartCurve = curveIndex == 0;
-			var isMidCurve = IsLoop && curveIndex == 1 && CurveCount == 2;
+			var isMidCurve = IsLoop && curveIndex == 1 && CurvesCount == 2;
 
 			if (!wasRemovingCurve && IsLoop && isStartCurve)
 			{
-				RemoveCurve(CurveCount, true);
+				RemoveCurve(CurvesCount, true);
 			}
 
 			var beginCurveIndex = curveIndex * 3;
@@ -468,7 +469,7 @@ namespace SplineMe
 
 			var nextPointIndex = (isLastCurve || startCurveIndex >= PointsCount) ? PointsCount - 1 : startCurveIndex;
 
-			if (IsLoop && CurveCount == 1)
+			if (IsLoop && CurvesCount == 1)
 			{
 				IsLoop = false;
 			}
@@ -479,6 +480,11 @@ namespace SplineMe
 			}
 
 			UpdatePoint(nextPointIndex, Points[nextPointIndex].position);
+		}
+
+		private void RemovePoint(int index)
+		{
+			Points.RemoveAt(index);
 		}
 
 		private void ApplyContraints(int index)
@@ -535,28 +541,28 @@ namespace SplineMe
 			Points[enforcedIndex].position = middle + enforcedTangent;
 		}
 
-		private void AddPoint(Vector3 point)
+		private void RemoveCurveAndRecalculateControlPoints(int curveIndex)
 		{
-			var nextIndex = PointsCount > 0 ? PointsCount : 0;
-			AddPoint(point, nextIndex);
-		}
+			var startPointIndex = curveIndex * 3;
+			var p0Index = startPointIndex - 3;
+			var p3Index = startPointIndex + 3;
 
-		private void AddPoint(Vector3 point, int index)
-		{
-			var linePoint = new SplinePoint(point);
-			if (index != PointsCount)
-			{
-				Points.Insert(index, linePoint);
-			}
-			else
-			{
-				Points.Add(linePoint);
-			}
-		}
+			var p0 = points[p0Index].position;
+			var p3 = points[p3Index].position;
 
-		private void RemovePoint(int index)
-		{
-			Points.RemoveAt(index);
+			var t = (curveIndex - 0.5f) / CurvesCount;
+			var pointOnCurve1 = GetPoint(t, false);
+
+			t = (curveIndex + 0.5f) / CurvesCount;
+			var pointOnCurve2 = GetPoint(t, false);
+
+			BezierUtils.GetInverseControlPoints(p0, p3, pointOnCurve1, pointOnCurve2, 0.25f, 0.75f, out var p1, out var p2);
+			SetControlPointMode(p0Index, BezierControlPointMode.Free);
+			SetControlPointMode(p3Index, BezierControlPointMode.Free);
+			UpdatePoint(p0Index + 1, p1);
+			UpdatePoint(p3Index - 1, p2);
+
+			RemoveCurve(curveIndex);
 		}
 
 		#endregion

@@ -9,7 +9,7 @@ namespace SplineMe
 		#region Public Static Methods
 
 		/// <summary>
-		/// Returns coordinates for point on cubic bezier curve with given control points and for given t
+		/// Returns coordinates for point on cubic bezier curve with given control points and t
 		/// </summary>
 		/// <param name="p0"></param>
 		/// <param name="p1"></param>
@@ -29,49 +29,7 @@ namespace SplineMe
 		}
 
 		/// <summary>
-		/// Returns coordinates of p1 for given control points and point on curve and given t.
-		/// </summary>
-		/// <param name="p0"></param>
-		/// <param name="p2"></param>
-		/// <param name="p3"></param>
-		/// <param name="pointOnCurve"></param>
-		/// <param name="t"></param>
-		/// <returns></returns>
-		public static Vector3 GetInverseCubicPointP1(Vector3 p0, Vector3 p2, Vector3 p3, Vector3 pointOnCurve, float t)
-		{
-			t = Mathf.Clamp01(t);
-			var oneMinusT = 1f - t;
-			return
-				(pointOnCurve -
-				oneMinusT * oneMinusT * oneMinusT * p0 -
-				3f * oneMinusT * t * t * p2 -
-				t * t * t * p3) /
-				(3f * oneMinusT * oneMinusT * t);
-		}
-
-		/// <summary>
-		/// Returns coordinates of p2 for given control points and point on curve and given t.
-		/// </summary>
-		/// <param name="p0"></param>
-		/// <param name="p2"></param>
-		/// <param name="p3"></param>
-		/// <param name="pointOnCurve"></param>
-		/// <param name="t"></param>
-		/// <returns></returns>
-		public static Vector3 GetInverseCubicPointP2(Vector3 p0, Vector3 p1, Vector3 p3, Vector3 pointOnCurve, float t)
-		{
-			t = Mathf.Clamp01(t);
-			var oneMinusT = 1f - t;
-			return
-				(pointOnCurve -
-				oneMinusT * oneMinusT * oneMinusT * p0 -
-				3f * oneMinusT * oneMinusT * t * p1 -
-				t * t * t * p3) /
-				(3f * oneMinusT * t * t);
-		}
-
-		/// <summary>
-		/// Cubic Bezier Curve First Derivative for given control points and given t.
+		/// Returns the first derivative of cubic bezier curve for given control points and t.
 		/// </summary>
 		/// <param name="p0"></param>
 		/// <param name="p1"></param>
@@ -79,7 +37,7 @@ namespace SplineMe
 		/// <param name="p3"></param>
 		/// <param name="t"></param>
 		/// <returns></returns>
-		public static Vector3 GetFirstDerivative(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
+		public static Vector3 GetTheFirstDerivative(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
 		{
 			t = Mathf.Clamp01(t);
 			float oneMinusT = 1f - t;
@@ -90,7 +48,7 @@ namespace SplineMe
 		}
 
 		/// <summary>
-		/// Cubic Bezier Curve length based on mid point quadratic approximation.
+		/// Cubic bezier curve length based on mid point quadratic approximation.
 		/// </summary>
 		/// <param name="p0"></param>
 		/// <param name="p1"></param>
@@ -141,7 +99,49 @@ namespace SplineMe
 		}
 
 		/// <summary>
-		/// Calculated controls points p1 and p2 for given p0, p3 and two points on curve with given u, v for them.
+		/// Returns coordinates of p1 for given control points and point on curve and t.
+		/// </summary>
+		/// <param name="p0"></param>
+		/// <param name="p2"></param>
+		/// <param name="p3"></param>
+		/// <param name="pointOnCurve"></param>
+		/// <param name="t"></param>
+		/// <returns></returns>
+		public static Vector3 GetInverseCubicPointP1(Vector3 p0, Vector3 p2, Vector3 p3, Vector3 pointOnCurve, float t)
+		{
+			t = Mathf.Clamp01(t);
+			var oneMinusT = 1f - t;
+			return
+				(pointOnCurve -
+				oneMinusT * oneMinusT * oneMinusT * p0 -
+				3f * oneMinusT * t * t * p2 -
+				t * t * t * p3) /
+				(3f * oneMinusT * oneMinusT * t);
+		}
+
+		/// <summary>
+		/// Returns coordinates of p2 for given control points and point on curve and t.
+		/// </summary>
+		/// <param name="p0"></param>
+		/// <param name="p2"></param>
+		/// <param name="p3"></param>
+		/// <param name="pointOnCurve"></param>
+		/// <param name="t"></param>
+		/// <returns></returns>
+		public static Vector3 GetInverseCubicPointP2(Vector3 p0, Vector3 p1, Vector3 p3, Vector3 pointOnCurve, float t)
+		{
+			t = Mathf.Clamp01(t);
+			var oneMinusT = 1f - t;
+			return
+				(pointOnCurve -
+				oneMinusT * oneMinusT * oneMinusT * p0 -
+				3f * oneMinusT * oneMinusT * t * p1 -
+				t * t * t * p3) /
+				(3f * oneMinusT * t * t);
+		}
+
+		/// <summary>
+		/// Calculates controls points p1 and p2 for given p0, p3 and two points on curve with given u, v for them.
 		/// Based on <ref>https://www.ijser.org/researchpaper/INVERSE-POINT-SOLUTION-OF-BEZIER-CURVE.pdf</ref>
 		/// </summary>
 		/// <param name="p0">First control point for the cubic curve</param>
