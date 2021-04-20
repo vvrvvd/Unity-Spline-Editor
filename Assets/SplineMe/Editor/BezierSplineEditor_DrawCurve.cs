@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using static SplineMe.BezierSpline;
 
 namespace SplineMe.Editor
 {
@@ -131,7 +132,7 @@ namespace SplineMe.Editor
 				return;
 			}
 
-			currentSpline.GetInverseControlPoints(p0, p3, newCurvePoints[1], newCurvePoints[2], BazierSplineEditor_Consts.DrawCurveFirstControlPoint, BazierSplineEditor_Consts.DrawCurveSecondControlPoint, out var p1, out var p2);
+			BezierUtils.GetInverseControlPoints(p0, p3, newCurvePoints[1], newCurvePoints[2], BazierSplineEditor_Consts.DrawCurveFirstControlPoint, BazierSplineEditor_Consts.DrawCurveSecondControlPoint, out var p1, out var p2);
 
 			p0 = handleTransform.TransformPoint(p0);
 			p1 = handleTransform.TransformPoint(p1);
@@ -247,7 +248,7 @@ namespace SplineMe.Editor
 		{
 			var p0 = newCurvePoints[0];
 			var p3 = newCurvePoints[3];
-			currentSpline.GetInverseControlPoints(p0, p3, newCurvePoints[1], newCurvePoints[2], BazierSplineEditor_Consts.DrawCurveFirstControlPoint, BazierSplineEditor_Consts.DrawCurveSecondControlPoint, out var p1, out var p2);
+			BezierUtils.GetInverseControlPoints(p0, p3, newCurvePoints[1], newCurvePoints[2], BazierSplineEditor_Consts.DrawCurveFirstControlPoint, BazierSplineEditor_Consts.DrawCurveSecondControlPoint, out var p1, out var p2);
 			currentSpline.AddCurve(p1, p2, p3, BezierControlPointMode.Free);
 		}
 

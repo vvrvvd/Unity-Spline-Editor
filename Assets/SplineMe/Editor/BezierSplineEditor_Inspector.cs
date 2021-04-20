@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using static SplineMe.BezierSpline;
 
 namespace SplineMe.Editor
 {

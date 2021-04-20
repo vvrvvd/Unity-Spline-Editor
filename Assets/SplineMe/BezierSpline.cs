@@ -1,45 +1,42 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace SplineMe
 {
-
-	public enum BezierControlPointMode : int
-	{
-		Free = 0,
-		Aligned = 1,
-		Mirrored = 2
-	}
-
-	[Serializable]
-	public class SplinePoint
-	{
-		public Vector3 position;
-
-		public SplinePoint(Vector3 position)
-		{
-			this.position = position;
-		}
-	}
 
 	[DisallowMultipleComponent]
 	public class BezierSpline : MonoBehaviour
 	{
 
-		public int PointsCount => points.Count;
-		public List<SplinePoint> Points => points;
+		#region Enums
+
+		public enum BezierControlPointMode : int
+		{
+			Free = 0,
+			Aligned = 1,
+			Mirrored = 2
+		}
+
+		#endregion
+
+		#region Editor Fields
 
 		[SerializeField]
-		protected List<SplinePoint> points;
+		private bool isLoop = default;
 
 		[SerializeField]
-		private bool isLoop;
+		protected List<SplinePoint> points = default;
 
 		[SerializeField]
-		private List<BezierControlPointMode> modes;
+		private List<BezierControlPointMode> modes = default;
+
+		#endregion
+
+		#region Properties
 
 		public int CurveCount => Mathf.Max(0 ,(PointsCount - 1) / 3);
+		public int PointsCount => points.Count;
+		public List<SplinePoint> Points => points;
 
 		public bool IsLoop
 		{
@@ -66,18 +63,20 @@ namespace SplineMe
 				var curveCount = CurveCount;
 				for (var i = 0; i < curveCount; i++)
 				{
-					lengthSum += GetLength(points[i * 3].position, points[i * 3 + 1].position, points[i * 3 + 2].position, points[i * 3 + 3].position);
+					lengthSum += BezierUtils.GetCubicLength(points[i * 3].position, points[i * 3 + 1].position, points[i * 3 + 2].position, points[i * 3 + 3].position);
 				}
 
 				return lengthSum;
 			}
 		}
 
+		#endregion
+
 		#region Getters & Setters
 
 		public Vector3 GetPoint(float t)
 		{
-			var i = 0;
+			int i;
 			if (t >= 1f)
 			{
 				t = 1f;
@@ -91,12 +90,12 @@ namespace SplineMe
 				i *= 3;
 			}
 
-			return transform.TransformPoint(GetPoint(Points[i].position, Points[i + 1].position, Points[i + 2].position, Points[i + 3].position, t));
+			return transform.TransformPoint(BezierUtils.GetPoint(Points[i].position, Points[i + 1].position, Points[i + 2].position, Points[i + 3].position, t));
 		}
 
 		public Vector3 GetVelocity(float t)
 		{
-			var i = 0;
+			int i;
 			if (t >= 1f)
 			{
 				t = 1f;
@@ -110,7 +109,7 @@ namespace SplineMe
 				i *= 3;
 			}
 
-			return transform.TransformPoint(GetFirstDerivative(Points[i].position, Points[i + 1].position, Points[i + 2].position, Points[i + 3].position, t)) - transform.position;
+			return transform.TransformPoint(BezierUtils.GetFirstDerivative(Points[i].position, Points[i + 1].position, Points[i + 2].position, Points[i + 3].position, t)) - transform.position;
 		}
 
 		public Vector3 GetDirection(float t)
@@ -143,103 +142,9 @@ namespace SplineMe
 			ApplyContraints(index);
 		}
 
-		private static Vector3 GetPoint(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
-		{
-			t = Mathf.Clamp01(t);
-			var oneMinusT = 1f - t;
-			return
-				oneMinusT * oneMinusT * oneMinusT * p0 +
-				3f * oneMinusT * oneMinusT * t * p1 +
-				3f * oneMinusT * t * t * p2 +
-				t * t * t * p3;
-		}
-
-		private static Vector3 GetInversePoint1(Vector3 p0, Vector3 p2, Vector3 p3, Vector3 pointOnCurve, float t)
-		{
-			t = Mathf.Clamp01(t);
-			var oneMinusT = 1f - t;
-			return
-				(pointOnCurve -
-				oneMinusT * oneMinusT * oneMinusT * p0 -
-				3f * oneMinusT * t * t * p2 -
-				t * t * t * p3) /
-				(3f * oneMinusT * oneMinusT * t);
-		}
-
-		private static Vector3 GetInversePoint2(Vector3 p0, Vector3 p1, Vector3 p3, Vector3 pointOnCurve, float t)
-		{
-			t = Mathf.Clamp01(t);
-			var oneMinusT = 1f - t;
-			return
-				(pointOnCurve -
-				oneMinusT * oneMinusT * oneMinusT * p0 -
-				3f * oneMinusT * oneMinusT * t * p1 -
-				t * t * t * p3) /
-				(3f * oneMinusT * t * t);
-		}
-
-		private static Vector3 GetFirstDerivative(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
-		{
-			t = Mathf.Clamp01(t);
-			float oneMinusT = 1f - t;
-			return
-				3f * oneMinusT * oneMinusT * (p1 - p0) +
-				6f * oneMinusT * t * (p2 - p1) +
-				3f * t * t * (p3 - p2);
-		}
-
-		/// <summary>
-		/// Cubic length curve based on mid point quadratic approximation.
-		/// </summary>
-		/// <param name="p0"></param>
-		/// <param name="p1"></param>
-		/// <param name="p2"></param>
-		/// <param name="p3"></param>
-		/// <returns></returns>
-		private static float GetLength(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
-		{
-			var midPoint = GetPoint(p0, p1, p2, p3, 0.5f);
-			return GetLength(p0, p1, midPoint) + GetLength(midPoint, p2, p3);
-		}
-
-		/// <summary>
-		/// Quadratic Bezier Curve Length.
-		/// <remarks>
-		/// Integral calculation by Dave Eberly.
-		/// See: http://www.gamedev.net/topic/551455-length-of-a-generalized-quadratic-bezier-curve-in-3d/
-		/// </remarks>
-		/// </summary>
-		/// <param name="p0"></param>
-		/// <param name="p1"></param>
-		/// <param name="p2"></param>
-		/// <returns></returns>
-		private static float GetLength(Vector3 p0, Vector3 p1, Vector3 p2)
-		{
-			if (p0 == p2)
-			{
-				if (p0 == p1) return 0.0f;
-				return (p0 - p1).magnitude;
-			}
-			if (p1 == p0 || p1 == p2) return (p0 - p2).magnitude;
-			var A0 = p1 - p0;
-			var A1 = p0 - 2.0f * p1 + p2;
-			if (Mathf.Approximately(A1.x, 0.0f) && Mathf.Approximately(A1.y, 0.0f) && Mathf.Approximately(A1.z, 0.0f))
-			{
-				var c = 4.0f * Vector3.Dot(A1, A1);
-				var b = 8.0f * Vector3.Dot(A0, A1);
-				var a = 4.0f * Vector3.Dot(A0, A0);
-				var q = 4.0f * a * c - b * b;
-				var twoCpB = 2.0f * c + b;
-				var sumCBA = c + b + a;
-				var l0 = ((0.25f / c) * (twoCpB * Mathf.Sqrt(sumCBA) - b * Mathf.Sqrt(a)));
-				if (Mathf.Approximately(q, 0.0f)) return l0;
-				var l1 = (q / (8.0f * Mathf.Pow(c, 1.5f))) * (Mathf.Log(2.0f * Mathf.Sqrt(c * sumCBA) + twoCpB) - Mathf.Log(2.0f * Mathf.Sqrt(c * a) + b));
-				return l0 + l1;
-			}
-			else return 2.0f * A0.magnitude;
-		}
-
 		#endregion
+
+		#region Initialize
 
 		private void Reset()
 		{
@@ -259,6 +164,10 @@ namespace SplineMe
 			modes.Add(BezierControlPointMode.Free);
 			modes.Add(BezierControlPointMode.Free);
 		}
+
+		#endregion
+
+		#region Public Methods
 
 		public void AddCurve(float segmentLength = 1f)
 		{
@@ -292,6 +201,227 @@ namespace SplineMe
 		{
 			RemoveCurve(curveIndex, false);
 		}
+
+		public void UpdatePoint(int index, Vector3 position, bool applyConstraints = true, bool applyToSidePoints = true)
+		{
+			if (applyToSidePoints && index % 3 == 0)
+			{
+				var delta = position - Points[index].position;
+				if (IsLoop)
+				{
+					if (index == 0)
+					{
+						Points[1].position += delta;
+						Points[PointsCount - 2].position += delta;
+						Points[PointsCount - 1].position = position;
+					}
+					else if (index == PointsCount - 1)
+					{
+						Points[0].position = position;
+						Points[1].position += delta;
+						Points[index - 1].position += delta;
+					}
+					else
+					{
+						Points[index - 1].position += delta;
+						Points[index + 1].position += delta;
+					}
+				}
+				else
+				{
+					if (index > 0)
+					{
+						Points[index - 1].position += delta;
+					}
+					if (index + 1 < PointsCount)
+					{
+						Points[index + 1].position += delta;
+					}
+				}
+			}
+
+			Points[index].position = position;
+
+			if (applyConstraints)
+			{
+				ApplyContraints(index);
+			}
+		}
+
+		public void CastCurve()
+		{
+			for (var i = 0; i < modes.Count; i++)
+			{
+				modes[i] = BezierControlPointMode.Free;
+			}
+
+			var newPointsPositions = new Vector3[PointsCount];
+			for (var i = 0; i < PointsCount; i++)
+			{
+				TryCastPoint(i, -transform.up, out newPointsPositions[i]);
+			}
+
+			for (var i = 0; i < PointsCount; i += 3)
+			{
+				var prevPoint = i > 0 ? points[i - 1].position : Vector3.zero;
+				var nextPoint = i < PointsCount - 1 ? points[i + 1].position : Vector3.zero;
+
+				UpdatePoint(i, newPointsPositions[i], false, true);
+
+				var isPreviousPointCasted = i > 0 && newPointsPositions[i - 1] != prevPoint;
+				if (isPreviousPointCasted)
+				{
+					UpdatePoint(i - 1, newPointsPositions[i - 1], false, false);
+				}
+
+				var isNextPointCasted = i < PointsCount - 1 && newPointsPositions[i + 1] != nextPoint;
+				if (isNextPointCasted)
+				{
+					UpdatePoint(i + 1, newPointsPositions[i + 1], false, false);
+				}
+			}
+
+		}
+
+		public bool TryCastPoint(int index, Vector3 direction, out Vector3 castedPoint)
+		{
+			var point = Points[index];
+			var worldPosition = transform.TransformPoint(point.position);
+			var isCorrectPosition = Physics.Raycast(worldPosition, direction, out var hit, Mathf.Infinity, Physics.AllLayers);
+
+			castedPoint = isCorrectPosition ? transform.InverseTransformPoint(hit.point) : point.position;
+			return isCorrectPosition;
+		}
+
+		public void AddMidCurve(int curveIndex)
+		{
+			var startPointIndex = curveIndex * 3;
+
+			var p0 = points[startPointIndex].position;
+			var p1 = points[startPointIndex + 1].position;
+
+			var t = (curveIndex + 0.5f) / CurveCount;
+			var newPoint = transform.InverseTransformPoint(GetPoint(t));
+
+			t = (curveIndex + 0.25f) / CurveCount;
+			var pointOnCurve = transform.InverseTransformPoint(GetPoint(t));
+
+			//Left control point
+			var leftControlPoint = BezierUtils.GetInverseCubicPointP2(p0, p1, newPoint, pointOnCurve, 0.5f);
+
+			p0 = newPoint;
+			var p2 = points[startPointIndex + 2].position;
+			var p3 = points[startPointIndex + 3].position;
+
+			t = (curveIndex + 0.75f) / CurveCount;
+			pointOnCurve = transform.InverseTransformPoint(GetPoint(t));
+
+			//Right control point
+			var rightControlPoint = BezierUtils.GetInverseCubicPointP1(newPoint, p2, p3, pointOnCurve, 0.5f);
+
+			AddPoint(leftControlPoint, startPointIndex + 2);
+			AddPoint(newPoint, startPointIndex + 3);
+			AddPoint(rightControlPoint, startPointIndex + 4);
+
+			var modeIndex = (startPointIndex + 3) / 3;
+			modes.Insert(modeIndex, BezierControlPointMode.Free);
+		}
+
+		public void FactorCurve()
+		{
+			for (var i = 0; i < CurveCount; i += 2)
+			{
+				AddMidCurveAndApplyConstraints(i);
+			}
+		}
+
+		public void SimplifyCurve()
+		{
+			for (var i = 1; i < CurveCount; i++)
+			{
+				RemoveCurveAndApplyConstraints(i);
+				if (i == CurveCount - 1)
+				{
+					return;
+				}
+			}
+		}
+
+		public void AddMidCurveAndApplyConstraints(int curveIndex)
+		{
+			var startPointIndex = curveIndex * 3;
+
+			SetControlPointMode(startPointIndex, BezierControlPointMode.Free);
+			SetControlPointMode(startPointIndex + 3, BezierControlPointMode.Free);
+
+			var p0 = points[startPointIndex].position;
+
+			var t = (curveIndex + 0.5f) / CurveCount;
+			var newPoint = transform.InverseTransformPoint(GetPoint(t));
+
+			t = (curveIndex + 0.16f) / CurveCount;
+			var pointOnCurve1 = transform.InverseTransformPoint(GetPoint(t));
+
+			t = (curveIndex + 0.33f) / CurveCount;
+			var pointOnCurve2 = transform.InverseTransformPoint(GetPoint(t));
+
+			//Left control point
+			BezierUtils.GetInverseControlPoints(p0, newPoint, pointOnCurve1, pointOnCurve2, 0.32f, 0.66f, out var p1, out var p2);
+			var leftControlPoint = p2;
+			var updatedP1 = p1;
+
+			var p3 = points[startPointIndex + 3].position;
+
+			t = (curveIndex + 0.66f) / CurveCount;
+			pointOnCurve1 = transform.InverseTransformPoint(GetPoint(t));
+
+			t = (curveIndex + 0.83f) / CurveCount;
+			pointOnCurve2 = transform.InverseTransformPoint(GetPoint(t));
+
+			//Right control point
+			BezierUtils.GetInverseControlPoints(newPoint, p3, pointOnCurve1, pointOnCurve2, 0.32f, 0.66f, out p1, out p2);
+
+			var rightControlPoint = p1;
+			var updatedP2 = p2;
+
+			UpdatePoint(startPointIndex + 2, updatedP2);
+			UpdatePoint(startPointIndex + 1, updatedP1);
+
+			AddPoint(leftControlPoint, startPointIndex + 2);
+			AddPoint(newPoint, startPointIndex + 3);
+			AddPoint(rightControlPoint, startPointIndex + 4);
+
+			var modeIndex = (startPointIndex + 3) / 3;
+			modes.Insert(modeIndex, BezierControlPointMode.Free);
+		}
+
+		public void RemoveCurveAndApplyConstraints(int curveIndex)
+		{
+			var startPointIndex = curveIndex * 3;
+			var p0Index = startPointIndex - 3;
+			var p3Index = startPointIndex + 3;
+
+			var p0 = points[p0Index].position;
+			var p3 = points[p3Index].position;
+
+			var t = (curveIndex - 0.5f) / CurveCount;
+			var pointOnCurve1 = transform.InverseTransformPoint(GetPoint(t));
+
+			t = (curveIndex + 0.5f) / CurveCount;
+			var pointOnCurve2 = transform.InverseTransformPoint(GetPoint(t));
+
+			BezierUtils.GetInverseControlPoints(p0, p3, pointOnCurve1, pointOnCurve2, 0.25f, 0.75f, out var p1, out var p2);
+			SetControlPointMode(p0Index, BezierControlPointMode.Free);
+			SetControlPointMode(p3Index, BezierControlPointMode.Free);
+			UpdatePoint(p0Index + 1, p1);
+			UpdatePoint(p3Index - 1, p2);
+
+			RemoveCurve(curveIndex);
+		}
+
+		#endregion
+
+		#region Private Methods
 
 		private void RemoveCurve(int curveIndex, bool isRecursiveCall)
 		{
@@ -349,52 +479,6 @@ namespace SplineMe
 			}
 
 			UpdatePoint(nextPointIndex, Points[nextPointIndex].position);
-		}
-
-		public void UpdatePoint(int index, Vector3 position, bool applyConstraints = true, bool applyToSidePoints = true)
-		{
-			if (applyToSidePoints && index % 3 == 0)
-			{
-				var delta = position - Points[index].position;
-				if (IsLoop)
-				{
-					if (index == 0)
-					{
-						Points[1].position += delta;
-						Points[PointsCount - 2].position += delta;
-						Points[PointsCount - 1].position = position;
-					}
-					else if (index == PointsCount - 1)
-					{
-						Points[0].position = position;
-						Points[1].position += delta;
-						Points[index - 1].position += delta;
-					}
-					else
-					{
-						Points[index - 1].position += delta;
-						Points[index + 1].position += delta;
-					}
-				}
-				else
-				{
-					if (index > 0)
-					{
-						Points[index - 1].position += delta;
-					}
-					if (index + 1 < PointsCount)
-					{
-						Points[index + 1].position += delta;
-					}
-				}
-			}
-
-			Points[index].position = position;
-
-			if (applyConstraints)
-			{
-				ApplyContraints(index);
-			}
 		}
 
 		private void ApplyContraints(int index)
@@ -475,258 +559,8 @@ namespace SplineMe
 			Points.RemoveAt(index);
 		}
 
-		public void CastCurve()
-		{
-			for (var i = 0; i < modes.Count; i++)
-			{
-				modes[i] = BezierControlPointMode.Free;
-			}
+		#endregion
 
-			var newPointsPositions = new Vector3[PointsCount];
-			for (var i = 0; i < PointsCount; i++)
-			{
-				TryCastPoint(i, -transform.up, out newPointsPositions[i]);
-			}
-
-			for (var i = 0; i < PointsCount; i += 3)
-			{
-				var prevPoint = i > 0 ? points[i - 1].position : Vector3.zero;
-				var nextPoint = i < PointsCount - 1 ? points[i + 1].position : Vector3.zero;
-
-				UpdatePoint(i, newPointsPositions[i], false, true);
-
-				var isPreviousPointCasted = i > 0 && newPointsPositions[i - 1] != prevPoint;
-				if (isPreviousPointCasted)
-				{
-					UpdatePoint(i - 1, newPointsPositions[i - 1], false, false);
-				}
-
-				var isNextPointCasted = i < PointsCount - 1 && newPointsPositions[i + 1] != nextPoint;
-				if (isNextPointCasted)
-				{
-					UpdatePoint(i + 1, newPointsPositions[i + 1], false, false);
-				}
-			}
-
-		}
-
-		public bool TryCastPoint(int index, Vector3 direction, out Vector3 castedPoint)
-		{
-			var point = Points[index];
-			var worldPosition = transform.TransformPoint(point.position);
-			var isCorrectPosition = Physics.Raycast(worldPosition, direction, out var hit, Mathf.Infinity, Physics.AllLayers);
-
-			castedPoint = isCorrectPosition ? transform.InverseTransformPoint(hit.point) : point.position;
-			return isCorrectPosition;
-		}
-
-		public void AddMidCurve(int curveIndex)
-		{
-			var startPointIndex = curveIndex * 3;
-
-			var p0 = points[startPointIndex].position;
-			var p1 = points[startPointIndex + 1].position;
-
-			var t = (curveIndex + 0.5f) / CurveCount;
-			var newPoint = transform.InverseTransformPoint(GetPoint(t));
-
-			t = (curveIndex + 0.25f) / CurveCount;
-			var pointOnCurve = transform.InverseTransformPoint(GetPoint(t));
-
-			//Left control point
-			var leftControlPoint = GetInversePoint2(p0, p1, newPoint, pointOnCurve, 0.5f);
-
-			p0 = newPoint;
-			var p2 = points[startPointIndex + 2].position;
-			var p3 = points[startPointIndex + 3].position;
-
-			t = (curveIndex + 0.75f) / CurveCount;
-			pointOnCurve = transform.InverseTransformPoint(GetPoint(t));
-
-			//Right control point
-			var rightControlPoint = GetInversePoint1(newPoint, p2, p3, pointOnCurve, 0.5f);
-
-			AddPoint(leftControlPoint, startPointIndex + 2);
-			AddPoint(newPoint, startPointIndex + 3);
-			AddPoint(rightControlPoint, startPointIndex + 4);
-
-			var modeIndex = (startPointIndex + 3) / 3;
-			modes.Insert(modeIndex, BezierControlPointMode.Free);
-		}
-
-		public void FactorCurve()
-		{
-			for (var i = 0; i < CurveCount; i += 2)
-			{
-				AddMidCurveAndApplyConstraints(i);
-			}
-		}
-
-		public void SimplifyCurve()
-		{
-			for (var i = 1; i < CurveCount; i++)
-			{
-				RemoveCurveAndApplyConstraints(i);
-				if (i == CurveCount - 1)
-				{
-					return;
-				}
-			}
-		}
-
-		public void AddMidCurveAndApplyConstraints(int curveIndex)
-		{
-			var startPointIndex = curveIndex * 3;
-
-			SetControlPointMode(startPointIndex, BezierControlPointMode.Free);
-			SetControlPointMode(startPointIndex + 3, BezierControlPointMode.Free);
-
-			var p0 = points[startPointIndex].position;
-
-			var t = (curveIndex + 0.5f) / CurveCount;
-			var newPoint = transform.InverseTransformPoint(GetPoint(t));
-
-			t = (curveIndex + 0.16f) / CurveCount;
-			var pointOnCurve1 = transform.InverseTransformPoint(GetPoint(t));
-
-			t = (curveIndex + 0.33f) / CurveCount;
-			var pointOnCurve2 = transform.InverseTransformPoint(GetPoint(t));
-
-			//Left control point
-			GetInverseControlPoints(p0, newPoint, pointOnCurve1, pointOnCurve2, 0.32f, 0.66f, out var p1, out var p2);
-			var leftControlPoint = p2;
-			var updatedP1 = p1;
-
-			var p3 = points[startPointIndex + 3].position;
-
-			t = (curveIndex + 0.66f) / CurveCount;
-			pointOnCurve1 = transform.InverseTransformPoint(GetPoint(t));
-
-			t = (curveIndex + 0.83f) / CurveCount;
-			pointOnCurve2 = transform.InverseTransformPoint(GetPoint(t));
-
-			//Right control point
-			GetInverseControlPoints(newPoint, p3, pointOnCurve1, pointOnCurve2, 0.32f, 0.66f, out p1, out p2);
-
-			var rightControlPoint = p1;
-			var updatedP2 = p2;
-
-			UpdatePoint(startPointIndex + 2, updatedP2);
-			UpdatePoint(startPointIndex + 1, updatedP1);
-
-			AddPoint(leftControlPoint, startPointIndex + 2);
-			AddPoint(newPoint, startPointIndex + 3);
-			AddPoint(rightControlPoint, startPointIndex + 4);
-
-			var modeIndex = (startPointIndex + 3) / 3;
-			modes.Insert(modeIndex, BezierControlPointMode.Free);
-		}
-
-		public void RemoveCurveAndApplyConstraints(int curveIndex)
-		{
-			var startPointIndex = curveIndex * 3;
-			var p0Index = startPointIndex - 3;
-			var p3Index = startPointIndex + 3;
-
-			var p0 = points[p0Index].position;
-			var p3 = points[p3Index].position;
-
-			var t = (curveIndex - 0.5f) / CurveCount;
-			var pointOnCurve1 = transform.InverseTransformPoint(GetPoint(t));
-
-			t = (curveIndex + 0.5f) / CurveCount;
-			var pointOnCurve2 = transform.InverseTransformPoint(GetPoint(t));
-
-			GetInverseControlPoints(p0, p3, pointOnCurve1, pointOnCurve2, 0.25f, 0.75f, out var p1, out var p2);
-			SetControlPointMode(p0Index, BezierControlPointMode.Free);
-			SetControlPointMode(p3Index, BezierControlPointMode.Free);
-			UpdatePoint(p0Index + 1, p1);
-			UpdatePoint(p3Index - 1, p2);
-
-			RemoveCurve(curveIndex);
-		}
-
-
-		public void GetInverseControlPoints(Vector3 p0, Vector3 p3, Vector3 f, Vector3 g, float u, float v, out Vector3 p1, out Vector3 p2)
-		{
-			p1 = Vector3.zero;
-			p2 = Vector3.zero;
-
-			var oneMinusU = (1f - u);
-			var c =
-				f -
-				(oneMinusU * oneMinusU * oneMinusU * p0) -
-				(u * u * u * p3);
-
-			var oneMinusV = (1f - v);
-			var d =
-				g -
-				(oneMinusV * oneMinusV * oneMinusV * p0) -
-				(v * v * v * p3);
-
-			var det =
-					(3f * oneMinusU * oneMinusU * u * 3f * oneMinusV * v * v) -
-					(3f * oneMinusU * u * u * 3f * oneMinusV * oneMinusV * v);
-
-			var m0 = (3f * oneMinusV * v * v) / det;
-			var m1 = (-3f * oneMinusU * u * u) / det;
-			var m2 = (-3f * oneMinusV * oneMinusV * v) / det;
-			var m3 = (3f * oneMinusU * oneMinusU * u) / det;
-
-			var a = new float[,]
-			{
-				{ m0, m1 }, {m2, m3}
-				// | m0 m1 |
-				// | m2 m3 |
-			};
-
-			var b = new float[,]
-			{
-				{c.x, c.y, c.z},
-				{d.x, d.y, d.z}
-				// | c.x d.x |
-				// | c.y d.y |
-				// | c.z d.z |
-			};
-
-			var solution = MultiplyMatrices(a, b);
-			p1.x = solution[0, 0];
-			p1.y = solution[0, 1];
-			p1.z = solution[0, 2];
-
-			p2.x = solution[1, 0];
-			p2.y = solution[1, 1];
-			p2.z = solution[1, 2];
-		}
-
-		private float[,] MultiplyMatrices(float[,] a, float[,] b)
-		{
-			int m = a.GetLength(0);
-			int n = a.GetLength(1);
-			int p = b.GetLength(0);
-			int q = b.GetLength(1);
-
-			if (n != p)
-			{
-				Debug.LogError($"Matrix multiplication not possible due to not matching sizes {n} != {p}");
-			}
-
-			float[,] c = new float[m, q];
-
-			for (var i = 0; i < m; i++)
-			{
-				for (var j = 0; j < q; j++)
-				{
-					c[i, j] = 0;
-					for (int k = 0; k < n; k++)
-					{
-						c[i, j] += a[i, k] * b[k, j];
-					}
-				}
-			}
-
-			return c;
-		}
 	}
 
 }
