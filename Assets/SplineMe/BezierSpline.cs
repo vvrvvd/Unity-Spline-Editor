@@ -273,43 +273,43 @@ namespace SplineMe
 		}
 
 		/// <summary>
-		/// Appends new curve of given length to the curve.
-		/// Curve is added in the direction of the last two curve points.
-		/// </summary>
-		/// <param name="length"></param>
-		public void AppendCurve(float length = 1f)
-		{
-			var deltaDir = (Points[PointsCount - 1].position - Points[PointsCount - 2].position).normalized * length / 3;
-			var p1 = Points[PointsCount - 1].position + deltaDir;
-			var p2 = p1 + deltaDir;
-			var p3 = p2 + deltaDir;
-
-			var prevMode = modes[modes.Count - 1];
-			AppendCurve(p1, p2, p3, prevMode);
-		}
-
-		/// <summary>
 		/// Appends new curve with given control points and control point mode.
 		/// </summary>
 		/// <param name="p1"></param>
 		/// <param name="p2"></param>
 		/// <param name="p3"></param>
-		/// <param name="mode"></param>
-		public void AppendCurve(Vector3 p1, Vector3 p2, Vector3 p3, BezierControlPointMode mode)
+		/// <param name="mode"></param
+		/// <param name="addInFront">Should new curve be added at the beginning of spline.</param>
+		public void AppendCurve(Vector3 p1, Vector3 p2, Vector3 p3, BezierControlPointMode mode, bool addInFront = true)
 		{
-			AddPoint(p1);
-			AddPoint(p2);
-			AddPoint(p3);
-
-			modes.Add(mode);
-			ApplyContraints(PointsCount - 4);
-
-			if (IsLoop)
+			if(!addInFront || IsLoop)
 			{
-				Points[PointsCount - 1].position = Points[0].position;
-				modes[modes.Count - 1] = modes[0];
-				ApplyContraints(0);
+				//Add at the end of the spline
+				AddPoint(p1);
+				AddPoint(p2);
+				AddPoint(p3);
+
+				modes.Add(mode);
+				ApplyContraints(PointsCount - 4);
+
+				if (IsLoop)
+				{
+					Points[PointsCount - 1].position = Points[0].position;
+					modes[modes.Count - 1] = modes[0];
+					ApplyContraints(0);
+				}
 			}
+			else
+			{
+				//Add at the beginning of the spline
+				AddPoint(p1, 0);
+				AddPoint(p2, 0);
+				AddPoint(p3, 0);
+
+				modes.Insert(0, mode);
+				ApplyContraints(3);
+			}
+
 		}
 
 		/// <summary>
@@ -318,7 +318,47 @@ namespace SplineMe
 		/// <param name="curveIndex"></param>
 		public void RemoveCurve(int curveIndex)
 		{
-			RemoveCurve(curveIndex, false);
+			var isLastCurve = (isLoop && curveIndex == CurvesCount) || (!isLoop && curveIndex == CurvesCount - 1);
+			var isStartCurve = curveIndex == 0;
+			var isMidCurve = IsLoop && curveIndex == 1 && CurvesCount == 2;
+			var beginCurveIndex = curveIndex * 3;
+			var startCurveIndex = beginCurveIndex;
+			if (isStartCurve)
+			{
+				startCurveIndex += 1;
+			}
+			else if (isLastCurve)
+			{
+				startCurveIndex = PointsCount - 2;
+			}
+			else if (isMidCurve)
+			{
+				startCurveIndex += 2;
+			}
+
+			RemovePoint(startCurveIndex + 1);
+			RemovePoint(startCurveIndex);
+
+			if (!isLastCurve || !IsLoop)
+			{
+				RemovePoint(startCurveIndex - 1);
+				var modeIndex = (beginCurveIndex + 2) / 3;
+				modes.RemoveAt(modeIndex);
+			}
+
+			var nextPointIndex = (isLastCurve || startCurveIndex >= PointsCount) ? PointsCount - 1 : startCurveIndex;
+
+			if (IsLoop && CurvesCount == 1)
+			{
+				IsLoop = false;
+			}
+
+			if (IsLoop)
+			{
+				UpdatePoint(0, points[0].position);
+			}
+
+			UpdatePoint(nextPointIndex, Points[nextPointIndex].position);
 		}
 
 		/// <summary>
@@ -424,72 +464,14 @@ namespace SplineMe
 			}
 		}
 
-		private void RemoveCurve(int curveIndex, bool isRecursiveCall)
+		private void RemovePoint(int pointIndex)
 		{
-			var wasRemovingCurve = isRecursiveCall;
-			var isLastCurve = curveIndex == CurvesCount;
-			var isStartCurve = curveIndex == 0;
-			var isMidCurve = IsLoop && curveIndex == 1 && CurvesCount == 2;
-
-			if (!wasRemovingCurve && IsLoop && isStartCurve)
-			{
-				RemoveCurve(CurvesCount, true);
-			}
-
-			var beginCurveIndex = curveIndex * 3;
-			var startCurveIndex = beginCurveIndex;
-			if (isStartCurve)
-			{
-				startCurveIndex += 1;
-			}
-			else if (isLastCurve)
-			{
-				startCurveIndex = PointsCount - 2;
-			}
-			else if (isMidCurve)
-			{
-				startCurveIndex += 2;
-			}
-
-			RemovePoint(startCurveIndex + 1);
-			RemovePoint(startCurveIndex);
-			RemovePoint(startCurveIndex - 1);
-			var modeIndex = (beginCurveIndex + 2) / 3;
-			modes.RemoveAt(modeIndex);
-
-			if (!wasRemovingCurve && IsLoop && isLastCurve)
-			{
-				RemoveCurve(0, true);
-			}
-
-			if (wasRemovingCurve)
-			{
-				return;
-			}
-
-			var nextPointIndex = (isLastCurve || startCurveIndex >= PointsCount) ? PointsCount - 1 : startCurveIndex;
-
-			if (IsLoop && CurvesCount == 1)
-			{
-				IsLoop = false;
-			}
-
-			if (IsLoop)
-			{
-				UpdatePoint(0, Points[0].position);
-			}
-
-			UpdatePoint(nextPointIndex, Points[nextPointIndex].position);
+			Points.RemoveAt(pointIndex);
 		}
 
-		private void RemovePoint(int index)
+		private void ApplyContraints(int pointIndex)
 		{
-			Points.RemoveAt(index);
-		}
-
-		private void ApplyContraints(int index)
-		{
-			var modeIndex = (index + 1) / 3;
+			var modeIndex = (pointIndex + 1) / 3;
 			var mode = modes[modeIndex];
 			if (mode == BezierControlPointMode.Free || (!IsLoop && (modeIndex == 0 || modeIndex == modes.Count - 1)))
 			{
@@ -498,7 +480,7 @@ namespace SplineMe
 
 			var middleIndex = modeIndex * 3;
 			int fixedIndex, enforcedIndex;
-			if (index <= middleIndex)
+			if (pointIndex <= middleIndex)
 			{
 				fixedIndex = middleIndex - 1;
 				if (fixedIndex < 0)

@@ -163,13 +163,14 @@ namespace SplineMe.Editor
 		{
 			GUILayout.BeginHorizontal();
 			GUI.backgroundColor = Color.red;
+			var prevEnabled = GUI.enabled;
 
+			GUI.enabled = CanNewCurveBeAdded;
 			if (GUILayout.Button("Add Curve"))
 			{
 				AddCurve();
 			}
 
-			var prevEnabled = GUI.enabled;
 			GUI.enabled = CanSelectedCurveBeRemoved && !isCurveDrawerMode;
 			if (GUILayout.Button("Remove Curve"))
 			{

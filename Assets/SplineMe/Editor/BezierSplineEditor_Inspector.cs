@@ -33,7 +33,7 @@ namespace SplineMe.Editor
 
 			GUI.enabled = prevEnabled;
 
-			if (selectedIndex >= currentSpline.PointsCount)
+			if (selectedPointIndex >= currentSpline.PointsCount)
 			{
 				SelectIndex(currentSpline.PointsCount - 1);
 			}
@@ -77,20 +77,20 @@ namespace SplineMe.Editor
 		{
 			GUILayout.Label("Selected Point");
 			EditorGUI.BeginChangeCheck();
-			Vector3 point = EditorGUILayout.Vector3Field("Position", currentSpline.Points[selectedIndex].position);
+			Vector3 point = EditorGUILayout.Vector3Field("Position", currentSpline.Points[selectedPointIndex].position);
 			if (EditorGUI.EndChangeCheck())
 			{
 				Undo.RecordObject(currentSpline, "Move Point");
-				currentSpline.UpdatePoint(selectedIndex, point);
+				currentSpline.UpdatePoint(selectedPointIndex, point);
 				EditorUtility.SetDirty(currentSpline);
 			}
 
 			EditorGUI.BeginChangeCheck();
-			BezierControlPointMode mode = (BezierControlPointMode)EditorGUILayout.EnumPopup("Mode", currentSpline.GetControlPointMode(selectedIndex));
+			BezierControlPointMode mode = (BezierControlPointMode)EditorGUILayout.EnumPopup("Mode", currentSpline.GetControlPointMode(selectedPointIndex));
 			if (EditorGUI.EndChangeCheck())
 			{
 				Undo.RecordObject(currentSpline, "Change Point Mode");
-				currentSpline.SetControlPointMode(selectedIndex, mode);
+				currentSpline.SetControlPointMode(selectedPointIndex, mode);
 				EditorUtility.SetDirty(currentSpline);
 			}
 		}

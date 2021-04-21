@@ -31,7 +31,7 @@ namespace SplineMe.Editor
 		{
 			if (Event.current.type == EventType.Repaint)
 			{
-				DrawSpline(currentSpline);
+				DrawSpline(currentSpline, SelectedCurveIndex);
 
 				if (showDirectionsLines)
 				{
@@ -109,7 +109,7 @@ namespace SplineMe.Editor
 				Repaint();
 			}
 
-			if (selectedIndex == index)
+			if (selectedPointIndex == index)
 			{
 				if (savedTool == Tool.Rotate && index % 3 == 0)
 				{
@@ -201,7 +201,7 @@ namespace SplineMe.Editor
 
 		#region Static Methods
 
-		private static void DrawSpline(BezierSpline spline)
+		private static void DrawSpline(BezierSpline spline, int selectedSplineIndex = -1)
 		{
 			var transformHandle = spline.transform;
 			for (var i = 0; i < spline.CurvesCount; i++)
@@ -212,7 +212,8 @@ namespace SplineMe.Editor
 				var p2 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 2].position);
 				var p3 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 3].position);
 
-				Handles.DrawBezier(p0, p3, p1, p2, BazierSplineEditor_Consts.LineColor, null, BazierSplineEditor_Consts.LineWidth * 1.5f);
+				var splineColor = i == selectedSplineIndex ? BazierSplineEditor_Consts.SelectedLineColor : BazierSplineEditor_Consts.LineColor;
+				Handles.DrawBezier(p0, p3, p1, p2, splineColor, null, BazierSplineEditor_Consts.LineWidth * 1.5f);
 			}
 		}
 

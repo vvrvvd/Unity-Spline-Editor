@@ -13,6 +13,7 @@ namespace SplineMe
 		public static Color LineMidPointColor => Color.white;
 		public static Color LineEndPointColor => Color.red;
 		public static Color LineColor => Color.red;
+		public static Color SelectedLineColor => Color.blue;
 		public static Color TangentLineColor => Color.grey;
 		public static Color DirectionLineColor => Color.green;
 		public static Color SegmentsColor => Color.blue;

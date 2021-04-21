@@ -16,7 +16,7 @@ namespace SplineMe.Editor
 
 		#region Private Fields
 
-		private int selectedIndex = -1;
+		private int selectedPointIndex = -1;
 
 		private Event currentEvent;
 		private Transform handleTransform;
@@ -29,7 +29,7 @@ namespace SplineMe.Editor
 		{
 			get
 			{
-				var selectedCurveIndex = selectedIndex != -1 ? selectedIndex / 3 : -1;
+				var selectedCurveIndex = selectedPointIndex != -1 ? selectedPointIndex / 3 : -1;
 				if (selectedCurveIndex == currentSpline.CurvesCount)
 				{
 					selectedCurveIndex = currentSpline.IsLoop ? 0 : currentSpline.CurvesCount - 1;
@@ -39,11 +39,11 @@ namespace SplineMe.Editor
 			}
 		}
 
-		private bool IsAnyPointSelected => selectedIndex != -1 && selectedIndex < currentSpline.PointsCount;
+		private bool IsAnyPointSelected => selectedPointIndex != -1 && selectedPointIndex < currentSpline.PointsCount;
 		private bool HasMoreThanOneCurve => currentSpline.CurvesCount > 1;
 		private bool CanBeSimplified => HasMoreThanOneCurve && (!currentSpline.IsLoop || currentSpline.CurvesCount > 2);
 		private bool CanSelectedCurveBeRemoved => IsAnyPointSelected && HasMoreThanOneCurve && (!currentSpline.IsLoop || currentSpline.CurvesCount > 2);
-
+		private bool CanNewCurveBeAdded => !currentSpline.IsLoop;
 
 		#endregion
 
@@ -83,7 +83,7 @@ namespace SplineMe.Editor
 			handleTransform = currentSpline.transform;
 			handleRotation = Tools.pivotRotation == PivotRotation.Local ? handleTransform.rotation : Quaternion.identity;
 
-			if (selectedIndex >= currentSpline.PointsCount)
+			if (selectedPointIndex >= currentSpline.PointsCount)
 			{
 				SelectIndex(currentSpline.PointsCount - 1);
 			}
@@ -113,7 +113,7 @@ namespace SplineMe.Editor
 
 		private void SelectIndex(int index)
 		{
-			if (index == -1 && selectedIndex == -1)
+			if (index == -1 && selectedPointIndex == -1)
 			{
 				return;
 			}
@@ -124,7 +124,7 @@ namespace SplineMe.Editor
 
 		private void UpdateSelectedIndex(int index)
 		{
-			selectedIndex = index;
+			selectedPointIndex = index;
 
 			if (index != -1)
 			{
@@ -136,9 +136,48 @@ namespace SplineMe.Editor
 
 		private void AddCurve()
 		{
+			if(!CanNewCurveBeAdded)
+			{
+				return;
+			}
+
 			Undo.RecordObject(currentSpline, "Add Curve");
-			currentSpline.AppendCurve(BazierSplineEditor_Consts.CreateCurveSegmentSize);
-			currentEditor.UpdateSelectedIndex(currentSpline.PointsCount - 1);
+
+			if(SelectedCurveIndex == 0)
+			{
+				AddBeginningCurve();
+			}
+			else
+			{
+				AddEndingCurve();
+			}
+		}
+
+		private void AddEndingCurve()
+		{
+			var pointsCount = currentSpline.PointsCount;
+			var deltaDir = (currentSpline.Points[pointsCount - 1].position - currentSpline.Points[pointsCount - 2].position).normalized * BazierSplineEditor_Consts.CreateCurveSegmentSize / 3;
+			var p1 = currentSpline.Points[pointsCount - 1].position + deltaDir;
+			var p2 = p1 + deltaDir;
+			var p3 = p2 + deltaDir;
+
+			var prevMode = currentSpline.GetControlPointMode(selectedPointIndex);
+
+			currentSpline.AppendCurve(p1, p2, p3, prevMode, false);
+			UpdateSelectedIndex(currentSpline.PointsCount - 1);
+		}
+
+		private void AddBeginningCurve()
+		{
+			var deltaDir = (currentSpline.Points[1].position - currentSpline.Points[0].position).normalized * BazierSplineEditor_Consts.CreateCurveSegmentSize / 3;
+			var p1 = currentSpline.Points[1].position - deltaDir;
+			var p2 = p1 - deltaDir;
+			var p3 = p2 - deltaDir;
+
+			var prevMode = currentSpline.GetControlPointMode(selectedPointIndex);
+
+			currentSpline.AppendCurve(p1, p2, p3, prevMode, true);
+			UpdateSelectedIndex(0);
 		}
 
 		private void AddMidCurve()
@@ -149,16 +188,16 @@ namespace SplineMe.Editor
 			}
 
 			Undo.RecordObject(currentSpline, "Add Mid Curve");
-			var wasLastPoint = selectedIndex == currentSpline.PointsCount - 1;
+			var wasLastPoint = selectedPointIndex == currentSpline.PointsCount - 1;
 			currentSpline.SplitCurve(SelectedCurveIndex);
 
 			if (wasLastPoint && !currentSpline.IsLoop)
 			{
 				currentEditor.SelectIndex(currentSpline.PointsCount - 4);
 			}
-			else if (selectedIndex != 0 && !(wasLastPoint && currentSpline.IsLoop))
+			else if (selectedPointIndex != 0 && !(wasLastPoint && currentSpline.IsLoop))
 			{
-				currentEditor.SelectIndex(selectedIndex + 3);
+				currentEditor.SelectIndex(selectedPointIndex + 3);
 			}
 			else
 			{
@@ -174,9 +213,9 @@ namespace SplineMe.Editor
 			}
 
 			Undo.RecordObject(currentSpline, "Remove Curve");
-			var curveToRemove = currentSpline.PointsCount - selectedIndex < 3 ? currentSpline.CurvesCount : SelectedCurveIndex;
+			var curveToRemove = SelectedCurveIndex;
 			currentSpline.RemoveCurve(curveToRemove);
-			var nextSelectedIndex = Mathf.Min(selectedIndex, currentSpline.PointsCount - 1);
+			var nextSelectedIndex = Mathf.Min(selectedPointIndex, currentSpline.PointsCount - 1);
 			UpdateSelectedIndex(nextSelectedIndex);
 		}
 
@@ -223,9 +262,9 @@ namespace SplineMe.Editor
 		{
 			Undo.RecordObject(currentSpline, "Factor Curve");
 			currentSpline.FactorSpline();
-			if (selectedIndex != -1)
+			if (selectedPointIndex != -1)
 			{
-				currentEditor.SelectIndex(selectedIndex * 2);
+				currentEditor.SelectIndex(selectedPointIndex * 2);
 			}
 		}
 
@@ -238,9 +277,9 @@ namespace SplineMe.Editor
 
 			Undo.RecordObject(currentSpline, "Simplify Curve");
 			currentSpline.SimplifySpline();
-			if (selectedIndex != -1)
+			if (selectedPointIndex != -1)
 			{
-				currentEditor.SelectIndex(selectedIndex / 2);
+				currentEditor.SelectIndex(selectedPointIndex / 2);
 			}
 		}
 
