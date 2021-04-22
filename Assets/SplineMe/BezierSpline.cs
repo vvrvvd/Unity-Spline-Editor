@@ -279,10 +279,10 @@ namespace SplineMe
 		/// <param name="p2"></param>
 		/// <param name="p3"></param>
 		/// <param name="mode"></param
-		/// <param name="addInFront">Should new curve be added at the beginning of spline.</param>
-		public void AppendCurve(Vector3 p1, Vector3 p2, Vector3 p3, BezierControlPointMode mode, bool addInFront = true)
+		/// <param name="addAtBeginning">Should new curve be added at the beginning of spline.</param>
+		public void AppendCurve(Vector3 p1, Vector3 p2, Vector3 p3, BezierControlPointMode mode, bool addAtBeginning = true)
 		{
-			if(!addInFront || IsLoop)
+			if(!addAtBeginning || IsLoop)
 			{
 				//Add at the end of the spline
 				AddPoint(p1);
@@ -368,7 +368,7 @@ namespace SplineMe
 		{
 			for (var i = 0; i < CurvesCount; i += 2)
 			{
-				SplitCurve(i);
+				InsertCurve(i, 0.5f);
 			}
 		}
 
@@ -388,11 +388,17 @@ namespace SplineMe
 		}
 
 		/// <summary>
-		/// Splits curve at given index by adding new curve at midpoint of this curve.
+		/// Inserts a new curve by adding it at t point of curve at given index.
 		/// </summary>
 		/// <param name="curveIndex"></param>
-		public void SplitCurve(int curveIndex)
+		public void InsertCurve(int curveIndex, float t)
 		{
+			t = Mathf.Clamp01(t);
+			if(t == 0f || t == 1f)
+			{
+				return;
+			}
+
 			var startPointIndex = curveIndex * 3;
 
 			SetControlPointMode(startPointIndex, BezierControlPointMode.Free);
@@ -400,30 +406,30 @@ namespace SplineMe
 
 			var p0 = points[startPointIndex].position;
 
-			var t = (curveIndex + 0.5f) / CurvesCount;
-			var newPoint = GetPoint(t, false);
+			var newT = (curveIndex + t) / CurvesCount;
+			var newPoint = GetPoint(newT, false);
 
-			t = (curveIndex + 0.16f) / CurvesCount;
-			var pointOnCurve1 = GetPoint(t, false);
+			newT = (curveIndex + 0.4f * t) / CurvesCount;
+			var pointOnCurve1 = GetPoint(newT, false);
 
-			t = (curveIndex + 0.33f) / CurvesCount;
-			var pointOnCurve2 = GetPoint(t, false);
+			newT = (curveIndex + 0.8f * t) / CurvesCount;
+			var pointOnCurve2 = GetPoint(newT, false);
 
 			//Left control point
-			BezierUtils.GetInverseControlPoints(p0, newPoint, pointOnCurve1, pointOnCurve2, 0.32f, 0.66f, out var p1, out var p2);
+			BezierUtils.GetInverseControlPoints(p0, newPoint, pointOnCurve1, pointOnCurve2, 0.4f, 0.8f, out var p1, out var p2);
 			var leftControlPoint = p2;
 			var updatedP1 = p1;
 
 			var p3 = points[startPointIndex + 3].position;
 
-			t = (curveIndex + 0.66f) / CurvesCount;
-			pointOnCurve1 = GetPoint(t, false);
+			newT = (curveIndex + t + (1f - t)*0.4f) / CurvesCount;
+			pointOnCurve1 = GetPoint(newT, false);
 
-			t = (curveIndex + 0.83f) / CurvesCount;
-			pointOnCurve2 = GetPoint(t, false);
+			newT = (curveIndex + t + (1f - t) * 0.8f) / CurvesCount;
+			pointOnCurve2 = GetPoint(newT, false);
 
 			//Right control point
-			BezierUtils.GetInverseControlPoints(newPoint, p3, pointOnCurve1, pointOnCurve2, 0.32f, 0.66f, out p1, out p2);
+			BezierUtils.GetInverseControlPoints(newPoint, p3, pointOnCurve1, pointOnCurve2, 0.4f, 0.8f, out p1, out p2);
 
 			var rightControlPoint = p1;
 			var updatedP2 = p2;

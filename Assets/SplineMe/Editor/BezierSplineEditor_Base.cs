@@ -189,7 +189,7 @@ namespace SplineMe.Editor
 
 			Undo.RecordObject(currentSpline, "Add Mid Curve");
 			var wasLastPoint = selectedPointIndex == currentSpline.PointsCount - 1;
-			currentSpline.SplitCurve(SelectedCurveIndex);
+			currentSpline.InsertCurve(SelectedCurveIndex, 0.5f);
 
 			if (wasLastPoint && !currentSpline.IsLoop)
 			{
