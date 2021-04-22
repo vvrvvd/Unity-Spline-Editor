@@ -82,7 +82,7 @@ namespace SplineMe.Editor
 			}
 
 			Handles.color = Color.green;
-			Handles.Button(curveDrawerPointWorld, handleRotation, size * BazierSplineEditor_Consts.DrawCurveSphereSize, size * BazierSplineEditor_Consts.DrawCurveSphereSize, Handles.SphereHandleCap);
+			Handles.Button(curveDrawerPointWorld, handleRotation, size * BezierSplineEditor_Consts.DrawCurveSphereSize, size * BezierSplineEditor_Consts.DrawCurveSphereSize, Handles.SphereHandleCap);
 
 			if (castSelectedPointFlag)
 			{
@@ -127,19 +127,19 @@ namespace SplineMe.Editor
 			var p0 = newCurvePoints[0];
 			var p3 = newCurvePoints[3];
 
-			if (Vector3.Distance(p0, p3) < BazierSplineEditor_Consts.DrawCurveMinLengthToVisualize)
+			if (Vector3.Distance(p0, p3) < BezierSplineEditor_Consts.DrawCurveMinLengthToVisualize)
 			{
 				return;
 			}
 
-			BezierUtils.GetInverseControlPoints(p0, p3, newCurvePoints[1], newCurvePoints[2], BazierSplineEditor_Consts.DrawCurveFirstControlPointT, BazierSplineEditor_Consts.DrawCurveSecondControlPoinT, out var p1, out var p2);
+			BezierUtils.GetInverseControlPoints(p0, p3, newCurvePoints[1], newCurvePoints[2], BezierSplineEditor_Consts.DrawCurveFirstControlPointT, BezierSplineEditor_Consts.DrawCurveSecondControlPointT, out var p1, out var p2);
 
 			p0 = handleTransform.TransformPoint(p0);
 			p1 = handleTransform.TransformPoint(p1);
 			p2 = handleTransform.TransformPoint(p2);
 			p3 = handleTransform.TransformPoint(p3);
 
-			Handles.DrawBezier(p0, p3, p1, p2, BazierSplineEditor_Consts.LineColor, null, BazierSplineEditor_Consts.LineWidth * 1.5f);
+			Handles.DrawBezier(p0, p3, p1, p2, BezierSplineEditor_Consts.LineColor, null, BezierSplineEditor_Consts.LineWidth * 1.5f);
 
 			if (showPointsHandles)
 			{
@@ -147,7 +147,7 @@ namespace SplineMe.Editor
 				{
 					var f = handleTransform.TransformPoint(newCurvePoints[1]);
 					var size = HandleUtility.GetHandleSize(f);
-					Handles.color = BazierSplineEditor_Consts.DrawCurvePointColor;
+					Handles.color = BezierSplineEditor_Consts.DrawCurvePointColor;
 					Handles.CubeHandleCap(0, f, Quaternion.identity, size * 0.1f, EventType.Repaint);
 				}
 
@@ -155,7 +155,7 @@ namespace SplineMe.Editor
 				{
 					var g = handleTransform.TransformPoint(newCurvePoints[2]);
 					var size = HandleUtility.GetHandleSize(g);
-					Handles.color = BazierSplineEditor_Consts.DrawCurvePointColor;
+					Handles.color = BezierSplineEditor_Consts.DrawCurvePointColor;
 					Handles.CubeHandleCap(0, g, Quaternion.identity, size * 0.1f, EventType.Repaint);
 				}
 
@@ -180,8 +180,8 @@ namespace SplineMe.Editor
 			}
 
 			var dir = (newEndPosition - newCurvePoints[0]).normalized;
-			var firstPointDistance = BazierSplineEditor_Consts.DrawCurveFirstControlPointT * BazierSplineEditor_Consts.DrawCurveSegmentLength;
-			var secondPointDistance = BazierSplineEditor_Consts.DrawCurveSecondControlPoinT * BazierSplineEditor_Consts.DrawCurveSegmentLength;
+			var firstPointDistance = BezierSplineEditor_Consts.DrawCurveFirstControlPointT * BezierSplineEditor_Consts.DrawCurveSegmentLength;
+			var secondPointDistance = BezierSplineEditor_Consts.DrawCurveSecondControlPointT * BezierSplineEditor_Consts.DrawCurveSegmentLength;
 
 			if (!firstControlPointSet)
 			{
@@ -202,7 +202,7 @@ namespace SplineMe.Editor
 				{
 					newCurvePoints[2] = newEndPosition;
 				}
-				else if (distance >= BazierSplineEditor_Consts.DrawCurveSegmentLength)
+				else if (distance >= BezierSplineEditor_Consts.DrawCurveSegmentLength)
 				{
 					newCurvePoints[2] = newCurvePoints[0] + dir * secondPointDistance;
 					secondControlPointSet = true;
@@ -211,30 +211,30 @@ namespace SplineMe.Editor
 
 			if (distance < secondPointDistance && distance >= firstPointDistance && !firstControlPointSet)
 			{
-				var prevFirstPointNormalizedDistance = Vector3.Distance(newCurvePoints[0], newCurvePoints[1]) / BazierSplineEditor_Consts.DrawCurveSegmentLength;
-				var normalizedCurrentDistance = distance / BazierSplineEditor_Consts.DrawCurveSegmentLength;
+				var prevFirstPointNormalizedDistance = Vector3.Distance(newCurvePoints[0], newCurvePoints[1]) / BezierSplineEditor_Consts.DrawCurveSegmentLength;
+				var normalizedCurrentDistance = distance / BezierSplineEditor_Consts.DrawCurveSegmentLength;
 				var normalizedDistancesDiff = Mathf.Abs(normalizedCurrentDistance - prevFirstPointNormalizedDistance);
-				newCurvePoints[1] = Vector3.Lerp(newCurvePoints[1], newEndPosition, Mathf.Abs(BazierSplineEditor_Consts.DrawCurveFirstControlPointT - prevFirstPointNormalizedDistance) / normalizedDistancesDiff);
+				newCurvePoints[1] = Vector3.Lerp(newCurvePoints[1], newEndPosition, Mathf.Abs(BezierSplineEditor_Consts.DrawCurveFirstControlPointT - prevFirstPointNormalizedDistance) / normalizedDistancesDiff);
 				firstControlPointSet = true;
 			}
 
-			if (distance < BazierSplineEditor_Consts.DrawCurveSegmentLength)
+			if (distance < BezierSplineEditor_Consts.DrawCurveSegmentLength)
 			{
 				newCurvePoints[3] = newEndPosition;
 
 				if (distance >= secondPointDistance && !secondControlPointSet)
 				{
-					var prevSecondPointNormalizedDistance = Vector3.Distance(newCurvePoints[0], newCurvePoints[2]) / BazierSplineEditor_Consts.DrawCurveSegmentLength;
-					var normalizedCurrentDistance = distance / BazierSplineEditor_Consts.DrawCurveSegmentLength;
+					var prevSecondPointNormalizedDistance = Vector3.Distance(newCurvePoints[0], newCurvePoints[2]) / BezierSplineEditor_Consts.DrawCurveSegmentLength;
+					var normalizedCurrentDistance = distance / BezierSplineEditor_Consts.DrawCurveSegmentLength;
 					var normalizedDistancesDiff = Mathf.Abs(normalizedCurrentDistance - prevSecondPointNormalizedDistance);
-					newCurvePoints[2] = Vector3.Lerp(newCurvePoints[2], newEndPosition, Mathf.Abs(BazierSplineEditor_Consts.DrawCurveSecondControlPoinT - prevSecondPointNormalizedDistance) / normalizedDistancesDiff);
+					newCurvePoints[2] = Vector3.Lerp(newCurvePoints[2], newEndPosition, Mathf.Abs(BezierSplineEditor_Consts.DrawCurveSecondControlPointT - prevSecondPointNormalizedDistance) / normalizedDistancesDiff);
 					secondControlPointSet = true;
 				}
 			}
 			else
 			{
-				var prevLastPointNormalizedDistance = Vector3.Distance(newCurvePoints[0], newCurvePoints[3]) / BazierSplineEditor_Consts.DrawCurveSegmentLength;
-				var normalizedCurrentDistance = distance / BazierSplineEditor_Consts.DrawCurveSegmentLength;
+				var prevLastPointNormalizedDistance = Vector3.Distance(newCurvePoints[0], newCurvePoints[3]) / BezierSplineEditor_Consts.DrawCurveSegmentLength;
+				var normalizedCurrentDistance = distance / BezierSplineEditor_Consts.DrawCurveSegmentLength;
 				var normalizedDistancesDiff = Mathf.Abs(normalizedCurrentDistance - prevLastPointNormalizedDistance);
 				newCurvePoints[3] = Vector3.Lerp(newCurvePoints[3], newEndPosition, Mathf.Abs(1f - prevLastPointNormalizedDistance) / normalizedDistancesDiff);
 				SpawnDrawCurveModeCurve(drawCurveSmoothAcuteAngles);
@@ -248,7 +248,7 @@ namespace SplineMe.Editor
 		{
 			var p0 = newCurvePoints[0];
 			var p3 = newCurvePoints[3];
-			BezierUtils.GetInverseControlPoints(p0, p3, newCurvePoints[1], newCurvePoints[2], BazierSplineEditor_Consts.DrawCurveFirstControlPointT, BazierSplineEditor_Consts.DrawCurveSecondControlPoinT, out var p1, out var p2);
+			BezierUtils.GetInverseControlPoints(p0, p3, newCurvePoints[1], newCurvePoints[2], BezierSplineEditor_Consts.DrawCurveFirstControlPointT, BezierSplineEditor_Consts.DrawCurveSecondControlPointT, out var p1, out var p2);
 
 			if (smoothAcuteAngles)
 			{

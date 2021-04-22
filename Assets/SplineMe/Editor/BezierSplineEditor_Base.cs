@@ -156,7 +156,7 @@ namespace SplineMe.Editor
 		private void AddEndingCurve()
 		{
 			var pointsCount = currentSpline.PointsCount;
-			var deltaDir = (currentSpline.Points[pointsCount - 1].position - currentSpline.Points[pointsCount - 2].position).normalized * BazierSplineEditor_Consts.CreateCurveSegmentSize / 3;
+			var deltaDir = (currentSpline.Points[pointsCount - 1].position - currentSpline.Points[pointsCount - 2].position).normalized * BezierSplineEditor_Consts.CreateCurveSegmentSize / 3;
 			var p1 = currentSpline.Points[pointsCount - 1].position + deltaDir;
 			var p2 = p1 + deltaDir;
 			var p3 = p2 + deltaDir;
@@ -169,7 +169,7 @@ namespace SplineMe.Editor
 
 		private void AddBeginningCurve()
 		{
-			var deltaDir = (currentSpline.Points[1].position - currentSpline.Points[0].position).normalized * BazierSplineEditor_Consts.CreateCurveSegmentSize / 3;
+			var deltaDir = (currentSpline.Points[1].position - currentSpline.Points[0].position).normalized * BezierSplineEditor_Consts.CreateCurveSegmentSize / 3;
 			var p1 = currentSpline.Points[1].position - deltaDir;
 			var p2 = p1 - deltaDir;
 			var p3 = p2 - deltaDir;

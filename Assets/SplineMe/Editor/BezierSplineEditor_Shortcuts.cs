@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor.ShortcutManagement;
+using UnityEditor;
 
 namespace SplineMe.Editor
 {
@@ -17,6 +18,7 @@ namespace SplineMe.Editor
 		private static bool drawCurveModeFlag;
 		private static bool castSelectedPointFlag;
 		private static bool castSelectedPointShortcutFlag;
+		private static bool snapEndPointsFlag;
 
 		#endregion
 
@@ -64,6 +66,18 @@ namespace SplineMe.Editor
 			drawCurveModeFlag = !drawCurveModeFlag;
 		}
 
+		[ClutchShortcut("Spline Editor/Snap Spline End Points", KeyCode.S, ShortcutModifiers.None)]
+		private static void SnapSplineEndPoints()
+		{
+			if(currentEditor!=null && currentSpline != null && snapEndPointsFlag && currentEditor.isSnapping)
+			{
+				Undo.RecordObject(currentSpline, "Snap Spline End Points");
+				currentSpline.IsLoop = true;
+			}
+
+			snapEndPointsFlag = !snapEndPointsFlag;
+		}
+
 		[ClutchShortcut("Spline Editor/Cast Selected Point To Mouse Position", KeyCode.U, ShortcutModifiers.None)]
 		private static void TryCastSelectedPointShortcut()
 		{
@@ -84,6 +98,7 @@ namespace SplineMe.Editor
 			drawCurveModeFlag = false;
 			castCurveFlag = false;
 			castSelectedPointFlag = false;
+			snapEndPointsFlag = false;
 		}
 
 		private void ApplyShortcuts()
