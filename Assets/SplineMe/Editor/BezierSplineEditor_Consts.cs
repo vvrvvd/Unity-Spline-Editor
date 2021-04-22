@@ -36,8 +36,8 @@ namespace SplineMe
 		public const float DrawCurveSphereSize = 0.30f;
 		public const float DrawCurveSegmentLength = 2f;
 		public const float DrawCurveMinLengthToVisualize = DrawCurveSegmentLength * 0.1f;
-		public const float DrawCurveFirstControlPoint = 0.33f;
-		public const float DrawCurveSecondControlPoint = 0.66f;
+		public const float DrawCurveFirstControlPointT = 0.33f;
+		public const float DrawCurveSecondControlPoinT = 0.66f;
 		public static Color DrawCurvePointColor => Color.blue;
 
 	}

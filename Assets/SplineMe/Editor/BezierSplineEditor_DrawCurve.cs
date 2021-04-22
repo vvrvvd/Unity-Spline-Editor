@@ -111,7 +111,7 @@ namespace SplineMe.Editor
 				{
 					if (firstControlPointSet && secondControlPointSet)
 					{
-						SpawnDrawCurveModeCurve();
+						SpawnDrawCurveModeCurve(drawCurveSmoothAcuteAngles);
 					}
 
 					var defaultDrawerPosition = currentSpline.Points[currentSpline.PointsCount - 1].position;
@@ -132,7 +132,7 @@ namespace SplineMe.Editor
 				return;
 			}
 
-			BezierUtils.GetInverseControlPoints(p0, p3, newCurvePoints[1], newCurvePoints[2], BazierSplineEditor_Consts.DrawCurveFirstControlPoint, BazierSplineEditor_Consts.DrawCurveSecondControlPoint, out var p1, out var p2);
+			BezierUtils.GetInverseControlPoints(p0, p3, newCurvePoints[1], newCurvePoints[2], BazierSplineEditor_Consts.DrawCurveFirstControlPointT, BazierSplineEditor_Consts.DrawCurveSecondControlPoinT, out var p1, out var p2);
 
 			p0 = handleTransform.TransformPoint(p0);
 			p1 = handleTransform.TransformPoint(p1);
@@ -180,8 +180,8 @@ namespace SplineMe.Editor
 			}
 
 			var dir = (newEndPosition - newCurvePoints[0]).normalized;
-			var firstPointDistance = BazierSplineEditor_Consts.DrawCurveFirstControlPoint * BazierSplineEditor_Consts.DrawCurveSegmentLength;
-			var secondPointDistance = BazierSplineEditor_Consts.DrawCurveSecondControlPoint * BazierSplineEditor_Consts.DrawCurveSegmentLength;
+			var firstPointDistance = BazierSplineEditor_Consts.DrawCurveFirstControlPointT * BazierSplineEditor_Consts.DrawCurveSegmentLength;
+			var secondPointDistance = BazierSplineEditor_Consts.DrawCurveSecondControlPoinT * BazierSplineEditor_Consts.DrawCurveSegmentLength;
 
 			if (!firstControlPointSet)
 			{
@@ -214,7 +214,7 @@ namespace SplineMe.Editor
 				var prevFirstPointNormalizedDistance = Vector3.Distance(newCurvePoints[0], newCurvePoints[1]) / BazierSplineEditor_Consts.DrawCurveSegmentLength;
 				var normalizedCurrentDistance = distance / BazierSplineEditor_Consts.DrawCurveSegmentLength;
 				var normalizedDistancesDiff = Mathf.Abs(normalizedCurrentDistance - prevFirstPointNormalizedDistance);
-				newCurvePoints[1] = Vector3.Lerp(newCurvePoints[1], newEndPosition, Mathf.Abs(BazierSplineEditor_Consts.DrawCurveFirstControlPoint - prevFirstPointNormalizedDistance) / normalizedDistancesDiff);
+				newCurvePoints[1] = Vector3.Lerp(newCurvePoints[1], newEndPosition, Mathf.Abs(BazierSplineEditor_Consts.DrawCurveFirstControlPointT - prevFirstPointNormalizedDistance) / normalizedDistancesDiff);
 				firstControlPointSet = true;
 			}
 
@@ -227,7 +227,7 @@ namespace SplineMe.Editor
 					var prevSecondPointNormalizedDistance = Vector3.Distance(newCurvePoints[0], newCurvePoints[2]) / BazierSplineEditor_Consts.DrawCurveSegmentLength;
 					var normalizedCurrentDistance = distance / BazierSplineEditor_Consts.DrawCurveSegmentLength;
 					var normalizedDistancesDiff = Mathf.Abs(normalizedCurrentDistance - prevSecondPointNormalizedDistance);
-					newCurvePoints[2] = Vector3.Lerp(newCurvePoints[2], newEndPosition, Mathf.Abs(BazierSplineEditor_Consts.DrawCurveSecondControlPoint - prevSecondPointNormalizedDistance) / normalizedDistancesDiff);
+					newCurvePoints[2] = Vector3.Lerp(newCurvePoints[2], newEndPosition, Mathf.Abs(BazierSplineEditor_Consts.DrawCurveSecondControlPoinT - prevSecondPointNormalizedDistance) / normalizedDistancesDiff);
 					secondControlPointSet = true;
 				}
 			}
@@ -237,19 +237,25 @@ namespace SplineMe.Editor
 				var normalizedCurrentDistance = distance / BazierSplineEditor_Consts.DrawCurveSegmentLength;
 				var normalizedDistancesDiff = Mathf.Abs(normalizedCurrentDistance - prevLastPointNormalizedDistance);
 				newCurvePoints[3] = Vector3.Lerp(newCurvePoints[3], newEndPosition, Mathf.Abs(1f - prevLastPointNormalizedDistance) / normalizedDistancesDiff);
-				SpawnDrawCurveModeCurve();
+				SpawnDrawCurveModeCurve(drawCurveSmoothAcuteAngles);
 				StartDrawCurveMode(newCurvePoints[3]);
 				UpdateNewDrawCurvePainterPosition(newEndPosition);
 			}
 
 		}
 
-		private void SpawnDrawCurveModeCurve()
+		private void SpawnDrawCurveModeCurve(bool smoothAcuteAngles)
 		{
 			var p0 = newCurvePoints[0];
 			var p3 = newCurvePoints[3];
-			BezierUtils.GetInverseControlPoints(p0, p3, newCurvePoints[1], newCurvePoints[2], BazierSplineEditor_Consts.DrawCurveFirstControlPoint, BazierSplineEditor_Consts.DrawCurveSecondControlPoint, out var p1, out var p2);
-			currentSpline.AppendCurve(p1, p2, p3, BezierControlPointMode.Free);
+			BezierUtils.GetInverseControlPoints(p0, p3, newCurvePoints[1], newCurvePoints[2], BazierSplineEditor_Consts.DrawCurveFirstControlPointT, BazierSplineEditor_Consts.DrawCurveSecondControlPoinT, out var p1, out var p2);
+
+			if (smoothAcuteAngles)
+			{
+				currentSpline.SetControlPointMode(currentSpline.PointsCount - 1, BezierControlPointMode.Aligned);
+			}
+
+			currentSpline.AppendCurve(p1, p2, p3, BezierControlPointMode.Free, false);
 		}
 
 		#endregion
