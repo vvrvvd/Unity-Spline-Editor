@@ -106,7 +106,7 @@ namespace SplineMe.Editor
 				var nextEndPointIndex = index == 0 ? currentSpline.PointsCount - 1 : 0;
 				var nextEndPoint = handleTransform.TransformPoint(currentSpline.Points[nextEndPointIndex].position);
 				var pointsDistance = Vector3.Distance(point, nextEndPoint);
-				isSnapping = snapEndPointsFlag && !currentSpline.IsLoop && pointsDistance <= size * BezierSplineEditor_Consts.SnapSplineEndPointsMinDistance;
+				isSnapping = (currentEditor.selectedPointIndex == 0 || currentEditor.selectedPointIndex == currentSpline.PointsCount - 1) && snapEndPointsFlag && !currentSpline.IsLoop && pointsDistance <= size * BezierSplineEditor_Consts.SnapSplineEndPointsMinDistance;
 				if (isSnapping)
 				{
 					Handles.color = BezierSplineEditor_Consts.SnapEndPointsLineColor;

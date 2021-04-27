@@ -9,8 +9,8 @@ namespace SplineMe.Editor
 
 		#region Static Fields
 		
-		private static BezierSpline currentSpline;
-		private static BezierSplineEditor currentEditor;
+		internal static BezierSpline currentSpline;
+		internal static BezierSplineEditor currentEditor;
 
 		#endregion
 
@@ -25,7 +25,8 @@ namespace SplineMe.Editor
 		#endregion
 
 		#region Properties
-		private int SelectedCurveIndex
+
+		internal int SelectedCurveIndex
 		{
 			get
 			{
@@ -39,11 +40,11 @@ namespace SplineMe.Editor
 			}
 		}
 
-		private bool IsAnyPointSelected => selectedPointIndex != -1 && selectedPointIndex < currentSpline.PointsCount;
-		private bool HasMoreThanOneCurve => currentSpline.CurvesCount > 1;
-		private bool CanBeSimplified => HasMoreThanOneCurve && (!currentSpline.IsLoop || currentSpline.CurvesCount > 2);
-		private bool CanSelectedCurveBeRemoved => IsAnyPointSelected && HasMoreThanOneCurve && (!currentSpline.IsLoop || currentSpline.CurvesCount > 2);
-		private bool CanNewCurveBeAdded => !currentSpline.IsLoop;
+		internal bool IsAnyPointSelected => selectedPointIndex != -1 && selectedPointIndex < currentSpline.PointsCount;
+		internal bool HasMoreThanOneCurve => currentSpline.CurvesCount > 1;
+		internal bool CanBeSimplified => HasMoreThanOneCurve && (!currentSpline.IsLoop || currentSpline.CurvesCount > 2);
+		internal bool CanSelectedCurveBeRemoved => IsAnyPointSelected && HasMoreThanOneCurve && (!currentSpline.IsLoop || currentSpline.CurvesCount > 2);
+		internal bool CanNewCurveBeAdded => !currentSpline.IsLoop;
 
 		#endregion
 
