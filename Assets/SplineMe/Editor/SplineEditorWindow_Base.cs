@@ -16,13 +16,15 @@ namespace SplineMe.Editor
         {
             SplineEditorWindow window = (SplineEditorWindow)EditorWindow.GetWindow(typeof(SplineEditorWindow), false, Title);
             window.Show();
-
         }
 
         private void OnGUI()
         {
-            if(editorSettings==null)
-			{
+            //Hack for getting hover mouse visuals before showing tooltip when using custom GUI.skin pt.1
+            wantsMouseMove = true;
+
+            if (editorSettings==null)
+            {
                 InitSettings();
 			}
 
@@ -34,6 +36,12 @@ namespace SplineMe.Editor
             DrawBezierCurveOptions();
             EditorGUILayout.EndVertical();
             GUI.skin = prevGUISkin;
+
+            //Hack for getting hover mouse visuals before showing tooltip when using custom GUI.skin pt.2
+            if (Event.current.type == EventType.MouseMove)
+            {
+                Repaint();
+            }
         }
         public static void DrawUILine(Color color, int thickness = 2, int padding = 10)
         {
