@@ -6,16 +6,25 @@ namespace SplineMe.Editor
 
 	public partial class SplineEditorWindow : EditorWindow
 	{
-        private const string Title = "Spline Editor";
+        private const string WindowTitle = "Spline Editor";
+        private const string HeaderTitle = "Spline Editor";
 
         private static SplineEditorSettings editorSettings = default;
 
+        private GUILayoutOption ButtonWidth { get; } = GUILayout.Width(90);
+        private GUILayoutOption ButtonHeight { get; } = GUILayout.Height(50);
 
         [MenuItem("Window/Spline Editor")]
-        static void Init()
+        static void Initialize()
         {
-            SplineEditorWindow window = (SplineEditorWindow)EditorWindow.GetWindow(typeof(SplineEditorWindow), false, Title);
+            SplineEditorWindow window = (SplineEditorWindow)EditorWindow.GetWindow(typeof(SplineEditorWindow), false, WindowTitle);
+            window.LoadSettings();
             window.Show();
+        }
+
+        private void LoadSettings()
+        {
+            editorSettings = Resources.Load<SplineEditorSettings>("SplineEditorSettings");
         }
 
         private void OnGUI()
@@ -25,12 +34,13 @@ namespace SplineMe.Editor
 
             if (editorSettings==null)
             {
-                InitSettings();
+                LoadSettings();
 			}
 
             var prevGUISkin = GUI.skin;
             GUI.skin = editorSettings.guiSkin;
             EditorGUILayout.BeginVertical();
+            DrawHeader();
             DrawSplineGroup();
             //DrawUILine(Color.grey, 2, 10);
             DrawBezierCurveOptions();
@@ -43,6 +53,15 @@ namespace SplineMe.Editor
                 Repaint();
             }
         }
+
+        private void DrawHeader()
+		{
+            GUILayout.Space(10);
+            var headerContent = new GUIContent(HeaderTitle);
+            GUILayout.Label(headerContent, editorSettings.guiSkin.FindStyle("Header"));
+
+        }
+
         public static void DrawUILine(Color color, int thickness = 2, int padding = 10)
         {
             Rect r = EditorGUILayout.GetControlRect(GUILayout.Height(padding + thickness));
@@ -51,11 +70,6 @@ namespace SplineMe.Editor
             r.x -= 2;
             r.width += 6;
             EditorGUI.DrawRect(r, color);
-        }
-
-        private void InitSettings()
-		{
-            editorSettings = Resources.Load<SplineEditorSettings>("SplineEditorSettings");
         }
 
     }

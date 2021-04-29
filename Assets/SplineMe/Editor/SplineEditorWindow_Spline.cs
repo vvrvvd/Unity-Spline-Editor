@@ -20,17 +20,24 @@ namespace SplineMe.Editor
         private const string CastSplineToCameraButtonTitle = "Cast To Camera View";
         private const string CastSplineToCameraButtonTooltip = "Cast spline regarding to camera view.";
 
-        private GUILayoutOption ButtonWidth { get; } = GUILayout.Width(80);
-        private GUILayoutOption ButtonHeight { get; } = GUILayout.Height(50);
+        private Transform customTransform = null;
+        private GUILayoutOption CustomTransformWidth { get; } = GUILayout.Width(345);
+
 
         private void DrawSplineGroup()
         {
+            var prevEnabled = GUI.enabled;
+            var isVisible = BezierSplineEditor.currentEditor != null && BezierSplineEditor.currentSpline!=null;
+            GUI.enabled = isVisible;
             var prevColor = GUI.color;
+
             GUILayout.BeginVertical();
             DrawSplineButtons();
             DrawCastButtons();
             GUILayout.EndVertical();
+
             GUI.color = prevColor;
+            GUI.enabled = prevEnabled;
         }
 
         private void DrawSplineButtons()
@@ -78,6 +85,13 @@ namespace SplineMe.Editor
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            customTransform = EditorGUILayout.ObjectField("Custom transform", customTransform, typeof(Transform), true, CustomTransformWidth) as Transform;
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
             GUILayout.Space(10);
             GUILayout.EndVertical();
         }
