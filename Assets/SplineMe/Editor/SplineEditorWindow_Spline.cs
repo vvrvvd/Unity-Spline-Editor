@@ -86,7 +86,8 @@ namespace SplineMe.Editor
             var castSplineToCameraContent = new GUIContent(CastSplineToCameraButtonTitle, CastSplineToCameraButtonTooltip);
             if (GUILayout.Button(castSplineToCameraContent, ButtonWidth, ButtonHeight))
             {
-                Debug.LogWarning("Needs implementation");
+                var cameraRay = HandleUtility.GUIPointToWorldRay(Vector2.zero);
+                BezierSplineEditor.CurrentEditor.CastCurve(cameraRay.direction);
                 repaintScene = true;
             }
             GUILayout.FlexibleSpace();

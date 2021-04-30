@@ -87,8 +87,7 @@ namespace SplineMe.Editor
 			if (castSelectedPointFlag)
 			{
 				isDraggingNewCurve = true;
-				var castedPosition = Vector3.zero;
-				if (TryCastMousePoint(out castedPosition))
+				if (TryCastMousePoint(out var castedPosition))
 				{
 					Undo.RecordObject(CurrentSpline, "Cast Drawer Point");
 					curveDrawerPosition = CurrentSpline.transform.InverseTransformPoint(castedPosition);

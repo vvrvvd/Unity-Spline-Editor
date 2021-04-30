@@ -265,10 +265,15 @@ namespace SplineMe.Editor
 
 		internal void CastCurve(Transform customTransform = null)
 		{
-			Undo.RecordObject(CurrentSpline, "Cast Curve Points");
 			var referenceTransform = customTransform == null ? handleTransform : customTransform;
+			CastCurve(-referenceTransform.up);
+		}
+
+		internal void CastCurve(Vector3 direction)
+		{
+			Undo.RecordObject(CurrentSpline, "Cast Curve Points");
 			var pointsCount = CurrentSpline.PointsCount;
-			for (var i = 0; i < pointsCount; i+=3)
+			for (var i = 0; i < pointsCount; i += 3)
 			{
 				CurrentSpline.SetControlPointMode(i, BezierSpline.BezierControlPointMode.Free);
 			}
@@ -276,9 +281,9 @@ namespace SplineMe.Editor
 			var newPointsPositions = new Vector3[pointsCount];
 			for (var i = 0; i < pointsCount; i++)
 			{
-				var worldPosition = referenceTransform.TransformPoint(CurrentSpline.Points[i].position);
-				Vector3Utils.TryCastPoint(worldPosition, -referenceTransform.up, out newPointsPositions[i]);
-				newPointsPositions[i] = referenceTransform.InverseTransformPoint(newPointsPositions[i]);
+				var worldPosition = handleTransform.TransformPoint(CurrentSpline.Points[i].position);
+				Vector3Utils.TryCastPoint(worldPosition, direction, out newPointsPositions[i]);
+				newPointsPositions[i] = handleTransform.InverseTransformPoint(newPointsPositions[i]);
 			}
 
 			for (var i = 0; i < pointsCount; i += 3)
@@ -300,7 +305,6 @@ namespace SplineMe.Editor
 					CurrentSpline.UpdatePoint(i + 1, newPointsPositions[i + 1], false, false);
 				}
 			}
-
 		}
 
 		internal void FactorCurve()
