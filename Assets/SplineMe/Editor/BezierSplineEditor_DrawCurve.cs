@@ -33,21 +33,21 @@ namespace SplineMe.Editor
 
 		private void ToggleDrawCurveMode(bool state)
 		{
-			if (state && currentSpline.IsLoop)
+			if (state && CurrentSpline.IsLoop)
 			{
 				return;
 			}
 
 			if (isCurveDrawerMode != state)
 			{
-				Undo.RecordObject(currentSpline, "Toggle Draw Curve Mode");
+				Undo.RecordObject(CurrentSpline, "Toggle Draw Curve Mode");
 			}
 
 			isCurveDrawerMode = state;
 
 			if (state)
 			{
-				var lastPoint = currentSpline.Points[currentSpline.PointsCount - 1];
+				var lastPoint = CurrentSpline.Points[CurrentSpline.PointsCount - 1];
 				StartDrawCurveMode(lastPoint.position);
 				SelectIndex(-1);
 			}
@@ -73,7 +73,7 @@ namespace SplineMe.Editor
 		private void DrawCurveModeSceneGUI()
 		{
 			var curveDrawerPointLocal = curveDrawerPosition;
-			var curveDrawerPointWorld = currentSpline.transform.TransformPoint(curveDrawerPointLocal);
+			var curveDrawerPointWorld = CurrentSpline.transform.TransformPoint(curveDrawerPointLocal);
 			var size = HandleUtility.GetHandleSize(curveDrawerPointWorld);
 
 			if (isDraggingNewCurve)
@@ -90,8 +90,8 @@ namespace SplineMe.Editor
 				var castedPosition = Vector3.zero;
 				if (TryCastMousePoint(out castedPosition))
 				{
-					Undo.RecordObject(currentSpline, "Cast Drawer Point");
-					curveDrawerPosition = currentSpline.transform.InverseTransformPoint(castedPosition);
+					Undo.RecordObject(CurrentSpline, "Cast Drawer Point");
+					curveDrawerPosition = CurrentSpline.transform.InverseTransformPoint(castedPosition);
 					UpdateNewDrawCurvePainterPosition(curveDrawerPosition);
 				}
 			}
@@ -103,8 +103,8 @@ namespace SplineMe.Editor
 				if (wasChanged)
 				{
 					isDraggingNewCurve = true;
-					Undo.RecordObject(currentSpline, "Move Drawer Point");
-					curveDrawerPosition = currentSpline.transform.InverseTransformPoint(newEndPositionGlobal);
+					Undo.RecordObject(CurrentSpline, "Move Drawer Point");
+					curveDrawerPosition = CurrentSpline.transform.InverseTransformPoint(newEndPositionGlobal);
 					UpdateNewDrawCurvePainterPosition(curveDrawerPosition);
 				}
 				else if ((isDraggingNewCurve && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
@@ -114,7 +114,7 @@ namespace SplineMe.Editor
 						SpawnDrawCurveModeCurve(drawCurveSmoothAcuteAngles);
 					}
 
-					var defaultDrawerPosition = currentSpline.Points[currentSpline.PointsCount - 1].position;
+					var defaultDrawerPosition = CurrentSpline.Points[CurrentSpline.PointsCount - 1].position;
 					StartDrawCurveMode(defaultDrawerPosition);
 					isDraggingNewCurve = false;
 					castSelectedPointFlag = false;
@@ -252,10 +252,10 @@ namespace SplineMe.Editor
 
 			if (smoothAcuteAngles)
 			{
-				currentSpline.SetControlPointMode(currentSpline.PointsCount - 1, BezierControlPointMode.Aligned);
+				CurrentSpline.SetControlPointMode(CurrentSpline.PointsCount - 1, BezierControlPointMode.Aligned);
 			}
 
-			currentSpline.AppendCurve(p1, p2, p3, BezierControlPointMode.Free, false);
+			CurrentSpline.AppendCurve(p1, p2, p3, BezierControlPointMode.Free, false);
 		}
 
 		#endregion

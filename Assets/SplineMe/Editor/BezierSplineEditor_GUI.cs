@@ -71,7 +71,7 @@ namespace SplineMe.Editor
 
 		private void DrawGUI()
 		{
-			if(currentEditor==null || currentSpline == null)
+			if(currentEditor==null || CurrentSpline == null)
 			{
 				return;
 			}

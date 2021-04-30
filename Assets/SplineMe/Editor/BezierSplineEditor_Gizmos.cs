@@ -10,7 +10,7 @@ namespace SplineMe.Editor
 		[DrawGizmo(GizmoType.InSelectionHierarchy | GizmoType.NotInSelectionHierarchy)]
 		private static void RenderCustomGizmo(BezierSpline curve, GizmoType gizmoType)
 		{
-			if (currentSpline == curve)
+			if (CurrentSpline == curve)
 			{
 				return;
 			}

@@ -69,10 +69,10 @@ namespace SplineMe.Editor
 		[ClutchShortcut("Spline Editor/Snap Spline End Points", KeyCode.S, ShortcutModifiers.None)]
 		private static void SnapSplineEndPoints()
 		{
-			if(currentEditor!=null && currentSpline != null && snapEndPointsFlag && currentEditor.isSnapping)
+			if(currentEditor!=null && CurrentSpline != null && snapEndPointsFlag && currentEditor.isSnapping)
 			{
-				Undo.RecordObject(currentSpline, "Snap Spline End Points");
-				currentSpline.IsLoop = true;
+				Undo.RecordObject(CurrentSpline, "Snap Spline End Points");
+				CurrentSpline.IsLoop = true;
 			}
 
 			snapEndPointsFlag = !snapEndPointsFlag;

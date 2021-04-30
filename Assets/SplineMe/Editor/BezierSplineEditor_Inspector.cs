@@ -14,28 +14,28 @@ namespace SplineMe.Editor
 			var prevEnabled = GUI.enabled;
 
 			GUI.enabled = false;
-			EditorGUILayout.FloatField("Length", currentSpline.Length);
+			EditorGUILayout.FloatField("Length", CurrentSpline.Length);
 
 			GUI.enabled = HasMoreThanOneCurve;
 			EditorGUI.BeginChangeCheck();
-			bool loop = EditorGUILayout.Toggle("Loop", currentSpline.IsLoop);
+			bool loop = EditorGUILayout.Toggle("Loop", CurrentSpline.IsLoop);
 			if (EditorGUI.EndChangeCheck())
 			{
-				Undo.RecordObject(currentSpline, "Toggle Loop");
-				currentSpline.IsLoop = loop;
+				Undo.RecordObject(CurrentSpline, "Toggle Loop");
+				CurrentSpline.IsLoop = loop;
 
-				if (currentSpline.IsLoop)
+				if (CurrentSpline.IsLoop)
 				{
 					ToggleDrawCurveMode(false);
-					EditorUtility.SetDirty(currentSpline);
+					EditorUtility.SetDirty(CurrentSpline);
 				}
 			}
 
 			GUI.enabled = prevEnabled;
 
-			if (selectedPointIndex >= currentSpline.PointsCount)
+			if (SelectedPointIndex >= CurrentSpline.PointsCount)
 			{
-				SelectIndex(currentSpline.PointsCount - 1);
+				SelectIndex(CurrentSpline.PointsCount - 1);
 			}
 
 			if (IsAnyPointSelected)
@@ -46,28 +46,28 @@ namespace SplineMe.Editor
 			if (GUILayout.Button("Cast Curve Points"))
 			{
 				CastCurve();
-				EditorUtility.SetDirty(currentSpline);
+				EditorUtility.SetDirty(CurrentSpline);
 			}
 
 			GUI.enabled = IsAnyPointSelected;
 			if (GUILayout.Button("Add Mid Curve"))
 			{
 				AddMidCurve();
-				EditorUtility.SetDirty(currentSpline);
+				EditorUtility.SetDirty(CurrentSpline);
 			}
 			GUI.enabled = prevEnabled;
 
 			if (GUILayout.Button("Factor Curve"))
 			{
 				FactorCurve();
-				EditorUtility.SetDirty(currentSpline);
+				EditorUtility.SetDirty(CurrentSpline);
 			}
 
 			GUI.enabled = CanBeSimplified;
 			if (GUILayout.Button("Simplify Curve"))
 			{
 				SimplifyCurve();
-				EditorUtility.SetDirty(currentSpline);
+				EditorUtility.SetDirty(CurrentSpline);
 			}
 
 			GUI.enabled = prevEnabled;
@@ -77,21 +77,21 @@ namespace SplineMe.Editor
 		{
 			GUILayout.Label("Selected Point");
 			EditorGUI.BeginChangeCheck();
-			Vector3 point = EditorGUILayout.Vector3Field("Position", currentSpline.Points[selectedPointIndex].position);
+			Vector3 point = EditorGUILayout.Vector3Field("Position", CurrentSpline.Points[SelectedPointIndex].position);
 			if (EditorGUI.EndChangeCheck())
 			{
-				Undo.RecordObject(currentSpline, "Move Point");
-				currentSpline.UpdatePoint(selectedPointIndex, point);
-				EditorUtility.SetDirty(currentSpline);
+				Undo.RecordObject(CurrentSpline, "Move Point");
+				CurrentSpline.UpdatePoint(SelectedPointIndex, point);
+				EditorUtility.SetDirty(CurrentSpline);
 			}
 
 			EditorGUI.BeginChangeCheck();
-			BezierControlPointMode mode = (BezierControlPointMode)EditorGUILayout.EnumPopup("Mode", currentSpline.GetControlPointMode(selectedPointIndex));
+			BezierControlPointMode mode = (BezierControlPointMode)EditorGUILayout.EnumPopup("Mode", CurrentSpline.GetControlPointMode(SelectedPointIndex));
 			if (EditorGUI.EndChangeCheck())
 			{
-				Undo.RecordObject(currentSpline, "Change Point Mode");
-				currentSpline.SetControlPointMode(selectedPointIndex, mode);
-				EditorUtility.SetDirty(currentSpline);
+				Undo.RecordObject(CurrentSpline, "Change Point Mode");
+				CurrentSpline.SetControlPointMode(SelectedPointIndex, mode);
+				EditorUtility.SetDirty(CurrentSpline);
 			}
 		}
 

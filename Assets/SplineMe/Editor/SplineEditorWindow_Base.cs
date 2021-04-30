@@ -14,12 +14,41 @@ namespace SplineMe.Editor
         private GUILayoutOption ButtonWidth { get; } = GUILayout.Width(90);
         private GUILayoutOption ButtonHeight { get; } = GUILayout.Height(50);
 
+        private bool repaintScene = false;
+        private bool isSplineEditorEnabled = false;
+        private bool isCurveEditorEnabled = false;
+
         [MenuItem("Window/Spline Editor")]
         static void Initialize()
         {
             SplineEditorWindow window = (SplineEditorWindow)EditorWindow.GetWindow(typeof(SplineEditorWindow), false, WindowTitle);
             window.LoadSettings();
             window.Show();
+        }
+
+		private void OnEnable()
+		{
+            BezierSplineEditor.OnCurrentSplineChanged += OnSelectedSplineChanged;
+            BezierSplineEditor.OnSelectedCurveChanged += OnSelectedCurveChanged;
+        }
+
+        private void OnDisable()
+		{
+            BezierSplineEditor.OnCurrentSplineChanged -= OnSelectedSplineChanged;
+            BezierSplineEditor.OnSelectedCurveChanged -= OnSelectedCurveChanged;
+        }
+
+        private void OnSelectedSplineChanged()
+		{
+            isSplineEditorEnabled = BezierSplineEditor.CurrentSpline != null;
+            isCurveEditorEnabled &= isSplineEditorEnabled;
+            Repaint();
+        }
+
+        private void OnSelectedCurveChanged()
+        {
+            isCurveEditorEnabled = isSplineEditorEnabled && BezierSplineEditor.CurrentEditor != null  && BezierSplineEditor.CurrentEditor.SelectedCurveIndex != -1;
+            Repaint();
         }
 
         private void LoadSettings()
@@ -29,6 +58,7 @@ namespace SplineMe.Editor
 
         private void OnGUI()
         {
+            repaintScene = false;
             //Hack for getting hover mouse visuals before showing tooltip when using custom GUI.skin pt.1
             wantsMouseMove = true;
 
@@ -42,7 +72,6 @@ namespace SplineMe.Editor
             EditorGUILayout.BeginVertical();
             DrawHeader();
             DrawSplineGroup();
-            //DrawUILine(Color.grey, 2, 10);
             DrawBezierCurveOptions();
             EditorGUILayout.EndVertical();
             GUI.skin = prevGUISkin;
@@ -52,6 +81,12 @@ namespace SplineMe.Editor
             {
                 Repaint();
             }
+        
+            if(repaintScene)
+			{
+                SceneView.RepaintAll();
+			}
+
         }
 
         private void DrawHeader()

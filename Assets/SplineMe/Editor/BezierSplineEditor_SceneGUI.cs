@@ -32,16 +32,16 @@ namespace SplineMe.Editor
 		{
 			if (Event.current.type == EventType.Repaint)
 			{
-				DrawSpline(currentSpline, SelectedCurveIndex);
+				DrawSpline(CurrentSpline, SelectedCurveIndex);
 
 				if (showDirectionsLines)
 				{
-					DrawSplineDirections(currentSpline);
+					DrawSplineDirections(CurrentSpline);
 				}
 
 				if (showSegmentsPoints)
 				{
-					DrawSplineSegments(currentSpline);
+					DrawSplineSegments(CurrentSpline);
 				}
 
 			}
@@ -60,15 +60,15 @@ namespace SplineMe.Editor
 
 		private void DrawPoints()
 		{
-			for (var i = 0; i < currentSpline.CurvesCount; i++)
+			for (var i = 0; i < CurrentSpline.CurvesCount; i++)
 			{
 				var curveStartIndex = i * 3;
 				var p0 = DrawPoint(curveStartIndex);
 				var p1 = DrawPoint(curveStartIndex + 1);
 				var p2 = DrawPoint(curveStartIndex + 2);
-				var p3 = handleTransform.TransformPoint(currentSpline.Points[curveStartIndex + 3].position);
+				var p3 = handleTransform.TransformPoint(CurrentSpline.Points[curveStartIndex + 3].position);
 
-				if (!isCurveDrawerMode || i < currentSpline.CurvesCount - 1)
+				if (!isCurveDrawerMode || i < CurrentSpline.CurvesCount - 1)
 				{
 					p3 = DrawPoint(curveStartIndex + 3);
 				}
@@ -86,7 +86,7 @@ namespace SplineMe.Editor
 
 		private Vector3 DrawPoint(int index)
 		{
-			var mode = currentSpline.GetControlPointMode(index);
+			var mode = CurrentSpline.GetControlPointMode(index);
 			var pointColor = index % 3 == 0 ? BezierSplineEditor_Consts.CurvePointColor : BezierSplineEditor_Consts.ModeColors[(int)mode];
 
 			return DrawPoint(index, pointColor);
@@ -94,19 +94,19 @@ namespace SplineMe.Editor
 
 		private Vector3 DrawPoint(int index, Color pointColor)
 		{
-			var point = handleTransform.TransformPoint(currentSpline.Points[index].position);
+			var point = handleTransform.TransformPoint(CurrentSpline.Points[index].position);
 			var size = HandleUtility.GetHandleSize(point);
 
-			if (index != 0 && index != currentSpline.PointsCount - 1)
+			if (index != 0 && index != CurrentSpline.PointsCount - 1)
 			{
 				size *= 0.5f;
 			}
 			else
 			{
-				var nextEndPointIndex = index == 0 ? currentSpline.PointsCount - 1 : 0;
-				var nextEndPoint = handleTransform.TransformPoint(currentSpline.Points[nextEndPointIndex].position);
+				var nextEndPointIndex = index == 0 ? CurrentSpline.PointsCount - 1 : 0;
+				var nextEndPoint = handleTransform.TransformPoint(CurrentSpline.Points[nextEndPointIndex].position);
 				var pointsDistance = Vector3.Distance(point, nextEndPoint);
-				isSnapping = (currentEditor.selectedPointIndex == 0 || currentEditor.selectedPointIndex == currentSpline.PointsCount - 1) && snapEndPointsFlag && !currentSpline.IsLoop && pointsDistance <= size * BezierSplineEditor_Consts.SnapSplineEndPointsMinDistance;
+				isSnapping = (currentEditor.SelectedPointIndex == 0 || currentEditor.SelectedPointIndex == CurrentSpline.PointsCount - 1) && snapEndPointsFlag && !CurrentSpline.IsLoop && pointsDistance <= size * BezierSplineEditor_Consts.SnapSplineEndPointsMinDistance;
 				if (isSnapping)
 				{
 					Handles.color = BezierSplineEditor_Consts.SnapEndPointsLineColor;
@@ -122,7 +122,7 @@ namespace SplineMe.Editor
 				Repaint();
 			}
 
-			if (selectedPointIndex == index)
+			if (SelectedPointIndex == index)
 			{
 				if (savedTool == Tool.Rotate && index % 3 == 0)
 				{
@@ -141,12 +141,11 @@ namespace SplineMe.Editor
 		{
 			if (castSelectedPointFlag)
 			{
-				var castedPosition = Vector3.zero;
-				if (TryCastMousePoint(out castedPosition))
+				if (TryCastMousePoint(out var castedPosition))
 				{
-					Undo.RecordObject(currentSpline, "Cast Line Point To Mouse");
+					Undo.RecordObject(CurrentSpline, "Cast Line Point To Mouse");
 					point = castedPosition;
-					currentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
+					CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
 				}
 			}
 			else
@@ -156,14 +155,14 @@ namespace SplineMe.Editor
 				var wasChanged = EditorGUI.EndChangeCheck();
 				if (wasChanged)
 				{
-					Undo.RecordObject(currentSpline, "Move Line Point");
+					Undo.RecordObject(CurrentSpline, "Move Line Point");
 					isDraggingPoint = true;
-					currentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
+					CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
 				}
 				else if ((isDraggingPoint && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
 				{
-					Undo.RecordObject(currentSpline, "Move Line Point");
-					currentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
+					Undo.RecordObject(CurrentSpline, "Move Line Point");
+					CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
 					isDraggingPoint = false;
 					castSelectedPointFlag = false;
 				}
@@ -184,22 +183,22 @@ namespace SplineMe.Editor
 
 				var rotationDiff = rotation * Quaternion.Inverse(lastRotation);
 
-				Undo.RecordObject(currentSpline, "Rotate Line Point");
-				var point1Index = index == currentSpline.PointsCount - 1 && currentSpline.IsLoop ? 1 : index + 1;
-				var point2Index = index == 0 && currentSpline.IsLoop ? currentSpline.PointsCount - 2 : index - 1;
+				Undo.RecordObject(CurrentSpline, "Rotate Line Point");
+				var point1Index = index == CurrentSpline.PointsCount - 1 && CurrentSpline.IsLoop ? 1 : index + 1;
+				var point2Index = index == 0 && CurrentSpline.IsLoop ? CurrentSpline.PointsCount - 2 : index - 1;
 
-				if (point1Index >= 0 && point1Index < currentSpline.PointsCount)
+				if (point1Index >= 0 && point1Index < CurrentSpline.PointsCount)
 				{
-					var point1 = handleTransform.TransformPoint(currentSpline.Points[point1Index].position);
+					var point1 = handleTransform.TransformPoint(CurrentSpline.Points[point1Index].position);
 					var rotatedPoint1 = Vector3Utils.RotateAround(point1, point, rotationDiff);
-					currentSpline.UpdatePoint(point1Index, handleTransform.InverseTransformPoint(rotatedPoint1));
+					CurrentSpline.UpdatePoint(point1Index, handleTransform.InverseTransformPoint(rotatedPoint1));
 				}
 
-				if (point2Index >= 0 && point2Index < currentSpline.PointsCount)
+				if (point2Index >= 0 && point2Index < CurrentSpline.PointsCount)
 				{
-					var point2 = handleTransform.TransformPoint(currentSpline.Points[point2Index].position);
+					var point2 = handleTransform.TransformPoint(CurrentSpline.Points[point2Index].position);
 					var rotatedPoint2 = Vector3Utils.RotateAround(point2, point, rotationDiff);
-					currentSpline.UpdatePoint(point2Index, handleTransform.InverseTransformPoint(rotatedPoint2));
+					CurrentSpline.UpdatePoint(point2Index, handleTransform.InverseTransformPoint(rotatedPoint2));
 				}
 
 				lastRotation = rotation;
