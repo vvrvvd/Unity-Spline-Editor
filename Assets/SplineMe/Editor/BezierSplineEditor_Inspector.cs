@@ -45,14 +45,14 @@ namespace SplineMe.Editor
 
 			if (GUILayout.Button("Cast Curve Points"))
 			{
-				CastCurve();
+				CastSpline(castSplineDirection);
 				EditorUtility.SetDirty(CurrentSpline);
 			}
 
 			GUI.enabled = IsAnyPointSelected;
 			if (GUILayout.Button("Add Mid Curve"))
 			{
-				AddMidCurve();
+				SplitCurve(splitCurveValue);
 				EditorUtility.SetDirty(CurrentSpline);
 			}
 			GUI.enabled = prevEnabled;
@@ -66,7 +66,7 @@ namespace SplineMe.Editor
 			GUI.enabled = CanBeSimplified;
 			if (GUILayout.Button("Simplify Curve"))
 			{
-				SimplifyCurve();
+				SimplifySpline();
 				EditorUtility.SetDirty(CurrentSpline);
 			}
 

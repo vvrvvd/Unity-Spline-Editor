@@ -67,14 +67,14 @@ namespace SplineMe.Editor
                 LoadSettings();
 			}
 
-            var prevGUISkin = GUI.skin;
-            GUI.skin = editorSettings.guiSkin;
             EditorGUILayout.BeginVertical();
-            DrawHeader();
+			var prevButtonSkin = GUI.skin.button;
+			GUI.skin.button = editorSettings.guiSkin.FindStyle("button");
+			DrawHeader();
             DrawSplineGroup();
             DrawBezierCurveOptions();
-            EditorGUILayout.EndVertical();
-            GUI.skin = prevGUISkin;
+			GUI.skin.button = prevButtonSkin;
+			EditorGUILayout.EndVertical();
 
             //Hack for getting hover mouse visuals before showing tooltip when using custom GUI.skin pt.2
             if (Event.current.type == EventType.MouseMove)

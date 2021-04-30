@@ -14,6 +14,9 @@ namespace SplineMe.Editor
         private const string RemoveCurveButtonTooltip = "Remove selected curve.";
         private const string SplitCurveButtonTitle = "Split Curve";
         private const string SplitCurveButtonTooltip = "Split curve by adding mid point.";
+        private const string SplitPointSliderLabel = "Split Point";
+
+		private float splitCurveValue = 0.5f;
 
         private void DrawBezierCurveOptions()
 		{
@@ -31,8 +34,8 @@ namespace SplineMe.Editor
             var addCurveButtonContent = new GUIContent(AddCurveButtonTitle, AddCurveButtonTooltip);
             if (GUILayout.Button(addCurveButtonContent, ButtonWidth, ButtonHeight))
             {
-                BezierSplineEditor.CurrentEditor.AddCurve();
-                repaintScene = true;
+				BezierSplineEditor.AddCurveShortcut();
+				repaintScene = true;
             }
 
             //TODO: Add event
@@ -40,10 +43,9 @@ namespace SplineMe.Editor
             var removeCurveButtonContent = new GUIContent(RemoveCurveButtonTitle, RemoveCurveButtonTooltip);
             if (GUILayout.Button(removeCurveButtonContent, ButtonWidth, ButtonHeight))
             {
-                BezierSplineEditor.CurrentEditor.RemoveSelectedCurve();
-                repaintScene = true;
+				BezierSplineEditor.RemoveSelectedCurveShortcut();
+				repaintScene = true;
             }
-
 
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
@@ -53,12 +55,19 @@ namespace SplineMe.Editor
             GUI.enabled = isCurveEditorEnabled;
             if (GUILayout.Button(splitCurveButtonContent, ButtonWidth, ButtonHeight))
             {
-                BezierSplineEditor.CurrentEditor.AddMidCurve();
-                repaintScene = true;
+				BezierSplineEditor.SplitCurveByPoint(splitCurveValue);
+				repaintScene = true;
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
-            GUILayout.Space(10);
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			splitCurveValue = EditorGUILayout.Slider(SplitPointSliderLabel, splitCurveValue, 0.001f, 0.999f, CustomTransformWidth);
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			GUILayout.Space(10);
             GUILayout.EndVertical();
             GUI.enabled = prevEnabled;
         }

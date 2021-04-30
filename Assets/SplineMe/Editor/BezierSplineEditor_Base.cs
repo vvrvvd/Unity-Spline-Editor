@@ -187,7 +187,7 @@ namespace SplineMe.Editor
 
 			Undo.RecordObject(CurrentSpline, "Add Curve");
 
-			if(SelectedCurveIndex == 0)
+			if(SelectedCurveIndex == 0 && (currentSpline.CurvesCount != 1 || selectedPointIndex <= 1))
 			{
 				AddBeginningCurve();
 			}
@@ -214,7 +214,7 @@ namespace SplineMe.Editor
 		internal void AddBeginningCurve()
 		{
 			var deltaDir = (CurrentSpline.Points[1].position - CurrentSpline.Points[0].position).normalized * BezierSplineEditor_Consts.CreateCurveSegmentSize / 3;
-			var p1 = CurrentSpline.Points[1].position - deltaDir;
+			var p1 = CurrentSpline.Points[0].position - deltaDir;
 			var p2 = p1 - deltaDir;
 			var p3 = p2 - deltaDir;
 
@@ -224,7 +224,7 @@ namespace SplineMe.Editor
 			UpdateSelectedIndex(0);
 		}
 
-		internal void AddMidCurve()
+		internal void SplitCurve(float splitPointValue)
 		{
 			if (!currentEditor.IsAnyPointSelected)
 			{
@@ -233,7 +233,7 @@ namespace SplineMe.Editor
 
 			Undo.RecordObject(CurrentSpline, "Add Mid Curve");
 			var wasLastPoint = SelectedPointIndex == CurrentSpline.PointsCount - 1;
-			CurrentSpline.InsertCurve(SelectedCurveIndex, 0.5f);
+			CurrentSpline.InsertCurve(SelectedCurveIndex, splitPointValue);
 
 			if (wasLastPoint && !CurrentSpline.IsLoop)
 			{
@@ -258,18 +258,13 @@ namespace SplineMe.Editor
 
 			Undo.RecordObject(CurrentSpline, "Remove Curve");
 			var curveToRemove = SelectedCurveIndex;
-			CurrentSpline.RemoveCurve(curveToRemove);
+			var removeFirstPoint = (selectedPointIndex - curveToRemove * 3) < 2;
+			CurrentSpline.RemoveCurve(curveToRemove, removeFirstPoint);
 			var nextSelectedIndex = Mathf.Min(SelectedPointIndex, CurrentSpline.PointsCount - 1);
 			UpdateSelectedIndex(nextSelectedIndex);
 		}
 
-		internal void CastCurve(Transform customTransform = null)
-		{
-			var referenceTransform = customTransform == null ? handleTransform : customTransform;
-			CastCurve(-referenceTransform.up);
-		}
-
-		internal void CastCurve(Vector3 direction)
+		private void CastSpline(Vector3 direction)
 		{
 			Undo.RecordObject(CurrentSpline, "Cast Curve Points");
 			var pointsCount = CurrentSpline.PointsCount;
@@ -317,7 +312,7 @@ namespace SplineMe.Editor
 			}
 		}
 
-		internal void SimplifyCurve()
+		internal void SimplifySpline()
 		{
 			if (!CanBeSimplified)
 			{

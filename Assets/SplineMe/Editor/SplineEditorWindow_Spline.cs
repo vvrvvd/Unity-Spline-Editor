@@ -50,7 +50,7 @@ namespace SplineMe.Editor
             var factorSplineButtonContent = new GUIContent(FactorSplineButtonTitle, FactorSplineButtonTooltip);
             if (GUILayout.Button(factorSplineButtonContent, ButtonWidth, ButtonHeight))
             {
-                BezierSplineEditor.CurrentEditor.FactorCurve();
+				BezierSplineEditor.FactorSplineShortcut();
                 repaintScene = true;
             }
 
@@ -59,8 +59,8 @@ namespace SplineMe.Editor
             GUI.enabled = isSplineEditorEnabled && BezierSplineEditor.CurrentEditor.CanBeSimplified;
             if (GUILayout.Button(simplifyButtonContent, ButtonWidth, ButtonHeight))
             {
-                BezierSplineEditor.CurrentEditor.SimplifyCurve();
-                repaintScene = true;
+				BezierSplineEditor.SimplifySplineShortcut();
+				repaintScene = true;
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
@@ -79,16 +79,17 @@ namespace SplineMe.Editor
             var castSplineContent = new GUIContent(CastSplineButtonTitle, CastSplineButtonTooltip);
             if (GUILayout.Button(castSplineContent, ButtonWidth, ButtonHeight))
             {
-                BezierSplineEditor.CurrentEditor.CastCurve(customTransform);
-                repaintScene = true;
+				var referenceTransform = customTransform == null ? BezierSplineEditor.CurrentSpline.transform : customTransform;
+				var castDirection = -referenceTransform.up;
+				BezierSplineEditor.CastCurvePoints(castDirection);
+				repaintScene = true;
             }
 
             var castSplineToCameraContent = new GUIContent(CastSplineToCameraButtonTitle, CastSplineToCameraButtonTooltip);
             if (GUILayout.Button(castSplineToCameraContent, ButtonWidth, ButtonHeight))
             {
-                var cameraRay = HandleUtility.GUIPointToWorldRay(Vector2.zero);
-                BezierSplineEditor.CurrentEditor.CastCurve(cameraRay.direction);
-                repaintScene = true;
+				BezierSplineEditor.CastSplineToCameraView();
+				repaintScene = true;
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();

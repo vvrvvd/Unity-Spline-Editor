@@ -10,34 +10,44 @@ namespace SplineMe.Editor
 		#region Static Fields
 
 		private static bool addCurveFlag;
-		private static bool addMidCurveFlag;
+		private static bool splitCurveFlag;
 		private static bool removeSelectedCurveFlag;
-		private static bool castCurveFlag;
-		private static bool factorCurveFlag;
-		private static bool simplifyCurveFlag;
-		private static bool drawCurveModeFlag;
+		private static bool castSplineFlag;
+		private static bool castSplineToCameraFlag;
+		private static bool factorSplineFlag;
+		private static bool simplifySplineFlag;
+		private static bool drawSplineModeFlag;
 		private static bool castSelectedPointFlag;
 		private static bool castSelectedPointShortcutFlag;
 		private static bool snapEndPointsFlag;
+
+		private static float splitCurveValue = 0.5f;
+		private static Vector3 castSplineDirection;
 
 		#endregion
 
 		#region ShortcutManager Callbacks
 
 		[ShortcutAttribute("Spline Editor/Add Curve", KeyCode.Home, ShortcutModifiers.Action)]
-		private static void AddCurveShortcut()
+		internal static void AddCurveShortcut()
 		{
 			addCurveFlag = true;
 		}
 
-		[ShortcutAttribute("Spline Editor/Add Mid Curve", KeyCode.M, ShortcutModifiers.Action)]
-		private static void AddMidCurveShortcut()
+		[ShortcutAttribute("Spline Editor/Split Curve", KeyCode.M, ShortcutModifiers.Action)]
+		private static void SplitCurveShortcut()
 		{
-			addMidCurveFlag = true;
+			SplitCurveByPoint(splitCurveValue);
+		}
+
+		internal static void SplitCurveByPoint(float splitPointValue)
+		{
+			splitCurveValue = splitPointValue;
+			splitCurveFlag = true;
 		}
 
 		[ShortcutAttribute("Spline Editor/Remove Curve", KeyCode.End, ShortcutModifiers.Action)]
-		private static void RemoveSelectedCurveShortcut()
+		internal static void RemoveSelectedCurveShortcut()
 		{
 			removeSelectedCurveFlag = true;
 		}
@@ -45,25 +55,42 @@ namespace SplineMe.Editor
 		[ShortcutAttribute("Spline Editor/Cast Curve Points", KeyCode.U, ShortcutModifiers.Action)]
 		private static void CastCurvePointsShortcut()
 		{
-			castCurveFlag = true;
+			if (currentSpline != null)
+			{
+				return;
+			}
+
+			var customRay = -currentSpline.transform.up;
+			CastCurvePoints(customRay);
+		}
+
+		internal static void CastSplineToCameraView()
+		{
+			castSplineToCameraFlag = true;
+		}
+
+		internal static void CastCurvePoints(Vector3 direction)
+		{
+			castSplineDirection = direction;
+			castSplineFlag = true;
 		}
 
 		[ShortcutAttribute("Spline Editor/Factor Curve", KeyCode.G, ShortcutModifiers.Action)]
-		private static void FactorCurvesShortcut()
+		internal static void FactorSplineShortcut()
 		{
-			factorCurveFlag = true;
+			factorSplineFlag = true;
 		}
 
 		[ShortcutAttribute("Spline Editor/Simplify Curve", KeyCode.H, ShortcutModifiers.Action)]
-		private static void SimplifyCurveShortcut()
+		internal static void SimplifySplineShortcut()
 		{
-			simplifyCurveFlag = true;
+			simplifySplineFlag = true;
 		}
 
-		[ShortcutAttribute("Spline Editor/Toggle Draw Curve Mode", KeyCode.Slash, ShortcutModifiers.Action)]
-		private static void ToggleDrawCurveModeShortcut()
+		[ShortcutAttribute("Spline Editor/Toggle Draw Spline Mode", KeyCode.Slash, ShortcutModifiers.Action)]
+		private static void ToggleDrawSplineModeShortcut()
 		{
-			drawCurveModeFlag = !drawCurveModeFlag;
+			drawSplineModeFlag = !drawSplineModeFlag;
 		}
 
 		[ClutchShortcut("Spline Editor/Snap Spline End Points", KeyCode.S, ShortcutModifiers.None)]
@@ -91,46 +118,59 @@ namespace SplineMe.Editor
 
 		private void InitializeShortcuts()
 		{
-			factorCurveFlag = false;
-			simplifyCurveFlag = false;
+			factorSplineFlag = false;
+			simplifySplineFlag = false;
 			addCurveFlag = false;
 			removeSelectedCurveFlag = false;
-			drawCurveModeFlag = false;
-			castCurveFlag = false;
+			drawSplineModeFlag = false;
+			castSplineFlag = false;
+			castSplineToCameraFlag = false;
 			castSelectedPointFlag = false;
 			snapEndPointsFlag = false;
 		}
 
 		private void ApplyShortcuts()
 		{
-			if (drawCurveModeFlag)
+			if (drawSplineModeFlag)
 			{
 				ToggleDrawCurveMode(!isCurveDrawerMode);
-				drawCurveModeFlag = false;
+				drawSplineModeFlag = false;
 			}
 
-			if(addMidCurveFlag)
+			if(splitCurveFlag)
 			{
-				AddMidCurve();
-				addMidCurveFlag = false;
+				SplitCurve(splitCurveValue);
+				splitCurveFlag = false;
 			}	
 
-			if (factorCurveFlag)
+			if (factorSplineFlag)
 			{
 				FactorCurve();
-				factorCurveFlag = false;
+				factorSplineFlag = false;
 			}
 
-			if (simplifyCurveFlag)
+			if (simplifySplineFlag)
 			{
-				SimplifyCurve();
-				simplifyCurveFlag = false;
+				SimplifySpline();
+				simplifySplineFlag = false;
 			}
 
-			if (castCurveFlag)
+			if (castSplineFlag)
 			{
-				CastCurve();
-				castCurveFlag = false;
+				castSplineFlag = false;
+				CastSpline(castSplineDirection);
+			}
+
+			if (castSplineToCameraFlag)
+			{
+				var sceneCamera = SceneView.lastActiveSceneView.camera;
+				if(sceneCamera!=null)
+				{
+					castSplineDirection = sceneCamera.transform.forward;
+					CastSpline(castSplineDirection);
+				}
+
+				castSplineToCameraFlag = false;
 			}
 
 			if (!isCurveDrawerMode)

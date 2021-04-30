@@ -316,11 +316,11 @@ namespace SplineMe
 		/// Removes curve at given index.
 		/// </summary>
 		/// <param name="curveIndex"></param>
-		public void RemoveCurve(int curveIndex)
+		public void RemoveCurve(int curveIndex, bool removeFirstPoints)
 		{
-			var isLastCurve = (isLoop && curveIndex == CurvesCount) || (!isLoop && curveIndex == CurvesCount - 1);
-			var isStartCurve = curveIndex == 0;
-			var isMidCurve = IsLoop && curveIndex == 1 && CurvesCount == 2;
+			var isLastCurve = !removeFirstPoints && ((isLoop && curveIndex == CurvesCount) || (!isLoop && curveIndex == CurvesCount - 1));
+			var isStartCurve = removeFirstPoints && curveIndex == 0;
+			var isMidCurve = (IsLoop && curveIndex == 1 && CurvesCount == 2);
 			var beginCurveIndex = curveIndex * 3;
 			var startCurveIndex = beginCurveIndex;
 			if (isStartCurve)
@@ -332,6 +332,9 @@ namespace SplineMe
 				startCurveIndex = PointsCount - 2;
 			}
 			else if (isMidCurve)
+			{
+				startCurveIndex += 2;
+			} else if(!removeFirstPoints)
 			{
 				startCurveIndex += 2;
 			}
@@ -380,7 +383,7 @@ namespace SplineMe
 			for (var i = 1; i < CurvesCount; i++)
 			{
 				RemoveCurveAndRecalculateControlPoints(i);
-				if (i == CurvesCount - 1)
+				if (i >= CurvesCount - 1)
 				{
 					return;
 				}
@@ -550,7 +553,7 @@ namespace SplineMe
 			UpdatePoint(p0Index + 1, p1);
 			UpdatePoint(p3Index - 1, p2);
 
-			RemoveCurve(curveIndex);
+			RemoveCurve(curveIndex, true);
 		}
 
 		#endregion
