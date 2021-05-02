@@ -44,6 +44,11 @@ namespace SplineMe.Editor
 		internal static event Action OnCurrentSplineChanged;
 		internal static event Action OnSelectedCurveChanged;
 
+		internal static float drawCurveSegmentLength = 1f;
+		internal static float drawCurveFirstPointHook = 0.33f;
+		internal static float drawCurveSecondPointHook = 0.66f;
+		internal static bool drawCurveSmoothAcuteAngles = false;
+
 		#endregion
 
 		#region Private Fields

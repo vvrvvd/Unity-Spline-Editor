@@ -88,7 +88,7 @@ namespace SplineMe.Editor
 		}
 
 		[ShortcutAttribute("Spline Editor/Toggle Draw Spline Mode", KeyCode.Slash, ShortcutModifiers.Action)]
-		private static void ToggleDrawSplineModeShortcut()
+		internal static void ToggleDrawSplineModeShortcut()
 		{
 			drawSplineModeFlag = !drawSplineModeFlag;
 		}

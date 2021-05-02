@@ -28,7 +28,6 @@ namespace SplineMe.Editor
 		private bool showPointsHandles;
 		private bool showSegmentsPoints;
 		private bool showDirectionsLines;
-		private bool drawCurveSmoothAcuteAngles;
 
 		#endregion
 
@@ -40,7 +39,6 @@ namespace SplineMe.Editor
 			showPointsHandles = EditorPrefs.GetBool(ShowPointsHandlesKey, true);
 			showSegmentsPoints = EditorPrefs.GetBool(ShowSegmentsHandleKey, false);
 			showDirectionsLines = EditorPrefs.GetBool(ShowDirectionsHandleKey, false);
-			drawCurveSmoothAcuteAngles = EditorPrefs.GetBool(DrawCurveSmoothAcuteAngles, false);
 
 			if (showMainTransformGizmo)
 			{
@@ -164,14 +162,6 @@ namespace SplineMe.Editor
 			GUILayout.Label("Draw Curve");
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
-
-			prevValue = drawCurveSmoothAcuteAngles;
-			newValue = GUILayout.Toggle(prevValue, "Draw Curve Smooth Acute Angles");
-			if (newValue != prevValue)
-			{
-				drawCurveSmoothAcuteAngles = newValue;
-				EditorPrefs.SetBool(DrawCurveSmoothAcuteAngles, newValue);
-			}
 
 			GUILayout.EndVertical();
 		}

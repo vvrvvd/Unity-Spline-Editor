@@ -13,15 +13,15 @@ namespace SplineMe.Editor
         private const string SimplifySplineButtonTitle = "Simplify Spline";
         private const string SimplifySplineButtonTooltip = "Simplify spline by removing every second curve.";
 
-        private const string CastOptionsTitle = "Cast";
         private const string CastSplineButtonTitle = "Cast Spline";
         private const string CastSplineButtonTooltip = "Cast spline regarding to custom Transform or self (transform == null).";
 
         private const string CastSplineToCameraButtonTitle = "Cast To Camera View";
         private const string CastSplineToCameraButtonTooltip = "Cast spline regarding to camera view.";
+        private const string CastTransformFieldLabel = "Reference Transform";
 
         private Transform customTransform = null;
-        private GUILayoutOption CustomTransformWidth { get; } = GUILayout.Width(345);
+        private GUILayoutOption CustomTransformFieldWidth { get; } = GUILayout.Width(345);
 
         private void DrawSplineGroup()
         {
@@ -96,7 +96,7 @@ namespace SplineMe.Editor
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            customTransform = EditorGUILayout.ObjectField("Custom transform", customTransform, typeof(Transform), true, CustomTransformWidth) as Transform;
+            customTransform = EditorGUILayout.ObjectField(CastTransformFieldLabel, customTransform, typeof(Transform), true, CustomTransformFieldWidth) as Transform;
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 

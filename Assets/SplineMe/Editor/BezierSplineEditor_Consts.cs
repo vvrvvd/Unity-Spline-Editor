@@ -35,10 +35,7 @@ namespace SplineMe
 
 		public const float CreateCurveSegmentSize = 1f;
 		public const float DrawCurveSphereSize = 0.30f;
-		public const float DrawCurveSegmentLength = 2f;
-		public const float DrawCurveMinLengthToVisualize = DrawCurveSegmentLength * 0.1f;
-		public const float DrawCurveFirstControlPointT = 0.33f;
-		public const float DrawCurveSecondControlPointT = 0.66f;
+		public const float DrawCurveMinLengthToVisualize = 0.1f;
 
 		public const float SnapSplineEndPointsMinDistance = 1f;
 

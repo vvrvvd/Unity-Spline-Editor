@@ -63,7 +63,7 @@ namespace SplineMe.Editor
 
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			splitCurveValue = EditorGUILayout.Slider(SplitPointSliderLabel, splitCurveValue, 0.001f, 0.999f, CustomTransformWidth);
+			splitCurveValue = EditorGUILayout.Slider(SplitPointSliderLabel, splitCurveValue, 0.001f, 0.999f, CustomTransformFieldWidth);
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 

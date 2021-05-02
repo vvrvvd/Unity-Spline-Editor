@@ -73,7 +73,8 @@ namespace SplineMe.Editor
 			DrawHeader();
             DrawSplineGroup();
             DrawBezierCurveOptions();
-			GUI.skin.button = prevButtonSkin;
+            DrawDrawerToolOptions();
+            GUI.skin.button = prevButtonSkin;
 			EditorGUILayout.EndVertical();
 
             //Hack for getting hover mouse visuals before showing tooltip when using custom GUI.skin pt.2
@@ -85,7 +86,7 @@ namespace SplineMe.Editor
             if(repaintScene)
 			{
                 SceneView.RepaintAll();
-			}
+            }
 
         }
 
