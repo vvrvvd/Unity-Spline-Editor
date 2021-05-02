@@ -71,8 +71,8 @@ namespace SplineMe.Editor
 			var prevButtonSkin = GUI.skin.button;
 			GUI.skin.button = editorSettings.guiSkin.FindStyle("button");
 			DrawHeader();
-            DrawSplineGroup();
             DrawBezierCurveOptions();
+            DrawSplineGroup();
             DrawDrawerToolOptions();
             GUI.skin.button = prevButtonSkin;
 			EditorGUILayout.EndVertical();

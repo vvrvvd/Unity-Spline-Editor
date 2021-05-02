@@ -19,8 +19,8 @@ namespace SplineMe.Editor
 		{
             var prevColor = GUI.color;
             var prevEnabled = GUI.enabled;
-            GUILayout.Label(DrawerGroupTitle);
             GUI.enabled = isSplineEditorEnabled;
+            GUILayout.Label(DrawerGroupTitle);
             var groupStyle = new GUIStyle(EditorStyles.helpBox);
             GUILayout.BeginVertical(groupStyle);
             GUILayout.Space(10);
