@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace SplineMe.Editor
@@ -10,6 +8,20 @@ namespace SplineMe.Editor
 	{
 
 		public GUISkin guiSkin = default;
+
+		[Header("Image buttons")]
+		public Texture imageLayoutIcon;
+		[Space]
+		public Texture addCurveIcon;
+		public Texture removeCurveIcon;
+		public Texture splitCurveIcon;
+		[Space]
+		public Texture factorSplineIcon;
+		public Texture simplifySplineIcon;
+		public Texture castSplineIcon;
+		public Texture castToCameraSplineIcon;
+		[Space]
+		public Texture drawerToolIcon;
 
 	}
 

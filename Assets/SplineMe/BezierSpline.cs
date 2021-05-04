@@ -336,7 +336,7 @@ namespace SplineMe
 				startCurveIndex += 2;
 			} else if(!removeFirstPoints)
 			{
-				startCurveIndex += 2;
+				startCurveIndex += 3;
 			}
 
 			RemovePoint(startCurveIndex + 1);

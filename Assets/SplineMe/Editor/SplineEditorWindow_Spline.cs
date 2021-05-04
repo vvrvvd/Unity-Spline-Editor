@@ -14,14 +14,14 @@ namespace SplineMe.Editor
         private const string SimplifySplineButtonTooltip = "Simplify spline by removing every second curve.";
 
         private const string CastSplineButtonTitle = "Cast Spline";
-        private const string CastSplineButtonTooltip = "Cast spline regarding to custom Transform or self (transform == null).";
+        private const string CastSplineButtonTooltip = "Cast spline regarding to cast transform or self (transform == null).";
 
-        private const string CastSplineToCameraButtonTitle = "Cast To Camera View";
+        private const string CastSplineToCameraButtonTitle = "Cast Spline To Camera View";
         private const string CastSplineToCameraButtonTooltip = "Cast spline regarding to camera view.";
-        private const string CastTransformFieldLabel = "Reference Transform";
+        private const string CastTransformFieldLabel = "Cast Transform";
 
         private Transform customTransform = null;
-        private GUILayoutOption CustomTransformFieldWidth { get; } = GUILayout.Width(345);
+        private GUILayoutOption CustomTransformFieldWidth { get; } = GUILayout.Width(175);
 
         private void DrawSplineGroup()
         {
@@ -47,17 +47,17 @@ namespace SplineMe.Editor
             GUILayout.Space(10);
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            var factorSplineButtonContent = new GUIContent(FactorSplineButtonTitle, FactorSplineButtonTooltip);
-            if (GUILayout.Button(factorSplineButtonContent, ButtonWidth, ButtonHeight))
+            var factorSplineButtonContent = new GUIContent(useText ? FactorSplineButtonTitle : string.Empty, useImages ? editorSettings.factorSplineIcon : null, useText ? FactorSplineButtonTooltip : FactorSplineButtonTitle);
+            if (GUILayout.Button(factorSplineButtonContent, buttonStyle, ButtonWidth, ButtonHeight))
             {
 				BezierSplineEditor.FactorSplineShortcut();
                 repaintScene = true;
             }
 
-            var simplifyButtonContent = new GUIContent(SimplifySplineButtonTitle, SimplifySplineButtonTooltip);
+            var simplifyButtonContent = new GUIContent(useText ? SimplifySplineButtonTitle : string.Empty, useImages ? editorSettings.simplifySplineIcon : null, useText ? SimplifySplineButtonTooltip : SimplifySplineButtonTitle);
             //TODO: Needs event to be added
             GUI.enabled = isSplineEditorEnabled && BezierSplineEditor.CurrentEditor.CanBeSimplified;
-            if (GUILayout.Button(simplifyButtonContent, ButtonWidth, ButtonHeight))
+            if (GUILayout.Button(simplifyButtonContent, buttonStyle, ButtonWidth, ButtonHeight))
             {
 				BezierSplineEditor.SimplifySplineShortcut();
 				repaintScene = true;
@@ -76,8 +76,8 @@ namespace SplineMe.Editor
             GUILayout.Space(10);
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            var castSplineContent = new GUIContent(CastSplineButtonTitle, CastSplineButtonTooltip);
-            if (GUILayout.Button(castSplineContent, ButtonWidth, ButtonHeight))
+            var castSplineContent = new GUIContent(useText ? CastSplineButtonTitle : string.Empty, useImages ? editorSettings.castSplineIcon : null, useText ? CastSplineButtonTooltip : CastSplineButtonTitle);
+            if (GUILayout.Button(castSplineContent, buttonStyle, ButtonWidth, ButtonHeight))
             {
 				var referenceTransform = customTransform == null ? BezierSplineEditor.CurrentSpline.transform : customTransform;
 				var castDirection = -referenceTransform.up;
@@ -85,8 +85,8 @@ namespace SplineMe.Editor
 				repaintScene = true;
             }
 
-            var castSplineToCameraContent = new GUIContent(CastSplineToCameraButtonTitle, CastSplineToCameraButtonTooltip);
-            if (GUILayout.Button(castSplineToCameraContent, ButtonWidth, ButtonHeight))
+            var castSplineToCameraContent = new GUIContent(useText ? CastSplineToCameraButtonTitle : string.Empty, useImages ? editorSettings.castToCameraSplineIcon : null, useText ? CastSplineToCameraButtonTooltip : CastSplineToCameraButtonTitle);
+            if (GUILayout.Button(castSplineToCameraContent, buttonStyle, ButtonWidth, ButtonHeight))
             {
 				BezierSplineEditor.CastSplineToCameraView();
 				repaintScene = true;
@@ -94,9 +94,11 @@ namespace SplineMe.Editor
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
+            GUILayout.Space(10);
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            customTransform = EditorGUILayout.ObjectField(CastTransformFieldLabel, customTransform, typeof(Transform), true, CustomTransformFieldWidth) as Transform;
+            GUILayout.Label(CastTransformFieldLabel);
+            customTransform = EditorGUILayout.ObjectField(customTransform, typeof(Transform), true, CustomTransformFieldWidth) as Transform;
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 

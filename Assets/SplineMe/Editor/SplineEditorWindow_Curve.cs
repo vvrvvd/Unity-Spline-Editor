@@ -21,8 +21,8 @@ namespace SplineMe.Editor
         private void DrawBezierCurveOptions()
 		{
             var prevEnabled = GUI.enabled;
-            GUILayout.Label(BezierGroupTitle);
             GUI.enabled = isCurveEditorEnabled;
+            GUILayout.Label(BezierGroupTitle);
             var groupStyle = new GUIStyle(EditorStyles.helpBox);
             GUILayout.BeginVertical(groupStyle);
             GUILayout.Space(10);
@@ -31,8 +31,8 @@ namespace SplineMe.Editor
 
             //TODO: Add event
             GUI.enabled = isCurveEditorEnabled && BezierSplineEditor.CurrentEditor.CanNewCurveBeAdded;
-            var addCurveButtonContent = new GUIContent(AddCurveButtonTitle, AddCurveButtonTooltip);
-            if (GUILayout.Button(addCurveButtonContent, ButtonWidth, ButtonHeight))
+            var addCurveButtonContent = new GUIContent(useText ? AddCurveButtonTitle : string.Empty, useImages ? editorSettings.addCurveIcon : null, useText ? AddCurveButtonTooltip : AddCurveButtonTitle);
+            if (GUILayout.Button(addCurveButtonContent, buttonStyle, ButtonWidth, ButtonHeight))
             {
 				BezierSplineEditor.AddCurveShortcut();
 				repaintScene = true;
@@ -40,8 +40,8 @@ namespace SplineMe.Editor
 
             //TODO: Add event
             GUI.enabled = isCurveEditorEnabled && BezierSplineEditor.CurrentEditor.CanSelectedCurveBeRemoved;
-            var removeCurveButtonContent = new GUIContent(RemoveCurveButtonTitle, RemoveCurveButtonTooltip);
-            if (GUILayout.Button(removeCurveButtonContent, ButtonWidth, ButtonHeight))
+            var removeCurveButtonContent = new GUIContent(useText ? RemoveCurveButtonTitle : string.Empty, useImages ? editorSettings.removeCurveIcon : null, useText ? RemoveCurveButtonTooltip : RemoveCurveButtonTitle);
+            if (GUILayout.Button(removeCurveButtonContent, buttonStyle, ButtonWidth, ButtonHeight))
             {
 				BezierSplineEditor.RemoveSelectedCurveShortcut();
 				repaintScene = true;
@@ -51,9 +51,9 @@ namespace SplineMe.Editor
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            var splitCurveButtonContent = new GUIContent(SplitCurveButtonTitle, SplitCurveButtonTooltip);
+            var splitCurveButtonContent = new GUIContent(useText ? SplitCurveButtonTitle : string.Empty, useImages ? editorSettings.splitCurveIcon : null, useText ? SplitCurveButtonTooltip : SplitCurveButtonTitle);
             GUI.enabled = isCurveEditorEnabled;
-            if (GUILayout.Button(splitCurveButtonContent, ButtonWidth, ButtonHeight))
+            if (GUILayout.Button(splitCurveButtonContent, buttonStyle, ButtonWidth, ButtonHeight))
             {
 				BezierSplineEditor.SplitCurveByPoint(splitCurveValue);
 				repaintScene = true;
@@ -63,7 +63,8 @@ namespace SplineMe.Editor
 
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			splitCurveValue = EditorGUILayout.Slider(SplitPointSliderLabel, splitCurveValue, 0.001f, 0.999f, CustomTransformFieldWidth);
+            GUILayout.Label(SplitPointSliderLabel);
+			splitCurveValue = EditorGUILayout.Slider(splitCurveValue, 0.001f, 0.999f, CustomSliderWidth);
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 

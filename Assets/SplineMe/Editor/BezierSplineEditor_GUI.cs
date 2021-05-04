@@ -12,7 +12,6 @@ namespace SplineMe.Editor
 		private const string ShowPointsHandlesKey = "ShowPointsHandles";
 		private const string ShowSegmentsHandleKey = "ShowSegmentsHandle";
 		private const string ShowDirectionsHandleKey = "ShowDirectionsHandle";
-		private const string DrawCurveSmoothAcuteAngles = "DrawCurveSmoothAcuteAngles";
 
 		#endregion
 
@@ -99,7 +98,6 @@ namespace SplineMe.Editor
 			GUILayout.EndHorizontal();
 
 			DrawToggles();
-			DrawButtons();
 
 			EditorGUILayout.EndVertical();
 			GUILayout.EndArea();
@@ -157,36 +155,7 @@ namespace SplineMe.Editor
 				EditorPrefs.SetBool(ShowDirectionsHandleKey, newValue);
 			}
 
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			GUILayout.Label("Draw Curve");
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-
 			GUILayout.EndVertical();
-		}
-
-		private void DrawButtons()
-		{
-			GUILayout.BeginHorizontal();
-			GUI.backgroundColor = Color.red;
-			var prevEnabled = GUI.enabled;
-
-			GUI.enabled = CanNewCurveBeAdded;
-			if (GUILayout.Button("Add Curve"))
-			{
-				AddCurve();
-			}
-
-			GUI.enabled = CanSelectedCurveBeRemoved && !isCurveDrawerMode;
-			if (GUILayout.Button("Remove Curve"))
-			{
-				RemoveSelectedCurve();
-			}
-
-			GUI.enabled = prevEnabled;
-
-			GUILayout.EndHorizontal();
 		}
 
 		#endregion

@@ -43,33 +43,6 @@ namespace SplineMe.Editor
 				DrawSelectedPointInspector();
 			}
 
-			if (GUILayout.Button("Cast Curve Points"))
-			{
-				CastSpline(castSplineDirection);
-				EditorUtility.SetDirty(CurrentSpline);
-			}
-
-			GUI.enabled = IsAnyPointSelected;
-			if (GUILayout.Button("Add Mid Curve"))
-			{
-				SplitCurve(splitCurveValue);
-				EditorUtility.SetDirty(CurrentSpline);
-			}
-			GUI.enabled = prevEnabled;
-
-			if (GUILayout.Button("Factor Curve"))
-			{
-				FactorCurve();
-				EditorUtility.SetDirty(CurrentSpline);
-			}
-
-			GUI.enabled = CanBeSimplified;
-			if (GUILayout.Button("Simplify Curve"))
-			{
-				SimplifySpline();
-				EditorUtility.SetDirty(CurrentSpline);
-			}
-
 			GUI.enabled = prevEnabled;
 		}
 

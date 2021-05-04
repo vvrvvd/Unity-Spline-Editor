@@ -28,7 +28,7 @@ namespace SplineMe.Editor
             GUILayout.FlexibleSpace();
 
             GUI.enabled = isSplineEditorEnabled && !BezierSplineEditor.CurrentSpline.IsLoop;
-            var addCurveButtonContent = new GUIContent(DrawCurveButtonTitle, DrawCurveButtonTooltip);
+            var addCurveButtonContent = new GUIContent(useText ? DrawCurveButtonTitle : string.Empty, useImages ? editorSettings.drawerToolIcon : null, useText ? DrawCurveButtonTooltip : DrawCurveButtonTitle);
             var toggleState = isSplineEditorEnabled ? BezierSplineEditor.CurrentEditor.isCurveDrawerMode : false;
             //TODO: Add event
             if (GUILayout.Toggle(toggleState, addCurveButtonContent, editorSettings.guiSkin.FindStyle("DrawerButton"), ButtonWidth, ButtonHeight))
@@ -56,13 +56,15 @@ namespace SplineMe.Editor
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            BezierSplineEditor.drawCurveFirstPointHook = EditorGUILayout.Slider(DrawCurveFirstHookLabel, BezierSplineEditor.drawCurveFirstPointHook, 0.001f, BezierSplineEditor.drawCurveSecondPointHook);
+            GUILayout.Label(DrawCurveFirstHookLabel);
+            BezierSplineEditor.drawCurveFirstPointHook = EditorGUILayout.Slider(BezierSplineEditor.drawCurveFirstPointHook, 0.001f, BezierSplineEditor.drawCurveSecondPointHook, CustomSliderWidth);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            BezierSplineEditor.drawCurveSecondPointHook = EditorGUILayout.Slider(DrawCurveSecondHookLabel, BezierSplineEditor.drawCurveSecondPointHook, BezierSplineEditor.drawCurveFirstPointHook, 0.999f);
+            GUILayout.Label(DrawCurveSecondHookLabel);
+            BezierSplineEditor.drawCurveSecondPointHook = EditorGUILayout.Slider(BezierSplineEditor.drawCurveSecondPointHook, BezierSplineEditor.drawCurveFirstPointHook, 0.999f, CustomSliderWidth);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
