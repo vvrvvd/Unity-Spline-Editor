@@ -2,9 +2,9 @@ using UnityEngine;
 using UnityEditor.ShortcutManagement;
 using UnityEditor;
 
-namespace SplineMe.Editor
+namespace SplineEditor.Editor
 {
-	public partial class BezierSplineEditor : UnityEditor.Editor
+	public partial class SplineEditor : UnityEditor.Editor
 	{
 
 		#region Static Fields
@@ -26,77 +26,59 @@ namespace SplineMe.Editor
 
 		#endregion
 
-		#region ShortcutManager Callbacks
+		#region Flags Logic
 
-		[ShortcutAttribute("Spline Editor/Add Curve", KeyCode.Home, ShortcutModifiers.Action)]
-		internal static void AddCurveShortcut()
+		internal static void ScheduleAddCurve()
 		{
 			addCurveFlag = true;
 		}
 
-		[ShortcutAttribute("Spline Editor/Split Curve", KeyCode.M, ShortcutModifiers.Action)]
-		private static void SplitCurveShortcut()
+		internal static void ScheduleRemoveSelectedCurve()
 		{
-			SplitCurveByPoint(splitCurveValue);
+			removeSelectedCurveFlag = true;
 		}
 
-		internal static void SplitCurveByPoint(float splitPointValue)
+		internal static void ScheduleFactorSpline()
+		{
+			factorSplineFlag = true;
+		}
+
+		internal static void ScheduleSimplifySpline()
+		{
+			simplifySplineFlag = true;
+		}
+
+		private static void ScheduleCastSelectedPoint()
+		{
+			castSelectedPointFlag = !castSelectedPointShortcutFlag;
+			castSelectedPointShortcutFlag = castSelectedPointFlag;
+		}
+
+		internal static void ScheduleSplitCurve(float splitPointValue)
 		{
 			splitCurveValue = splitPointValue;
 			splitCurveFlag = true;
 		}
 
-		[ShortcutAttribute("Spline Editor/Remove Curve", KeyCode.End, ShortcutModifiers.Action)]
-		internal static void RemoveSelectedCurveShortcut()
-		{
-			removeSelectedCurveFlag = true;
-		}
-
-		[ShortcutAttribute("Spline Editor/Cast Curve Points", KeyCode.U, ShortcutModifiers.Action)]
-		private static void CastCurvePointsShortcut()
-		{
-			if (currentSpline != null)
-			{
-				return;
-			}
-
-			var customRay = -currentSpline.transform.up;
-			CastCurvePoints(customRay);
-		}
-
-		internal static void CastSplineToCameraView()
+		internal static void ScheduleCastSplineToCameraView()
 		{
 			castSplineToCameraFlag = true;
 		}
 
-		internal static void CastCurvePoints(Vector3 direction)
+		internal static void ScheduleCastSpline(Vector3 direction)
 		{
 			castSplineDirection = direction;
 			castSplineFlag = true;
 		}
 
-		[ShortcutAttribute("Spline Editor/Factor Curve", KeyCode.G, ShortcutModifiers.Action)]
-		internal static void FactorSplineShortcut()
-		{
-			factorSplineFlag = true;
-		}
-
-		[ShortcutAttribute("Spline Editor/Simplify Curve", KeyCode.H, ShortcutModifiers.Action)]
-		internal static void SimplifySplineShortcut()
-		{
-			simplifySplineFlag = true;
-		}
-
-		[ShortcutAttribute("Spline Editor/Toggle Draw Spline Mode", KeyCode.Slash, ShortcutModifiers.Action)]
-		internal static void ToggleDrawSplineModeShortcut()
+		internal static void ToggleDrawSplineMode()
 		{
 			drawSplineModeFlag = !drawSplineModeFlag;
 		}
 
-		[ClutchShortcut("Spline Editor/Snap Spline End Points", KeyCode.S, ShortcutModifiers.None)]
-		private static void SnapSplineEndPoints()
+		private static void ToggleSnapCurvePointMode()
 		{
-			if(currentEditor!=null && CurrentSpline != null && snapEndPointsFlag && currentEditor.isSnapping)
+			if (currentEditor != null && CurrentSpline != null && snapEndPointsFlag && currentEditor.isSnapping)
 			{
 				Undo.RecordObject(CurrentSpline, "Snap Spline End Points");
 				CurrentSpline.IsLoop = true;
@@ -105,18 +87,11 @@ namespace SplineMe.Editor
 			snapEndPointsFlag = !snapEndPointsFlag;
 		}
 
-		[ClutchShortcut("Spline Editor/Cast Selected Point To Mouse Position", KeyCode.U, ShortcutModifiers.None)]
-		private static void TryCastSelectedPointShortcut()
-		{
-			castSelectedPointFlag = !castSelectedPointShortcutFlag;
-			castSelectedPointShortcutFlag = castSelectedPointFlag;
-		}
-
 		#endregion
 
 		#region Shortcuts Logic
 
-		private void InitializeShortcuts()
+		private void InitializeFlags()
 		{
 			factorSplineFlag = false;
 			simplifySplineFlag = false;
@@ -129,7 +104,7 @@ namespace SplineMe.Editor
 			snapEndPointsFlag = false;
 		}
 
-		private void ApplyShortcuts()
+		private void InvokeScheduledActions()
 		{
 			if (drawSplineModeFlag)
 			{

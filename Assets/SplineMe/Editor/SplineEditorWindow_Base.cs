@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace SplineMe.Editor
+namespace SplineEditor.Editor
 {
 
 	public partial class SplineEditorWindow : EditorWindow
@@ -37,26 +37,32 @@ namespace SplineMe.Editor
 
 		private void OnEnable()
 		{
-            BezierSplineEditor.OnCurrentSplineChanged += OnSelectedSplineChanged;
-            BezierSplineEditor.OnSelectedCurveChanged += OnSelectedCurveChanged;
+            SplineEditor.OnSplineModified += OnSplineModified;
+            SplineEditor.OnSelectedSplineChanged += OnSelectedSplineChanged;
+            SplineEditor.OnSelectedPointChanged += OnSelectedCurveChanged;
         }
 
         private void OnDisable()
 		{
-            BezierSplineEditor.OnCurrentSplineChanged -= OnSelectedSplineChanged;
-            BezierSplineEditor.OnSelectedCurveChanged -= OnSelectedCurveChanged;
+            SplineEditor.OnSplineModified -= OnSplineModified;
+            SplineEditor.OnSelectedSplineChanged -= OnSelectedSplineChanged;
+            SplineEditor.OnSelectedPointChanged -= OnSelectedCurveChanged;
         }
+
+        private void OnSplineModified()
+		{
+            Repaint();
+		}
 
         private void OnSelectedSplineChanged()
 		{
-            isSplineEditorEnabled = BezierSplineEditor.CurrentSpline != null;
-            isCurveEditorEnabled &= isSplineEditorEnabled;
-            Repaint();
+            isSplineEditorEnabled = SplineEditor.CurrentSpline != null;
+            OnSelectedCurveChanged();
         }
 
         private void OnSelectedCurveChanged()
         {
-            isCurveEditorEnabled = isSplineEditorEnabled && BezierSplineEditor.CurrentEditor != null  && BezierSplineEditor.CurrentEditor.SelectedCurveIndex != -1;
+            isCurveEditorEnabled = isSplineEditorEnabled && SplineEditor.IsAnyPointSelected;
             Repaint();
         }
 

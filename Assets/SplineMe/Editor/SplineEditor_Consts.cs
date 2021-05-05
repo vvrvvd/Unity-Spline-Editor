@@ -1,10 +1,9 @@
 using UnityEngine;
 
-namespace SplineMe
+namespace SplineEditor.Editor
 {
 
-
-	public class BezierSplineEditor_Consts
+	public class SplineEditor_Consts
 	{
 
 		public const int CurveStepsCount = 10;

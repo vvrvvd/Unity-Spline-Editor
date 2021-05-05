@@ -2,35 +2,39 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace SplineMe.Editor
+namespace SplineEditor.Editor
 {
 	[CustomEditor(typeof(BezierSpline))]
-	public partial class BezierSplineEditor : UnityEditor.Editor
+	public partial class SplineEditor : UnityEditor.Editor
 	{
 
 		#region Static Fields
 
-		private static BezierSpline currentSpline;		
+		internal static event Action OnSplineModified;
+		internal static event Action OnSelectedPointChanged;
+		internal static event Action OnSelectedSplineChanged;
+
+		private static BezierSpline currentSpline;
 		internal static BezierSpline CurrentSpline
 		{
 			get => currentSpline;
-			set
+			private set
 			{
-				if(value==currentSpline)
+				if (value == currentSpline)
 				{
 					return;
 				}
 
 				currentSpline = value;
-				OnCurrentSplineChanged?.Invoke();
+				OnSelectedSplineChanged?.Invoke();
 			}
 		}
 
-		private static BezierSplineEditor currentEditor;
-		internal static BezierSplineEditor CurrentEditor
+		private static SplineEditor currentEditor;
+		internal static SplineEditor CurrentEditor
 		{
 			get => currentEditor;
-			set
+			private set
 			{
 				if (value == currentEditor)
 				{
@@ -38,16 +42,138 @@ namespace SplineMe.Editor
 				}
 
 				currentEditor = value;
+				UpdateSplineStates();
 			}
 		}
 
-		internal static event Action OnCurrentSplineChanged;
-		internal static event Action OnSelectedCurveChanged;
+		private static int selectedPointIndex = -1;
+		internal static int SelectedPointIndex
+		{
+			get => selectedPointIndex;
+			private set
+			{
+				selectedPointIndex = value;
+				var newSelectedCurveIndex = value != -1 ? value / 3 : -1;
+				if (newSelectedCurveIndex == CurrentSpline.CurvesCount)
+				{
+					newSelectedCurveIndex = CurrentSpline.IsLoop ? 0 : CurrentSpline.CurvesCount - 1;
+				}
+				SelectedCurveIndex = newSelectedCurveIndex;
+				OnSelectedPointChanged?.Invoke();
+			}
+		}
 
-		internal static float drawCurveSegmentLength = 1f;
-		internal static float drawCurveFirstPointHook = 0.33f;
-		internal static float drawCurveSecondPointHook = 0.66f;
-		internal static bool drawCurveSmoothAcuteAngles = false;
+		private static int selectedCurveIndex = -1;
+		internal static int SelectedCurveIndex
+		{
+			get => selectedCurveIndex;
+			private set
+			{
+				selectedCurveIndex = value;
+				UpdateSplineStates();
+			}
+		}
+
+		private static bool isAnyPointSelected;
+		internal static bool IsAnyPointSelected
+		{
+			get => isAnyPointSelected;
+			set {
+				if (isAnyPointSelected == value)
+				{
+					return;
+				}
+
+				isAnyPointSelected = value;
+			}
+		}
+
+		private static bool canSelectedCurveBeRemoved;
+		internal static bool CanSelectedCurveBeRemoved
+		{
+			get => canSelectedCurveBeRemoved;
+			set
+			{
+				if (canSelectedCurveBeRemoved == value)
+				{
+					return;
+				}
+
+				canSelectedCurveBeRemoved = value;
+				wasSplineModified = true;
+			}
+		}
+
+		private static bool canNewCurveBeAdded;
+		internal static bool CanNewCurveBeAdded
+		{
+			get => canNewCurveBeAdded;
+			set
+			{
+				if (canNewCurveBeAdded == value)
+				{
+					return;
+				}
+
+				canNewCurveBeAdded = value;
+				wasSplineModified = true;
+			}
+		}
+
+		private static bool isSplineLooped;
+		internal static bool IsSplineLooped
+		{
+			get => isSplineLooped;
+			set
+			{
+				if (isSplineLooped == value)
+				{
+					return;
+				}
+
+				isSplineLooped = value;
+				wasSplineModified = true;
+			}
+		}
+
+		private static bool canSplineBeLooped;
+		internal static bool CanSplineBeLooped
+		{
+			get => canSplineBeLooped;
+			set
+			{
+				if (canSplineBeLooped == value)
+				{
+					return;
+				}
+
+				canSplineBeLooped = value;
+				wasSplineModified = true;
+			}
+		}
+
+		private static bool canSplineBeSimplified;
+		internal static bool CanSplineBeSimplified
+		{
+			get => canSplineBeSimplified;
+			set
+			{
+				if (canSplineBeSimplified == value)
+				{
+					return;
+				}
+
+				canSplineBeSimplified = value;
+				wasSplineModified = true;
+			}
+		}
+
+		internal static bool DrawCurveSmoothAcuteAngles = false;
+		internal static float DrawCurveSegmentLength = 1f;
+		internal static float DrawCurveFirstPointHook = 0.33f;
+		internal static float DrawCurveSecondPointHook = 0.66f;
+
+		private static bool wasSplineModified = false;
 
 		#endregion
 
@@ -59,40 +185,24 @@ namespace SplineMe.Editor
 
 		#endregion
 
-		#region Properties
+		#region Static Methods
 
-		private int selectedPointIndex = -1;
-		private int SelectedPointIndex
+		private static void UpdateSplineStates()
 		{
-			get => selectedPointIndex;
-			set
+			IsSplineLooped = CurrentSpline != null && CurrentSpline.IsLoop;
+			IsAnyPointSelected = SelectedPointIndex != -1 && SelectedPointIndex < CurrentSpline.PointsCount;
+			
+			CanSplineBeLooped = CurrentSpline != null && CurrentSpline.CurvesCount > 1;
+			CanNewCurveBeAdded = !IsSplineLooped;
+			CanSplineBeSimplified = CanSplineBeLooped && (!CurrentSpline.IsLoop || CurrentSpline.CurvesCount > 2);
+			CanSelectedCurveBeRemoved = IsAnyPointSelected && CanSplineBeLooped && (!CurrentSpline.IsLoop || CurrentSpline.CurvesCount > 2);
+
+			if (wasSplineModified)
 			{
-				selectedPointIndex = value;
-				var newSelectedCurveIndex = value != -1 ? value / 3 : -1;
-				if (newSelectedCurveIndex == CurrentSpline.CurvesCount)
-				{
-					newSelectedCurveIndex = CurrentSpline.IsLoop ? 0 : CurrentSpline.CurvesCount - 1;
-				}
-				SelectedCurveIndex = newSelectedCurveIndex;
+				OnSplineModified?.Invoke();
+				wasSplineModified = false;
 			}
 		}
-
-		internal int selectedCurveIndex = -1;
-		internal int SelectedCurveIndex
-		{
-			get => selectedCurveIndex;
-			private set
-			{
-				selectedCurveIndex = value;
-				OnSelectedCurveChanged?.Invoke();
-			}
-		}
-
-		internal bool IsAnyPointSelected => SelectedPointIndex != -1 && SelectedPointIndex < CurrentSpline.PointsCount;
-		internal bool HasMoreThanOneCurve => CurrentSpline.CurvesCount > 1;
-		internal bool CanBeSimplified => HasMoreThanOneCurve && (!CurrentSpline.IsLoop || CurrentSpline.CurvesCount > 2);
-		internal bool CanSelectedCurveBeRemoved => IsAnyPointSelected && HasMoreThanOneCurve && (!CurrentSpline.IsLoop || CurrentSpline.CurvesCount > 2);
-		internal bool CanNewCurveBeAdded => !CurrentSpline.IsLoop;
 
 		#endregion
 
@@ -105,7 +215,7 @@ namespace SplineMe.Editor
 
 			InitializeGUI();
 			InitializeSceneGUI();
-			InitializeShortcuts();
+			InitializeFlags();
 			InitializeDrawCurveMode();
 		}
 
@@ -123,7 +233,7 @@ namespace SplineMe.Editor
 
 		private void OnSceneGUI()
 		{
-			if (currentEditor==null || currentEditor.target != target)
+			if (currentEditor == null || currentEditor.target != target)
 			{
 				return;
 			}
@@ -132,14 +242,23 @@ namespace SplineMe.Editor
 			handleTransform = CurrentSpline.transform;
 			handleRotation = Tools.pivotRotation == PivotRotation.Local ? handleTransform.rotation : Quaternion.identity;
 
+			if (currentEvent.type == EventType.ValidateCommand)
+			{
+				wasSplineModified = true;
+			}
+
 			if (SelectedPointIndex >= CurrentSpline.PointsCount)
 			{
 				SelectIndex(CurrentSpline.PointsCount - 1);
+			} else if(SelectedCurveIndex >= CurrentSpline.CurvesCount)
+			{
+				SelectedCurveIndex = CurrentSpline.CurvesCount - 1;
 			}
 
-			ApplyShortcuts();
+			InvokeScheduledActions();
 			DrawSceneGUI();
 			DrawGUI();
+			UpdateSplineStates();
 		}
 
 		public override void OnInspectorGUI()
@@ -160,7 +279,7 @@ namespace SplineMe.Editor
 
 		#region Tools Methods
 
-		internal void SelectIndex(int pointIndex)
+		private void SelectIndex(int pointIndex)
 		{
 			if (pointIndex == -1 && SelectedPointIndex == -1)
 			{
@@ -183,7 +302,7 @@ namespace SplineMe.Editor
 			Repaint();
 		}
 
-		internal void AddCurve()
+		private void AddCurve()
 		{
 			if(!CanNewCurveBeAdded)
 			{
@@ -202,10 +321,10 @@ namespace SplineMe.Editor
 			}
 		}
 
-		internal void AddEndingCurve()
+		private void AddEndingCurve()
 		{
 			var pointsCount = CurrentSpline.PointsCount;
-			var deltaDir = (CurrentSpline.Points[pointsCount - 1].position - CurrentSpline.Points[pointsCount - 2].position).normalized * BezierSplineEditor_Consts.CreateCurveSegmentSize / 3;
+			var deltaDir = (CurrentSpline.Points[pointsCount - 1].position - CurrentSpline.Points[pointsCount - 2].position).normalized * SplineEditor_Consts.CreateCurveSegmentSize / 3;
 			var p1 = CurrentSpline.Points[pointsCount - 1].position + deltaDir;
 			var p2 = p1 + deltaDir;
 			var p3 = p2 + deltaDir;
@@ -216,9 +335,9 @@ namespace SplineMe.Editor
 			UpdateSelectedIndex(CurrentSpline.PointsCount - 1);
 		}
 
-		internal void AddBeginningCurve()
+		private void AddBeginningCurve()
 		{
-			var deltaDir = (CurrentSpline.Points[1].position - CurrentSpline.Points[0].position).normalized * BezierSplineEditor_Consts.CreateCurveSegmentSize / 3;
+			var deltaDir = (CurrentSpline.Points[1].position - CurrentSpline.Points[0].position).normalized * SplineEditor_Consts.CreateCurveSegmentSize / 3;
 			var p1 = CurrentSpline.Points[0].position - deltaDir;
 			var p2 = p1 - deltaDir;
 			var p3 = p2 - deltaDir;
@@ -229,9 +348,9 @@ namespace SplineMe.Editor
 			UpdateSelectedIndex(0);
 		}
 
-		internal void SplitCurve(float splitPointValue)
+		private void SplitCurve(float splitPointValue)
 		{
-			if (!currentEditor.IsAnyPointSelected)
+			if (!IsAnyPointSelected)
 			{
 				return;
 			}
@@ -252,9 +371,11 @@ namespace SplineMe.Editor
 			{
 				currentEditor.SelectIndex(3);
 			}
+
+			wasSplineModified = true;
 		}
 
-		internal void RemoveSelectedCurve()
+		private void RemoveSelectedCurve()
 		{
 			if (!CanSelectedCurveBeRemoved)
 			{
@@ -267,6 +388,8 @@ namespace SplineMe.Editor
 			CurrentSpline.RemoveCurve(curveToRemove, removeFirstPoint);
 			var nextSelectedIndex = Mathf.Min(SelectedPointIndex, CurrentSpline.PointsCount - 1);
 			UpdateSelectedIndex(nextSelectedIndex);
+
+			wasSplineModified = true;
 		}
 
 		private void CastSpline(Vector3 direction)
@@ -305,9 +428,11 @@ namespace SplineMe.Editor
 					CurrentSpline.UpdatePoint(i + 1, newPointsPositions[i + 1], false, false);
 				}
 			}
+
+			wasSplineModified = true;
 		}
 
-		internal void FactorCurve()
+		private void FactorCurve()
 		{
 			Undo.RecordObject(CurrentSpline, "Factor Curve");
 			CurrentSpline.FactorSpline();
@@ -315,11 +440,13 @@ namespace SplineMe.Editor
 			{
 				currentEditor.SelectIndex(SelectedPointIndex * 2);
 			}
+
+			wasSplineModified = true;
 		}
 
-		internal void SimplifySpline()
+		private void SimplifySpline()
 		{
-			if (!CanBeSimplified)
+			if (!CanSplineBeSimplified)
 			{
 				return;
 			}
@@ -330,9 +457,11 @@ namespace SplineMe.Editor
 			{
 				currentEditor.SelectIndex(SelectedPointIndex / 2);
 			}
+
+			wasSplineModified = true;
 		}
 
-		internal bool TryCastMousePoint(out Vector3 castedPoint)
+		private bool TryCastMousePoint(out Vector3 castedPoint)
 		{
 			var mousePosition = Event.current.mousePosition;
 			var ray = HandleUtility.GUIPointToWorldRay(mousePosition);

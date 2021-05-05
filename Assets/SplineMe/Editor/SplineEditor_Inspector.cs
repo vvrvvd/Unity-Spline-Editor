@@ -1,11 +1,11 @@
 using UnityEditor;
 using UnityEngine;
-using static SplineMe.BezierSpline;
+using static SplineEditor.BezierSpline;
 
-namespace SplineMe.Editor
+namespace SplineEditor.Editor
 {
-    public partial class BezierSplineEditor : UnityEditor.Editor
-    {
+	public partial class SplineEditor : UnityEditor.Editor
+	{
 
 		#region Inspector GUI
 
@@ -16,7 +16,7 @@ namespace SplineMe.Editor
 			GUI.enabled = false;
 			EditorGUILayout.FloatField("Length", CurrentSpline.Length);
 
-			GUI.enabled = HasMoreThanOneCurve;
+			GUI.enabled = CanSplineBeLooped;
 			EditorGUI.BeginChangeCheck();
 			bool loop = EditorGUILayout.Toggle("Loop", CurrentSpline.IsLoop);
 			if (EditorGUI.EndChangeCheck())

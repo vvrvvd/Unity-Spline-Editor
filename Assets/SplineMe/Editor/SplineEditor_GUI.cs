@@ -1,9 +1,9 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace SplineMe.Editor
+namespace SplineEditor.Editor
 {
-	public partial class BezierSplineEditor : UnityEditor.Editor
+	public partial class SplineEditor : UnityEditor.Editor
 	{
 
 		#region Const Fields

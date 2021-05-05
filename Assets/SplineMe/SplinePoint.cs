@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace SplineMe
+namespace SplineEditor
 {
 
 	[Serializable]

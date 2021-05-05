@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace SplineMe
+namespace SplineEditor
 {
 
 	public static class Vector3Utils

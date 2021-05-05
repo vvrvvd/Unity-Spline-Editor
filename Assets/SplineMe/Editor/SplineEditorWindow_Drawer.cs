@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace SplineMe.Editor
+namespace SplineEditor.Editor
 {
 
 	public partial class SplineEditorWindow : EditorWindow
@@ -27,13 +27,12 @@ namespace SplineMe.Editor
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            GUI.enabled = isSplineEditorEnabled && !BezierSplineEditor.CurrentSpline.IsLoop;
+            GUI.enabled = isSplineEditorEnabled && !SplineEditor.CurrentSpline.IsLoop;
             var addCurveButtonContent = new GUIContent(useText ? DrawCurveButtonTitle : string.Empty, useImages ? editorSettings.drawerToolIcon : null, useText ? DrawCurveButtonTooltip : DrawCurveButtonTitle);
-            var toggleState = isSplineEditorEnabled ? BezierSplineEditor.CurrentEditor.isCurveDrawerMode : false;
-            //TODO: Add event
+            var toggleState = isSplineEditorEnabled ? SplineEditor.CurrentEditor.isCurveDrawerMode : false;
             if (GUILayout.Toggle(toggleState, addCurveButtonContent, editorSettings.guiSkin.FindStyle("DrawerButton"), ButtonWidth, ButtonHeight))
             {
-				BezierSplineEditor.ToggleDrawSplineModeShortcut();
+				SplineEditor.ToggleDrawSplineMode();
 				repaintScene = true;
             }
 
@@ -44,27 +43,27 @@ namespace SplineMe.Editor
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            BezierSplineEditor.drawCurveSmoothAcuteAngles = EditorGUILayout.Toggle(DrawCurveSmoothAnglesLabel, BezierSplineEditor.drawCurveSmoothAcuteAngles);
+            SplineEditor.DrawCurveSmoothAcuteAngles = EditorGUILayout.Toggle(DrawCurveSmoothAnglesLabel, SplineEditor.DrawCurveSmoothAcuteAngles);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			BezierSplineEditor.drawCurveSegmentLength = EditorGUILayout.FloatField(DrawCurveSegmentLengthLabel, BezierSplineEditor.drawCurveSegmentLength);
+			SplineEditor.DrawCurveSegmentLength = EditorGUILayout.FloatField(DrawCurveSegmentLengthLabel, SplineEditor.DrawCurveSegmentLength);
             GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             GUILayout.Label(DrawCurveFirstHookLabel);
-            BezierSplineEditor.drawCurveFirstPointHook = EditorGUILayout.Slider(BezierSplineEditor.drawCurveFirstPointHook, 0.001f, BezierSplineEditor.drawCurveSecondPointHook, CustomSliderWidth);
+            SplineEditor.DrawCurveFirstPointHook = EditorGUILayout.Slider(SplineEditor.DrawCurveFirstPointHook, 0.001f, SplineEditor.DrawCurveSecondPointHook, CustomSliderWidth);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             GUILayout.Label(DrawCurveSecondHookLabel);
-            BezierSplineEditor.drawCurveSecondPointHook = EditorGUILayout.Slider(BezierSplineEditor.drawCurveSecondPointHook, BezierSplineEditor.drawCurveFirstPointHook, 0.999f, CustomSliderWidth);
+            SplineEditor.DrawCurveSecondPointHook = EditorGUILayout.Slider(SplineEditor.DrawCurveSecondPointHook, SplineEditor.DrawCurveFirstPointHook, 0.999f, CustomSliderWidth);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
