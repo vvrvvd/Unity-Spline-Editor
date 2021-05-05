@@ -6,32 +6,21 @@ namespace SplineEditor.Editor
 
 	public partial class SplineEditorWindow : EditorWindow
 	{
-        private const string WindowTitle = "Spline Editor";
-        private const string HeaderTitle = "Spline Editor";
 
         private static SplineEditorSettings editorSettings = default;
-
-        private GUILayoutOption ButtonWidth { get; } = GUILayout.Width(110);
-        private GUILayoutOption ButtonHeight { get; } = GUILayout.Height(50);
 
         private bool repaintScene = false;
         private bool isSplineEditorEnabled = false;
         private bool isCurveEditorEnabled = false;
 
-        private GUILayoutOption CustomSliderWidth { get; } = GUILayout.Width(175);
-
         private int buttonsLayoutIndex = 2;
-        private GUIContent[] layoutsButtonsContent = new GUIContent[3];
-
-        private bool useText = false;
-        private bool useImages = false;
-        private GUIStyle buttonStyle;
 
         [MenuItem("Window/Spline Editor")]
         static void Initialize()
         {
             SplineEditorWindow window = (SplineEditorWindow)EditorWindow.GetWindow(typeof(SplineEditorWindow), false, WindowTitle);
             window.LoadSettings();
+            window.InitializeStyles();
             window.Show();
         }
 
@@ -82,13 +71,14 @@ namespace SplineEditor.Editor
                 LoadSettings();
 			}
 
-            buttonStyle = editorSettings.guiSkin.FindStyle("button");
-
             EditorGUILayout.BeginVertical();
             GUILayout.Space(10);
 			DrawHeader();
             GUILayout.Space(10);
-            DrawLayoutsToolbar();
+			DrawLayoutsToolbar();
+
+            UpdateStyles();
+
             DrawBezierCurveOptions();
             GUILayout.Space(10);
             DrawSplineGroup();
@@ -118,14 +108,10 @@ namespace SplineEditor.Editor
 		{
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            layoutsButtonsContent[0] = new GUIContent("T", "Text Layout");
-            layoutsButtonsContent[1] = new GUIContent(editorSettings.imageLayoutIcon, "Image Layout");
-            layoutsButtonsContent[2] = new GUIContent("+T", editorSettings.imageLayoutIcon, "Text & Image Layout");
-            buttonsLayoutIndex = GUILayout.Toolbar(buttonsLayoutIndex, layoutsButtonsContent, GUILayout.Width(128), GUILayout.Height(18));
+
+            buttonsLayoutIndex = GUILayout.Toolbar(buttonsLayoutIndex, layoutsButtonsContent, ToolsHeaderToolbarWidth, ToolsHeaderToolbarHeight);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
-            useText = buttonsLayoutIndex == 0 || buttonsLayoutIndex == 2;
-            useImages = buttonsLayoutIndex == 1 || buttonsLayoutIndex == 2;
         }
 
         public static void DrawUILine(Color color, int thickness = 2, int padding = 10)

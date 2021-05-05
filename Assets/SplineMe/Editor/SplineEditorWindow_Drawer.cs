@@ -7,30 +7,20 @@ namespace SplineEditor.Editor
 	public partial class SplineEditorWindow : EditorWindow
 	{
 
-        private const string DrawerGroupTitle = "Drawer Tool";
-        private const string DrawCurveButtonTitle = "Drawer Tool";
-        private const string DrawCurveButtonTooltip = "Draw spline using mouse.";
-        private const string DrawCurveSegmentLengthLabel = "Segment length";
-        private const string DrawCurveSmoothAnglesLabel = "Smooth angles";
-        private const string DrawCurveFirstHookLabel = "1st point hook";
-        private const string DrawCurveSecondHookLabel = "2nd point hook";
-
         private void DrawDrawerToolOptions()
 		{
             var prevColor = GUI.color;
             var prevEnabled = GUI.enabled;
             GUI.enabled = isSplineEditorEnabled;
             GUILayout.Label(DrawerGroupTitle);
-            var groupStyle = new GUIStyle(EditorStyles.helpBox);
-            GUILayout.BeginVertical(groupStyle);
+            GUILayout.BeginVertical(groupsStyle);
             GUILayout.Space(10);
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
             GUI.enabled = isSplineEditorEnabled && !SplineEditor.CurrentSpline.IsLoop;
-            var addCurveButtonContent = new GUIContent(useText ? DrawCurveButtonTitle : string.Empty, useImages ? editorSettings.drawerToolIcon : null, useText ? DrawCurveButtonTooltip : DrawCurveButtonTitle);
             var toggleState = isSplineEditorEnabled ? SplineEditor.CurrentEditor.isCurveDrawerMode : false;
-            if (GUILayout.Toggle(toggleState, addCurveButtonContent, editorSettings.guiSkin.FindStyle("DrawerButton"), ButtonWidth, ButtonHeight))
+            if (GUILayout.Toggle(toggleState, DrawCurveButtonContent, editorSettings.guiSkin.FindStyle("DrawerButton"), ToolsButtonsWidth, ToolsButtonsHeight))
             {
 				SplineEditor.ToggleDrawSplineMode();
 				repaintScene = true;
@@ -43,27 +33,27 @@ namespace SplineEditor.Editor
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            SplineEditor.DrawCurveSmoothAcuteAngles = EditorGUILayout.Toggle(DrawCurveSmoothAnglesLabel, SplineEditor.DrawCurveSmoothAcuteAngles);
+            SplineEditor.DrawCurveSmoothAcuteAngles = EditorGUILayout.Toggle(DrawCurveSmoothAnglesContent, SplineEditor.DrawCurveSmoothAcuteAngles);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			SplineEditor.DrawCurveSegmentLength = EditorGUILayout.FloatField(DrawCurveSegmentLengthLabel, SplineEditor.DrawCurveSegmentLength);
+			SplineEditor.DrawCurveSegmentLength = EditorGUILayout.FloatField(DrawCurveSegmentLengthContent, SplineEditor.DrawCurveSegmentLength);
             GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            GUILayout.Label(DrawCurveFirstHookLabel);
-            SplineEditor.DrawCurveFirstPointHook = EditorGUILayout.Slider(SplineEditor.DrawCurveFirstPointHook, 0.001f, SplineEditor.DrawCurveSecondPointHook, CustomSliderWidth);
+            GUILayout.Label(DrawCurveFirstHookContent);
+            SplineEditor.DrawCurveFirstPointHook = EditorGUILayout.Slider(SplineEditor.DrawCurveFirstPointHook, 0.001f, SplineEditor.DrawCurveSecondPointHook, ToolsSliderWidth);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            GUILayout.Label(DrawCurveSecondHookLabel);
-            SplineEditor.DrawCurveSecondPointHook = EditorGUILayout.Slider(SplineEditor.DrawCurveSecondPointHook, SplineEditor.DrawCurveFirstPointHook, 0.999f, CustomSliderWidth);
+            GUILayout.Label(DrawCurveSecondHookContent);
+            SplineEditor.DrawCurveSecondPointHook = EditorGUILayout.Slider(SplineEditor.DrawCurveSecondPointHook, SplineEditor.DrawCurveFirstPointHook, 0.999f, ToolsSliderWidth);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
