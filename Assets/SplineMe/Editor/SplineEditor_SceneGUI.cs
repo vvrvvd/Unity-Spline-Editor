@@ -120,6 +120,7 @@ namespace SplineEditor.Editor
 			{
 				SelectIndex(index);
 				Repaint();
+				wasSplineModified = true;
 			}
 
 			if (SelectedPointIndex == index)
@@ -146,6 +147,7 @@ namespace SplineEditor.Editor
 					Undo.RecordObject(CurrentSpline, "Cast Line Point To Mouse");
 					point = castedPosition;
 					CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
+					wasSplineModified = true;
 				}
 			}
 			else
@@ -158,6 +160,7 @@ namespace SplineEditor.Editor
 					Undo.RecordObject(CurrentSpline, "Move Line Point");
 					isDraggingPoint = true;
 					CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
+					wasSplineModified = true;
 				}
 				else if ((isDraggingPoint && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
 				{
@@ -165,6 +168,7 @@ namespace SplineEditor.Editor
 					CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
 					isDraggingPoint = false;
 					castSelectedPointFlag = false;
+					wasSplineModified = true;
 				}
 			}
 		}
@@ -202,11 +206,13 @@ namespace SplineEditor.Editor
 				}
 
 				lastRotation = rotation;
+				wasSplineModified = true;
 			}
 			else if (isRotating && currentEvent.type == EventType.MouseUp)
 			{
 				lastRotation = handleRotation;
 				isRotating = false;
+				wasSplineModified = true;
 			}
 		}
 

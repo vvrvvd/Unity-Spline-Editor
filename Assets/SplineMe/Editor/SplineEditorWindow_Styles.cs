@@ -19,6 +19,9 @@ namespace SplineEditor.Editor
 		private static GUILayoutOption ToolsHeaderToolbarHeight { get; } = GUILayout.Height(18);
 		private static GUILayoutOption ToolsButtonsWidth { get; } = GUILayout.Width(110);
 		private static GUILayoutOption ToolsButtonsHeight { get; } = GUILayout.Height(50);
+		private static GUILayoutOption ToolsPointPositionWidth { get; } = GUILayout.Width(275);
+		private static GUILayoutOption ToolsPointPopupLabelWidth { get; } = GUILayout.Width(50);
+		private static GUILayoutOption ToolsPointPopupWidth { get; } = GUILayout.Width(80);
 		private static GUILayoutOption ToolsSliderWidth { get; } = GUILayout.Width(175);
 		private static GUILayoutOption ToolsCustomTransformFieldWidth { get; } = GUILayout.Width(175);
 
@@ -40,6 +43,17 @@ namespace SplineEditor.Editor
 				new GUIContent(LayoutImageTitle, LayoutImageTooltip),
 				new GUIContent(LayoutTextAndImageTitle, LayoutTextAndImageTooltip),
 		};
+
+		#endregion
+
+		#region Point Styles
+
+		private const string PointGroupTitle = "Point";
+		private const string PointPositionLabel = "Position";
+		private const string PointModeLabel = "Mode";
+
+		private static GUIContent PointPositionContent = new GUIContent(PointPositionLabel);
+		private static GUIContent PointModeContent = new GUIContent(PointModeLabel);
 
 		#endregion
 
@@ -73,12 +87,16 @@ namespace SplineEditor.Editor
 		private const string CastSplineToCameraButtonTitle = "Cast Spline To Camera View";
 		private const string CastSplineToCameraButtonTooltip = "Cast spline regarding to camera view.";
 		private const string CastTransformFieldLabel = "Cast Transform";
+		private const string LoopToggleFieldLabel = "Loop";
+		private const string LengthSplineFieldLabel = "Length:";
 
 		private static GUIContent FactorSplineButtonContent = new GUIContent();
 		private static GUIContent SimplifyButtonContent = new GUIContent();
 		private static GUIContent CastSplineContent = new GUIContent();
 		private static GUIContent CastSplineToCameraContent = new GUIContent();
 		private static GUIContent CastTransformFieldContent = new GUIContent(CastTransformFieldLabel);
+		private static GUIContent LoopToggleFieldContent = new GUIContent(LoopToggleFieldLabel);
+		private static GUIContent LengthSplineFieldContent = new GUIContent(LengthSplineFieldLabel);
 
 		#endregion
 

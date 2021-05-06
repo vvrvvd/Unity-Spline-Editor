@@ -9,54 +9,83 @@ namespace SplineEditor.Editor
 
 		private float splitCurveValue = 0.5f;
 
-        private void DrawBezierCurveOptions()
+        private bool isCurveSectionFolded = true;
+
+        private void DrawCurveOptions()
 		{
             var prevEnabled = GUI.enabled;
             var isGroupEnabled = isCurveEditorEnabled;
+
+            isCurveSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(isCurveSectionFolded, BezierGroupTitle);
             GUI.enabled = isGroupEnabled;
-            GUILayout.Label(BezierGroupTitle);
-            GUILayout.BeginVertical(groupsStyle);
-            GUILayout.Space(10);
+            if (isCurveSectionFolded)
+            {
+                GUILayout.BeginVertical(groupsStyle);
+                GUILayout.Space(10);
+
+                DrawAddAndRemoveCurveSection();
+                DrawSplitCurveSection();
+
+                GUILayout.Space(10);
+                GUILayout.EndVertical();
+            }
+
+            EditorGUILayout.EndFoldoutHeaderGroup();
+            GUI.enabled = prevEnabled;
+        }
+
+        private void DrawAddAndRemoveCurveSection()
+		{
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            GUI.enabled = isGroupEnabled && SplineEditor.CanNewCurveBeAdded;
+            DrawAddCurveButton();
+            DrawRemoveCurveButton();
+
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+        }
+
+        private void DrawAddCurveButton()
+		{
+
+            GUI.enabled &= SplineEditor.CanNewCurveBeAdded;
             if (GUILayout.Button(AddCurveButtonContent, buttonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
             {
-				SplineEditor.ScheduleAddCurve();
-				repaintScene = true;
+                SplineEditor.ScheduleAddCurve();
+                repaintScene = true;
             }
+        }
 
-            GUI.enabled = isGroupEnabled && SplineEditor.CanSelectedCurveBeRemoved;
+        private void DrawRemoveCurveButton()
+		{
+            GUI.enabled &= SplineEditor.CanSelectedCurveBeRemoved;
             if (GUILayout.Button(RemoveCurveButtonContent, buttonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
             {
-				SplineEditor.ScheduleRemoveSelectedCurve();
-				repaintScene = true;
+                SplineEditor.ScheduleRemoveSelectedCurve();
+                repaintScene = true;
             }
+        }
 
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
+        private void DrawSplitCurveSection()
+		{
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            GUI.enabled = isGroupEnabled && SplineEditor.IsAnyPointSelected;
+            GUI.enabled &= SplineEditor.IsAnyPointSelected;
             if (GUILayout.Button(SplitCurveButtonContent, buttonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
             {
-				SplineEditor.ScheduleSplitCurve(splitCurveValue);
-				repaintScene = true;
+                SplineEditor.ScheduleSplitCurve(splitCurveValue);
+                repaintScene = true;
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
             GUILayout.Label(SplitPointSliderContent);
-			splitCurveValue = EditorGUILayout.Slider(splitCurveValue, 0.001f, 0.999f, ToolsSliderWidth);
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-
-			GUILayout.Space(10);
-            GUILayout.EndVertical();
-            GUI.enabled = prevEnabled;
+            splitCurveValue = EditorGUILayout.Slider(splitCurveValue, 0.001f, 0.999f, ToolsSliderWidth);
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
         }
 
     }

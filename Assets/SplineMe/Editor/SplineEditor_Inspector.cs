@@ -16,21 +16,6 @@ namespace SplineEditor.Editor
 			GUI.enabled = false;
 			EditorGUILayout.FloatField("Length", CurrentSpline.Length);
 
-			GUI.enabled = CanSplineBeLooped;
-			EditorGUI.BeginChangeCheck();
-			bool loop = EditorGUILayout.Toggle("Loop", CurrentSpline.IsLoop);
-			if (EditorGUI.EndChangeCheck())
-			{
-				Undo.RecordObject(CurrentSpline, "Toggle Loop");
-				CurrentSpline.IsLoop = loop;
-
-				if (CurrentSpline.IsLoop)
-				{
-					ToggleDrawCurveMode(false);
-					EditorUtility.SetDirty(CurrentSpline);
-				}
-			}
-
 			GUI.enabled = prevEnabled;
 
 			if (SelectedPointIndex >= CurrentSpline.PointsCount)
@@ -56,6 +41,7 @@ namespace SplineEditor.Editor
 				Undo.RecordObject(CurrentSpline, "Move Point");
 				CurrentSpline.UpdatePoint(SelectedPointIndex, point);
 				EditorUtility.SetDirty(CurrentSpline);
+				wasSplineModified = true;
 			}
 
 			EditorGUI.BeginChangeCheck();
@@ -65,6 +51,8 @@ namespace SplineEditor.Editor
 				Undo.RecordObject(CurrentSpline, "Change Point Mode");
 				CurrentSpline.SetControlPointMode(SelectedPointIndex, mode);
 				EditorUtility.SetDirty(CurrentSpline);
+
+				wasSplineModified = true;
 			}
 		}
 

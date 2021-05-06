@@ -190,7 +190,7 @@ namespace SplineEditor.Editor
 		private static void UpdateSplineStates()
 		{
 			IsSplineLooped = CurrentSpline != null && CurrentSpline.IsLoop;
-			IsAnyPointSelected = SelectedPointIndex != -1 && SelectedPointIndex < CurrentSpline.PointsCount;
+			IsAnyPointSelected = CurrentSpline != null && SelectedPointIndex != -1 && SelectedPointIndex < CurrentSpline.PointsCount;
 			
 			CanSplineBeLooped = CurrentSpline != null && CurrentSpline.CurvesCount > 1;
 			CanNewCurveBeAdded = !IsSplineLooped;

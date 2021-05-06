@@ -79,10 +79,12 @@ namespace SplineEditor.Editor
 
             UpdateStyles();
 
-            DrawBezierCurveOptions();
-            GUILayout.Space(10);
+            DrawPointGroup();
+            GUILayout.Space(3);
+            DrawCurveOptions();
+            GUILayout.Space(3);
             DrawSplineGroup();
-            GUILayout.Space(10);
+            GUILayout.Space(3);
             DrawDrawerToolOptions();
 			EditorGUILayout.EndVertical();
             //Hack for getting hover mouse visuals before showing tooltip when using custom GUI.skin pt.2
