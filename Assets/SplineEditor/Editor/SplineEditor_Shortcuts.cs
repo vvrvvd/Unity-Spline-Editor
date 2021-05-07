@@ -12,7 +12,7 @@ namespace SplineEditor.Editor
 		[ShortcutAttribute("Spline Editor/Add Curve", KeyCode.Home, ShortcutModifiers.Action)]
 		private static void AddCurveShortcut()
 		{
-			ScheduleAddCurve();
+			ScheduleAddCurve(addCurveLength);
 		}
 
 		[ShortcutAttribute("Spline Editor/Split Curve", KeyCode.M, ShortcutModifiers.Action)]

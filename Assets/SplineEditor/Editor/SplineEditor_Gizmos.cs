@@ -15,6 +15,7 @@ namespace SplineEditor.Editor
 				return;
 			}
 
+			TryLoadEditorSettings();
 			DrawSpline(curve);
 		}
 

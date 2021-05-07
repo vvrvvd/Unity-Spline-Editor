@@ -56,7 +56,9 @@ namespace SplineEditor.Editor
 			var nextLoopState = GUILayout.Toggle(prevLoopState, string.Empty);
 			if (nextLoopState != prevLoopState)
 			{
+				Undo.RecordObject(SplineEditor.CurrentSpline, "Set Looped");
 				SplineEditor.CurrentSpline.IsLoop = nextLoopState;
+				EditorUtility.SetDirty(SplineEditor.CurrentSpline);
 				repaintScene = true;
 			}
 			GUILayout.FlexibleSpace();

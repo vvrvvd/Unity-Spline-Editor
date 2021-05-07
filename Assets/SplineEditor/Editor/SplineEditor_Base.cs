@@ -26,7 +26,11 @@ namespace SplineEditor.Editor
 				}
 
 				currentSpline = value;
-				OnSelectedSplineChanged?.Invoke();
+
+				if (!stopEventsOnInitialization)
+				{
+					OnSelectedSplineChanged?.Invoke();
+				}
 			}
 		}
 
@@ -59,7 +63,11 @@ namespace SplineEditor.Editor
 					newSelectedCurveIndex = CurrentSpline.IsLoop ? 0 : CurrentSpline.CurvesCount - 1;
 				}
 				SelectedCurveIndex = newSelectedCurveIndex;
-				OnSelectedPointChanged?.Invoke();
+
+				if(!stopEventsOnInitialization)
+				{
+					OnSelectedPointChanged?.Invoke();
+				}
 			}
 		}
 
@@ -168,12 +176,30 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		internal static bool DrawCurveSmoothAcuteAngles = false;
+		private static bool isDrawerMode;
+		internal static bool IsDrawerMode
+		{
+			get => isDrawerMode;
+			set
+			{
+				if (isDrawerMode == value)
+				{
+					return;
+				}
+
+				isDrawerMode = value;
+				wasSplineModified = true;
+			}
+		}
+
+		internal static bool DrawCurveSmoothAcuteAngles = true;
 		internal static float DrawCurveSegmentLength = 1f;
 		internal static float DrawCurveFirstPointHook = 0.33f;
 		internal static float DrawCurveSecondPointHook = 0.66f;
 
 		private static bool wasSplineModified = false;
+		private static bool stopEventsOnInitialization = false;
+		private static SplineEditorConfiguration editorSettings;
 
 		#endregion
 
@@ -196,22 +222,41 @@ namespace SplineEditor.Editor
 			CanNewCurveBeAdded = !IsSplineLooped;
 			CanSplineBeSimplified = CanSplineBeLooped && (!CurrentSpline.IsLoop || CurrentSpline.CurvesCount > 2);
 			CanSelectedCurveBeRemoved = IsAnyPointSelected && CanSplineBeLooped && (!CurrentSpline.IsLoop || CurrentSpline.CurvesCount > 2);
+			
+			if(CurrentEditor!=null && IsSplineLooped && IsDrawerMode)
+			{
+				CurrentEditor.ToggleDrawCurveMode(false);
+			}
 
-			if (wasSplineModified)
+			if (!stopEventsOnInitialization && wasSplineModified)
 			{
 				OnSplineModified?.Invoke();
 				wasSplineModified = false;
 			}
+
 		}
 
 		#endregion
 
 		#region Unity Callbacks
 
+		[RuntimeInitializeOnLoadMethod]
+		private static void TryLoadEditorSettings()
+		{
+			if (editorSettings != null)
+			{
+				return;
+			}
+			
+			editorSettings = Resources.Load<SplineEditorConfiguration>("SplineEditorSettings");
+		}
+
 		private void OnEnable()
 		{
-			currentEditor = this;
+			stopEventsOnInitialization = true;
+			CurrentEditor = this;
 			CurrentSpline = target as BezierSpline;
+			TryLoadEditorSettings();
 
 			InitializeGUI();
 			InitializeSceneGUI();
@@ -221,22 +266,24 @@ namespace SplineEditor.Editor
 
 		private void OnDisable()
 		{
-			if (currentEditor == null || currentEditor.target != target)
+			if (CurrentEditor == null || CurrentEditor.target != target)
 			{
 				return;
 			}
 
 			CurrentSpline = null;
-			currentEditor = null;
+			CurrentEditor = null;
 			ReleaseGUI();
 		}
 
 		private void OnSceneGUI()
 		{
-			if (currentEditor == null || currentEditor.target != target)
+			if (CurrentEditor == null || CurrentEditor.target != target)
 			{
 				return;
 			}
+
+			TryLoadEditorSettings();
 
 			currentEvent = Event.current;
 			handleTransform = CurrentSpline.transform;
@@ -245,6 +292,8 @@ namespace SplineEditor.Editor
 			if (currentEvent.type == EventType.ValidateCommand)
 			{
 				wasSplineModified = true;
+				var lastPoint = CurrentSpline.Points[CurrentSpline.PointsCount - 1];
+				curveDrawerPosition = lastPoint.position;
 			}
 
 			if (SelectedPointIndex >= CurrentSpline.PointsCount)
@@ -259,19 +308,28 @@ namespace SplineEditor.Editor
 			DrawSceneGUI();
 			DrawGUI();
 			UpdateSplineStates();
+
+			if(stopEventsOnInitialization)
+			{
+				OnSelectedSplineChanged?.Invoke();
+				OnSelectedPointChanged?.Invoke();
+				OnSplineModified?.Invoke();
+				stopEventsOnInitialization = false;
+			}
 		}
 
 		public override void OnInspectorGUI()
 		{
-			var prevEditor = currentEditor;
+			var prevEditor = CurrentEditor;
 			var prevSpline = CurrentSpline;
 
-			currentEditor = this;
+			CurrentEditor = this;
 			CurrentSpline = target as BezierSpline;
 
+			TryLoadEditorSettings();
 			DrawInspectorGUI();
 
-			currentEditor = prevEditor;
+			CurrentEditor = prevEditor;
 			CurrentSpline = prevSpline;
 		}
 
@@ -302,7 +360,7 @@ namespace SplineEditor.Editor
 			Repaint();
 		}
 
-		private void AddCurve()
+		private void AddCurve(float curveLength)
 		{
 			if(!CanNewCurveBeAdded)
 			{
@@ -313,18 +371,18 @@ namespace SplineEditor.Editor
 
 			if(SelectedCurveIndex == 0 && (currentSpline.CurvesCount != 1 || selectedPointIndex <= 1))
 			{
-				AddBeginningCurve();
+				AddBeginningCurve(curveLength);
 			}
 			else
 			{
-				AddEndingCurve();
+				AddEndingCurve(curveLength);
 			}
 		}
 
-		private void AddEndingCurve()
+		private void AddEndingCurve(float curveLength)
 		{
 			var pointsCount = CurrentSpline.PointsCount;
-			var deltaDir = (CurrentSpline.Points[pointsCount - 1].position - CurrentSpline.Points[pointsCount - 2].position).normalized * SplineEditor_Consts.CreateCurveSegmentSize / 3;
+			var deltaDir = (CurrentSpline.Points[pointsCount - 1].position - CurrentSpline.Points[pointsCount - 2].position).normalized * curveLength / 3;
 			var p1 = CurrentSpline.Points[pointsCount - 1].position + deltaDir;
 			var p2 = p1 + deltaDir;
 			var p3 = p2 + deltaDir;
@@ -335,9 +393,9 @@ namespace SplineEditor.Editor
 			UpdateSelectedIndex(CurrentSpline.PointsCount - 1);
 		}
 
-		private void AddBeginningCurve()
+		private void AddBeginningCurve(float curveLength)
 		{
-			var deltaDir = (CurrentSpline.Points[1].position - CurrentSpline.Points[0].position).normalized * SplineEditor_Consts.CreateCurveSegmentSize / 3;
+			var deltaDir = (CurrentSpline.Points[1].position - CurrentSpline.Points[0].position).normalized * curveLength / 3;
 			var p1 = CurrentSpline.Points[0].position - deltaDir;
 			var p2 = p1 - deltaDir;
 			var p3 = p2 - deltaDir;
@@ -361,15 +419,15 @@ namespace SplineEditor.Editor
 
 			if (wasLastPoint && !CurrentSpline.IsLoop)
 			{
-				currentEditor.SelectIndex(CurrentSpline.PointsCount - 4);
+				CurrentEditor.SelectIndex(CurrentSpline.PointsCount - 4);
 			}
 			else if (SelectedPointIndex != 0 && !(wasLastPoint && CurrentSpline.IsLoop))
 			{
-				currentEditor.SelectIndex(SelectedPointIndex + 3);
+				CurrentEditor.SelectIndex(SelectedPointIndex + 3);
 			}
 			else
 			{
-				currentEditor.SelectIndex(3);
+				CurrentEditor.SelectIndex(3);
 			}
 
 			wasSplineModified = true;
@@ -438,7 +496,7 @@ namespace SplineEditor.Editor
 			CurrentSpline.FactorSpline();
 			if (SelectedPointIndex != -1)
 			{
-				currentEditor.SelectIndex(SelectedPointIndex * 2);
+				CurrentEditor.SelectIndex(SelectedPointIndex * 2);
 			}
 
 			wasSplineModified = true;
@@ -455,7 +513,7 @@ namespace SplineEditor.Editor
 			CurrentSpline.SimplifySpline();
 			if (SelectedPointIndex != -1)
 			{
-				currentEditor.SelectIndex(SelectedPointIndex / 2);
+				CurrentEditor.SelectIndex(SelectedPointIndex / 2);
 			}
 
 			wasSplineModified = true;

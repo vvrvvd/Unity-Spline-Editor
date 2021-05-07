@@ -21,6 +21,7 @@ namespace SplineEditor.Editor
 		private static bool castSelectedPointShortcutFlag;
 		private static bool snapEndPointsFlag;
 
+		private static float addCurveLength = 1f;
 		private static float splitCurveValue = 0.5f;
 		private static Vector3 castSplineDirection;
 
@@ -28,9 +29,10 @@ namespace SplineEditor.Editor
 
 		#region Flags Logic
 
-		internal static void ScheduleAddCurve()
+		internal static void ScheduleAddCurve(float curveLength)
 		{
 			addCurveFlag = true;
+			addCurveLength = curveLength;
 		}
 
 		internal static void ScheduleRemoveSelectedCurve()
@@ -78,7 +80,7 @@ namespace SplineEditor.Editor
 
 		private static void ToggleSnapCurvePointMode()
 		{
-			if (currentEditor != null && CurrentSpline != null && snapEndPointsFlag && currentEditor.isSnapping)
+			if (CurrentEditor != null && CurrentSpline != null && snapEndPointsFlag && CurrentEditor.isSnapping)
 			{
 				Undo.RecordObject(CurrentSpline, "Snap Spline End Points");
 				CurrentSpline.IsLoop = true;
@@ -108,7 +110,7 @@ namespace SplineEditor.Editor
 		{
 			if (drawSplineModeFlag)
 			{
-				ToggleDrawCurveMode(!isCurveDrawerMode);
+				ToggleDrawCurveMode(!IsDrawerMode);
 				drawSplineModeFlag = false;
 			}
 
@@ -148,11 +150,11 @@ namespace SplineEditor.Editor
 				castSplineToCameraFlag = false;
 			}
 
-			if (!isCurveDrawerMode)
+			if (!IsDrawerMode)
 			{
 				if (addCurveFlag)
 				{
-					AddCurve();
+					AddCurve(addCurveLength);
 					addCurveFlag = false;
 				}
 

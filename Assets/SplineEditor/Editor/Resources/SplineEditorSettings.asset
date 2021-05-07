@@ -13,6 +13,25 @@ MonoBehaviour:
   m_Name: SplineEditorSettings
   m_EditorClassIdentifier: 
   guiSkin: {fileID: 11400000, guid: f8399d3ad1b6b9146a7395a5c9cfb8fc, type: 2}
+  ScalePointOnScreen: 1
+  MainPointSize: 0.04
+  TangentPointSize: 0.04
+  BeginAndEndPointsScale: 2
+  PointColor: {r: 1, g: 1, b: 1, a: 1}
+  FreeModeColor: {r: 0, g: 1, b: 0, a: 1}
+  AlignedModeColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  MirroredModeColor: {r: 0, g: 1, b: 1, a: 1}
+  AddCurveLength: 1
+  SelectedCurveColor: {r: 0, g: 0, b: 1, a: 1}
+  TangentLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  SplineWidth: 2
+  SplineColor: {r: 1, g: 0, b: 0, a: 1}
+  ScaleDrawerHandleOnScreen: 0
+  DrawerModeHandleSize: 0.2
+  DrawerModeHandleColor: {r: 0, g: 1, b: 0, a: 1}
+  DrawModePointColor: {r: 0, g: 0, b: 1, a: 1}
+  DrawerModeCurveColor: {r: 0, g: 0, b: 1, a: 1}
+  settingsIcon: {fileID: 2800000, guid: decd528ac6789664d986bbf3e2d3f438, type: 3}
   imageLayoutIcon: {fileID: 2800000, guid: 0d98d02c60a2dce49a563b3205966726, type: 3}
   addCurveIcon: {fileID: 2800000, guid: b533686a755bb3647a09723cff0d3f4c, type: 3}
   removeCurveIcon: {fileID: 2800000, guid: 69f1345bb6876c74c8b15986395cc2ed, type: 3}

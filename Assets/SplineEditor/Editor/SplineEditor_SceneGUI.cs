@@ -46,7 +46,7 @@ namespace SplineEditor.Editor
 
 			}
 
-			if (isCurveDrawerMode)
+			if (IsDrawerMode)
 			{
 				DrawCurveModeSceneGUI();
 			}
@@ -68,13 +68,13 @@ namespace SplineEditor.Editor
 				var p2 = DrawPoint(curveStartIndex + 2);
 				var p3 = handleTransform.TransformPoint(CurrentSpline.Points[curveStartIndex + 3].position);
 
-				if (!isCurveDrawerMode || i < CurrentSpline.CurvesCount - 1)
+				if (!IsDrawerMode || i < CurrentSpline.CurvesCount - 1)
 				{
 					p3 = DrawPoint(curveStartIndex + 3);
 				}
 
-				DrawLine(p0, p1, SplineEditor_Consts.TangentLineColor);
-				DrawLine(p3, p2, SplineEditor_Consts.TangentLineColor);
+				DrawLine(p0, p1, editorSettings.TangentLineColor);
+				DrawLine(p3, p2, editorSettings.TangentLineColor);
 			}
 		}
 
@@ -87,7 +87,9 @@ namespace SplineEditor.Editor
 		private Vector3 DrawPoint(int index)
 		{
 			var mode = CurrentSpline.GetControlPointMode(index);
-			var pointColor = index % 3 == 0 ? SplineEditor_Consts.CurvePointColor : SplineEditor_Consts.ModeColors[(int)mode];
+			var modeIndex = (int)mode;
+			var modeColor = modeIndex == 0 ? editorSettings.FreeModeColor : modeIndex == 1 ? editorSettings.AlignedModeColor : editorSettings.MirroredModeColor;
+			var pointColor = index % 3 == 0 ? editorSettings.PointColor : modeColor;
 
 			return DrawPoint(index, pointColor);
 		}
@@ -95,28 +97,26 @@ namespace SplineEditor.Editor
 		private Vector3 DrawPoint(int index, Color pointColor)
 		{
 			var point = handleTransform.TransformPoint(CurrentSpline.Points[index].position);
-			var size = HandleUtility.GetHandleSize(point);
+			var size = editorSettings.ScalePointOnScreen ? HandleUtility.GetHandleSize(point) : 1f;
 
-			if (index != 0 && index != CurrentSpline.PointsCount - 1)
+			if (index == 0 || index == CurrentSpline.PointsCount - 1)
 			{
-				size *= 0.5f;
-			}
-			else
-			{
+				size *= editorSettings.BeginAndEndPointsScale;
 				var nextEndPointIndex = index == 0 ? CurrentSpline.PointsCount - 1 : 0;
 				var nextEndPoint = handleTransform.TransformPoint(CurrentSpline.Points[nextEndPointIndex].position);
 				var pointsDistance = Vector3.Distance(point, nextEndPoint);
-				isSnapping = (SelectedPointIndex == 0 || SelectedPointIndex == CurrentSpline.PointsCount - 1) && snapEndPointsFlag && !CurrentSpline.IsLoop && pointsDistance <= size * SplineEditor_Consts.SnapSplineEndPointsMinDistance;
+				isSnapping = (SelectedPointIndex == 0 || SelectedPointIndex == CurrentSpline.PointsCount - 1) && snapEndPointsFlag && !CurrentSpline.IsLoop && pointsDistance <= size * editorSettings.SnapSplineEndPointsMinDistance;
 				if (isSnapping)
 				{
-					Handles.color = SplineEditor_Consts.SnapEndPointsLineColor;
+					Handles.color = editorSettings.SnapEndPointsLineColor;
 					Handles.DrawDottedLine(point, nextEndPoint, 5f);
 				}
 			}
 
 			Handles.color = pointColor;
+			var handleSize = index % 3 == 0 ? editorSettings.MainPointSize :  editorSettings.TangentPointSize;
 
-			if (Handles.Button(point, handleRotation, size * SplineEditor_Consts.HandlePointSize, size * SplineEditor_Consts.PickPointSize, Handles.DotHandleCap))
+			if (Handles.Button(point, handleRotation, size * handleSize, size * handleSize, Handles.DotHandleCap))
 			{
 				SelectIndex(index);
 				Repaint();
@@ -231,35 +231,35 @@ namespace SplineEditor.Editor
 				var p2 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 2].position);
 				var p3 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 3].position);
 
-				var splineColor = !snapEndPointsFlag && i == selectedSplineIndex ? SplineEditor_Consts.SelectedLineColor : SplineEditor_Consts.LineColor;
-				Handles.DrawBezier(p0, p3, p1, p2, splineColor, null, SplineEditor_Consts.LineWidth * 1.5f);
+				var splineColor = !snapEndPointsFlag && i == selectedSplineIndex ? editorSettings.SelectedCurveColor : editorSettings.SplineColor;
+				Handles.DrawBezier(p0, p3, p1, p2, splineColor, null, editorSettings.SplineWidth * 1.5f);
 			}
 		}
 
 		private static void DrawSplineDirections(BezierSpline spline)
 		{
 			var point = spline.GetPoint(1f);
-			Handles.DrawLine(point, point - spline.GetDirection(1f) * SplineEditor_Consts.DirectionScale);
+			Handles.DrawLine(point, point - spline.GetDirection(1f) * editorSettings.DirectionScale);
 
-			var curveSteps = SplineEditor_Consts.CurveStepsCount * spline.CurvesCount;
+			var curveSteps = editorSettings.CurveStepsCount * spline.CurvesCount;
 			for (int i = curveSteps - 1; i >= 0; i--)
 			{
 				point = spline.GetPoint(i / (float)curveSteps);
-				Handles.color = SplineEditor_Consts.DirectionLineColor;
-				Handles.DrawLine(point, point - spline.GetDirection(i / (float)curveSteps) * SplineEditor_Consts.DirectionScale);
+				Handles.color = editorSettings.DirectionLineColor;
+				Handles.DrawLine(point, point - spline.GetDirection(i / (float)curveSteps) * editorSettings.DirectionScale);
 			}
 		}
 
 		private static void DrawSplineSegments(BezierSpline spline)
 		{
 			var point = spline.GetPoint(1f);
-			Handles.color = SplineEditor_Consts.SegmentsColor;
-			var curveSteps = SplineEditor_Consts.CurveStepsCount * spline.CurvesCount;
+			Handles.color = editorSettings.SegmentsColor;
+			var curveSteps = editorSettings.CurveStepsCount * spline.CurvesCount;
 			for (int i = curveSteps - 1; i >= 0; i--)
 			{
 				var size = HandleUtility.GetHandleSize(point);
 				point = spline.GetPoint(i / (float)curveSteps);
-				Handles.Button(point, Quaternion.identity, size * SplineEditor_Consts.HandleSegmentSize, size * SplineEditor_Consts.HandleSegmentSize, Handles.DotHandleCap);
+				Handles.Button(point, Quaternion.identity, size * editorSettings.HandleSegmentSize, size * editorSettings.HandleSegmentSize, Handles.DotHandleCap);
 			}
 		}
 

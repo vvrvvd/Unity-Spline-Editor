@@ -7,8 +7,8 @@ namespace SplineEditor.Editor
 	public partial class SplineEditorWindow : EditorWindow
 	{
 
+		private bool isDrawerMode = false;
         private bool isDrawerSectionFolded = true;
-
 
         private void DrawDrawerToolOptions()
 		{
@@ -36,6 +36,32 @@ namespace SplineEditor.Editor
 			EditorGUILayout.EndFoldoutHeaderGroup();
             GUI.enabled = prevEnabled;
         }
+
+		private void DrawDrawerToolButton()
+		{
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+
+			GUI.enabled = isSplineEditorEnabled && !SplineEditor.CurrentSpline.IsLoop;
+			var toggleState = isSplineEditorEnabled && isDrawerMode;
+			if (GUILayout.Toggle(toggleState, DrawCurveButtonContent, drawerButtonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
+			{
+				SplineEditor.ToggleDrawSplineMode();
+				repaintScene = true;
+			}
+
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+		}
+
+		private static void DrawSmoothAnglesToggle()
+		{
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			SplineEditor.DrawCurveSmoothAcuteAngles = EditorGUILayout.Toggle(DrawCurveSmoothAnglesContent, SplineEditor.DrawCurveSmoothAcuteAngles);
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+		}
 
 		private static void DrawSecondPointHookSlider()
 		{
@@ -66,31 +92,6 @@ namespace SplineEditor.Editor
 			GUILayout.EndHorizontal();
 		}
 
-		private static void DrawSmoothAnglesToggle()
-		{
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			SplineEditor.DrawCurveSmoothAcuteAngles = EditorGUILayout.Toggle(DrawCurveSmoothAnglesContent, SplineEditor.DrawCurveSmoothAcuteAngles);
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-		}
-
-		private void DrawDrawerToolButton()
-		{
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-
-			GUI.enabled = isSplineEditorEnabled && !SplineEditor.CurrentSpline.IsLoop;
-			var toggleState = isSplineEditorEnabled ? SplineEditor.CurrentEditor.isCurveDrawerMode : false;
-			if (GUILayout.Toggle(toggleState, DrawCurveButtonContent, editorSettings.guiSkin.FindStyle("DrawerButton"), ToolsButtonsWidth, ToolsButtonsHeight))
-			{
-				SplineEditor.ToggleDrawSplineMode();
-				repaintScene = true;
-			}
-
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-		}
 	}
 
 }

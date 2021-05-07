@@ -68,7 +68,7 @@ namespace SplineEditor.Editor
 
 		private void DrawGUI()
 		{
-			if(currentEditor==null || CurrentSpline == null)
+			if(CurrentEditor==null || CurrentSpline == null)
 			{
 				return;
 			}

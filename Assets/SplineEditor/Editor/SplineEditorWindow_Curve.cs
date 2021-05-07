@@ -7,6 +7,7 @@ namespace SplineEditor.Editor
 	public partial class SplineEditorWindow : EditorWindow
 	{
 
+        private float addCurveLength = 1f;
 		private float splitCurveValue = 0.5f;
 
         private bool isCurveSectionFolded = true;
@@ -25,6 +26,7 @@ namespace SplineEditor.Editor
 
                 DrawAddAndRemoveCurveSection();
                 DrawSplitCurveSection();
+                DrawCurveParametersSection();
 
                 GUILayout.Space(10);
                 GUILayout.EndVertical();
@@ -52,7 +54,7 @@ namespace SplineEditor.Editor
             GUI.enabled &= SplineEditor.CanNewCurveBeAdded;
             if (GUILayout.Button(AddCurveButtonContent, buttonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
             {
-                SplineEditor.ScheduleAddCurve();
+                SplineEditor.ScheduleAddCurve(addCurveLength);
                 repaintScene = true;
             }
         }
@@ -79,7 +81,25 @@ namespace SplineEditor.Editor
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
+        }
 
+        private void DrawCurveParametersSection()
+		{
+			DrawAddCurveLengthField();
+			DrawSplitCurveSlider();
+		}
+
+		private void DrawAddCurveLengthField()
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            addCurveLength = EditorGUILayout.FloatField(AddCurveLengthFieldContent, addCurveLength);
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+        }
+
+        private void DrawSplitCurveSlider()
+        {
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             GUILayout.Label(SplitPointSliderContent);

@@ -9,7 +9,6 @@ namespace SplineEditor.Editor
 
 		#region Private Fields
 
-		internal bool isCurveDrawerMode;
 		private bool isDraggingNewCurve;
 		private bool firstControlPointSet;
 		private bool secondControlPointSet;
@@ -23,7 +22,7 @@ namespace SplineEditor.Editor
 
 		private void InitializeDrawCurveMode()
 		{
-			if (!isCurveDrawerMode)
+			if (!IsDrawerMode)
 			{
 				return;
 			}
@@ -38,12 +37,12 @@ namespace SplineEditor.Editor
 				return;
 			}
 
-			if (isCurveDrawerMode != state)
+			if (IsDrawerMode != state)
 			{
 				Undo.RecordObject(CurrentSpline, "Toggle Draw Curve Mode");
 			}
 
-			isCurveDrawerMode = state;
+			IsDrawerMode = state;
 
 			if (state)
 			{
@@ -76,15 +75,15 @@ namespace SplineEditor.Editor
 		{
 			var curveDrawerPointLocal = curveDrawerPosition;
 			var curveDrawerPointWorld = CurrentSpline.transform.TransformPoint(curveDrawerPointLocal);
-			var size = HandleUtility.GetHandleSize(curveDrawerPointWorld);
+			var size = editorSettings.ScaleDrawerHandleOnScreen ? HandleUtility.GetHandleSize(curveDrawerPointWorld) : 1f;
 
 			if (isDraggingNewCurve)
 			{
 				VisualizeDrawCurveModeCurve();
 			}
 
-			Handles.color = Color.green;
-			Handles.Button(curveDrawerPointWorld, handleRotation, size * SplineEditor_Consts.DrawCurveSphereSize, size * SplineEditor_Consts.DrawCurveSphereSize, Handles.SphereHandleCap);
+			Handles.color = editorSettings.DrawerModeHandleColor;
+			Handles.Button(curveDrawerPointWorld, handleRotation, size * editorSettings.DrawerModeHandleSize, size * editorSettings.DrawerModeHandleSize, Handles.SphereHandleCap);
 
 			if (castSelectedPointFlag)
 			{
@@ -128,7 +127,7 @@ namespace SplineEditor.Editor
 			var p0 = newCurvePoints[0];
 			var p3 = newCurvePoints[3];
 
-			if (Vector3.Distance(p0, p3) < DrawCurveSegmentLength * SplineEditor_Consts.DrawCurveMinLengthToVisualize)
+			if (Vector3.Distance(p0, p3) < DrawCurveSegmentLength * editorSettings.DrawCurveMinLengthToVisualize)
 			{
 				return;
 			}
@@ -140,24 +139,24 @@ namespace SplineEditor.Editor
 			p2 = handleTransform.TransformPoint(p2);
 			p3 = handleTransform.TransformPoint(p3);
 
-			Handles.DrawBezier(p0, p3, p1, p2, SplineEditor_Consts.LineColor, null, SplineEditor_Consts.LineWidth * 1.5f);
+			Handles.DrawBezier(p0, p3, p1, p2, editorSettings.DrawerModeCurveColor, null, editorSettings.SplineWidth * 1.5f);
 
 			if (showPointsHandles)
 			{
 				if (firstControlPointSet)
 				{
 					var f = handleTransform.TransformPoint(newCurvePoints[1]);
-					var size = HandleUtility.GetHandleSize(f);
-					Handles.color = SplineEditor_Consts.DrawCurvePointColor;
-					Handles.CubeHandleCap(0, f, Quaternion.identity, size * 0.1f, EventType.Repaint);
+					var size = editorSettings.ScaleDrawerHandleOnScreen ? HandleUtility.GetHandleSize(f) : 1f;
+					Handles.color = editorSettings.DrawModePointColor;
+					Handles.CubeHandleCap(0, f, Quaternion.identity, size * editorSettings.MainPointSize, EventType.Repaint);
 				}
 
 				if (secondControlPointSet)
 				{
 					var g = handleTransform.TransformPoint(newCurvePoints[2]);
-					var size = HandleUtility.GetHandleSize(g);
-					Handles.color = SplineEditor_Consts.DrawCurvePointColor;
-					Handles.CubeHandleCap(0, g, Quaternion.identity, size * 0.1f, EventType.Repaint);
+					var size = editorSettings.ScaleDrawerHandleOnScreen ? HandleUtility.GetHandleSize(g) : 1f;
+					Handles.color = editorSettings.DrawModePointColor;
+					Handles.CubeHandleCap(0, g, Quaternion.identity, size * editorSettings.MainPointSize, EventType.Repaint);
 				}
 
 			}

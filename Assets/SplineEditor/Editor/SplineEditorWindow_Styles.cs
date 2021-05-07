@@ -15,6 +15,8 @@ namespace SplineEditor.Editor
 
 		#region Tools Styles
 
+		private static GUILayoutOption ToolsSettingsButtonWidth { get; } = GUILayout.Width(30);
+		private static GUILayoutOption ToolsSettingsButtonHeight { get; } = GUILayout.Height(30);
 		private static GUILayoutOption ToolsHeaderToolbarWidth { get; } = GUILayout.Width(128);
 		private static GUILayoutOption ToolsHeaderToolbarHeight { get; } = GUILayout.Height(18);
 		private static GUILayoutOption ToolsButtonsWidth { get; } = GUILayout.Width(110);
@@ -30,12 +32,15 @@ namespace SplineEditor.Editor
 
 		private const string HeaderTitle = "Spline Editor";
 
+		private const string SettingsTooltip = "Editor Settings";
 		private const string LayoutTextTitle = "T";
 		private const string LayoutTextTooltip = "Text Layout";
 		private const string LayoutImageTitle = "";
 		private const string LayoutImageTooltip = "Image Layout";
 		private const string LayoutTextAndImageTitle = "+T";
 		private const string LayoutTextAndImageTooltip = "Text & Image Layout";
+
+		private GUIContent settingsButtonContent = new GUIContent(string.Empty, SettingsTooltip);
 
 		private GUIContent[] layoutsButtonsContent = new GUIContent[]
 		{
@@ -61,6 +66,7 @@ namespace SplineEditor.Editor
 
 		private const string BezierGroupTitle = "Curve";
 		private const string AddCurveButtonTitle = "Add Curve";
+		private const string AddCurveLengthTitle = "Add Curve Length";
 		private const string AddCurveButtonTooltip = "Add curve at the beginning or the end of the spline.";
 		private const string RemoveCurveButtonTitle = "Remove Curve";
 		private const string RemoveCurveButtonTooltip = "Remove selected curve.";
@@ -69,6 +75,7 @@ namespace SplineEditor.Editor
 		private const string SplitPointSliderLabel = "Split Point";
 
 		private static GUIContent AddCurveButtonContent = new GUIContent();
+		private static GUIContent AddCurveLengthFieldContent = new GUIContent(AddCurveLengthTitle);
 		private static GUIContent RemoveCurveButtonContent = new GUIContent();
 		private static GUIContent SplitCurveButtonContent = new GUIContent();
 		private static GUIContent SplitPointSliderContent = new GUIContent(SplitPointSliderLabel);
@@ -125,15 +132,25 @@ namespace SplineEditor.Editor
 
 		private GUIStyle buttonStyle;
 		private GUIStyle groupsStyle;
+		private GUIStyle headerLabelStyle;
+		private GUIStyle drawerButtonStyle;
+		private GUIStyle settingsButtonStyle;
 
-		private void InitializeStyles()
+		private void InitializeStyles(SplineEditorConfiguration editorSettings)
 		{
 			buttonStyle = editorSettings.guiSkin.FindStyle("button");
 			groupsStyle = new GUIStyle(EditorStyles.helpBox);
+			headerLabelStyle = editorSettings.guiSkin.FindStyle("Header");
+			drawerButtonStyle = editorSettings.guiSkin.FindStyle("DrawerButton");
+			settingsButtonStyle = editorSettings.guiSkin.FindStyle("SettingsButton");
 		}
 
-		private void UpdateStyles()
+		private void UpdateStyles(SplineEditorConfiguration editorSettings)
 		{
+			buttonStyle = editorSettings.guiSkin.FindStyle("button");
+			headerLabelStyle = editorSettings.guiSkin.FindStyle("Header");
+			drawerButtonStyle = editorSettings.guiSkin.FindStyle("DrawerButton");
+			settingsButtonStyle = editorSettings.guiSkin.FindStyle("SettingsButton");
 
 			useText = buttonsLayoutIndex == 0 || buttonsLayoutIndex == 2;
 			useImages = buttonsLayoutIndex == 1 || buttonsLayoutIndex == 2;
