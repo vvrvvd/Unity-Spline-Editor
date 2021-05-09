@@ -57,12 +57,6 @@ namespace SplineEditor.Editor
 			ToggleDrawSplineMode();
 		}
 
-		[ClutchShortcut("Spline Editor/Snap Spline End Points", KeyCode.S, ShortcutModifiers.None)]
-		private static void SnapSplineEndPointsShortcut()
-		{
-			ToggleSnapCurvePointMode();
-		}
-
 		[ClutchShortcut("Spline Editor/Cast Selected Point To Mouse Position", KeyCode.U, ShortcutModifiers.None)]
 		private static void TryCastSelectedPointShortcut()
 		{

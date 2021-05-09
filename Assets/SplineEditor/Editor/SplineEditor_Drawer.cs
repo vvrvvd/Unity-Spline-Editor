@@ -7,6 +7,12 @@ namespace SplineEditor.Editor
 	public partial class SplineEditor : UnityEditor.Editor
 	{
 
+		#region Const Fields
+
+		private const float DrawCurveMinLengthToVisualize = 0.1f;
+
+		#endregion
+
 		#region Private Fields
 
 		private bool isDraggingNewCurve;
@@ -127,7 +133,7 @@ namespace SplineEditor.Editor
 			var p0 = newCurvePoints[0];
 			var p3 = newCurvePoints[3];
 
-			if (Vector3.Distance(p0, p3) < DrawCurveSegmentLength * editorSettings.DrawCurveMinLengthToVisualize)
+			if (Vector3.Distance(p0, p3) < DrawCurveSegmentLength * DrawCurveMinLengthToVisualize)
 			{
 				return;
 			}

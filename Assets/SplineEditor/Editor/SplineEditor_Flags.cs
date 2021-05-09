@@ -19,7 +19,6 @@ namespace SplineEditor.Editor
 		private static bool drawSplineModeFlag;
 		private static bool castSelectedPointFlag;
 		private static bool castSelectedPointShortcutFlag;
-		private static bool snapEndPointsFlag;
 
 		private static float addCurveLength = 1f;
 		private static float splitCurveValue = 0.5f;
@@ -78,17 +77,6 @@ namespace SplineEditor.Editor
 			drawSplineModeFlag = !drawSplineModeFlag;
 		}
 
-		private static void ToggleSnapCurvePointMode()
-		{
-			if (CurrentEditor != null && CurrentSpline != null && snapEndPointsFlag && CurrentEditor.isSnapping)
-			{
-				Undo.RecordObject(CurrentSpline, "Snap Spline End Points");
-				CurrentSpline.IsLoop = true;
-			}
-
-			snapEndPointsFlag = !snapEndPointsFlag;
-		}
-
 		#endregion
 
 		#region Shortcuts Logic
@@ -103,7 +91,6 @@ namespace SplineEditor.Editor
 			castSplineFlag = false;
 			castSplineToCameraFlag = false;
 			castSelectedPointFlag = false;
-			snapEndPointsFlag = false;
 		}
 
 		private void InvokeScheduledActions()

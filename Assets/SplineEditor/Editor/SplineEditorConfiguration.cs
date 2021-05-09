@@ -49,16 +49,6 @@ namespace SplineEditor.Editor
 		[Space]
 		public Texture drawerToolIcon;
 
-		//Deprecated
-		public int CurveStepsCount => 10;
-		public float DirectionScale => 0.5f;
-		public float HandleSegmentSize => 0.03f;
-		public float DrawCurveMinLengthToVisualize => 0.1f;
-		public float SnapSplineEndPointsMinDistance => 1f;
-		public Color DirectionLineColor => Color.green;
-		public Color SegmentsColor => Color.blue;
-		public Color SnapEndPointsLineColor => Color.blue;
-
 	}
 
 }
