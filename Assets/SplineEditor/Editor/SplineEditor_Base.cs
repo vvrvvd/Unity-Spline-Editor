@@ -213,7 +213,7 @@ namespace SplineEditor.Editor
 
 		#region Static Methods
 
-		private static void UpdateSplineStates()
+		internal static void UpdateSplineStates()
 		{
 			IsSplineLooped = CurrentSpline != null && CurrentSpline.IsLoop;
 			IsAnyPointSelected = CurrentSpline != null && SelectedPointIndex != -1 && SelectedPointIndex < CurrentSpline.PointsCount;

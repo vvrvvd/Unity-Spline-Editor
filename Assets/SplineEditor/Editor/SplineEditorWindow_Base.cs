@@ -81,6 +81,8 @@ namespace SplineEditor.Editor
                 LoadSettings();
             }
 
+            SplineEditor.UpdateSplineStates();
+
             scrollPos = GUILayout.BeginScrollView(scrollPos, GUILayout.ExpandHeight(true));
             EditorGUILayout.BeginVertical();
             GUILayout.Space(10);
