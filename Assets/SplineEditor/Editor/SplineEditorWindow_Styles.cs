@@ -95,7 +95,11 @@ namespace SplineEditor.Editor
 		private const string CastSplineToCameraButtonTooltip = "Cast spline regarding to camera view.";
 		private const string CastTransformFieldLabel = "Cast Transform";
 		private const string LoopToggleFieldLabel = "Loop";
-		private const string LengthSplineFieldLabel = "Length:";
+		private const string LengthSplineFieldLabel = "Length";
+
+		private const string DrawPointsFieldLabel = "Draw Points";
+		private const string ShowTransformHandleFieldLabel = "Show Transform Handle";
+		private const string AlwaysDrawOnSceneFieldLabel = "Always Draw On Scene";
 
 		private static GUIContent FactorSplineButtonContent = new GUIContent();
 		private static GUIContent SimplifyButtonContent = new GUIContent();
@@ -104,6 +108,9 @@ namespace SplineEditor.Editor
 		private static GUIContent CastTransformFieldContent = new GUIContent(CastTransformFieldLabel);
 		private static GUIContent LoopToggleFieldContent = new GUIContent(LoopToggleFieldLabel);
 		private static GUIContent LengthSplineFieldContent = new GUIContent(LengthSplineFieldLabel);
+		private static GUIContent DrawPointsFieldContent = new GUIContent(DrawPointsFieldLabel);
+		private static GUIContent ShowTransformHandleFieldContent = new GUIContent(ShowTransformHandleFieldLabel);
+		private static GUIContent AlwaysDrawOnSceneFieldContent = new GUIContent(AlwaysDrawOnSceneFieldLabel);
 
 		#endregion
 

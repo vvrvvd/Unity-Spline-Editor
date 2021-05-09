@@ -3,7 +3,7 @@ using UnityEngine;
 namespace SplineEditor.Editor
 {
 
-	[CreateAssetMenu(fileName = "SplineEditorSettings", menuName = "Spline Editor/Settings", order = 1)]
+	//[CreateAssetMenu(fileName = "SplineEditorSettings", menuName = "Spline Editor/Settings", order = 1)]
 	public class SplineEditorConfiguration : ScriptableObject
 	{
 

@@ -33,17 +33,6 @@ namespace SplineEditor.Editor
 			if (Event.current.type == EventType.Repaint)
 			{
 				DrawSpline(CurrentSpline, SelectedCurveIndex);
-
-				if (showDirectionsLines)
-				{
-					DrawSplineDirections(CurrentSpline);
-				}
-
-				if (showSegmentsPoints)
-				{
-					DrawSplineSegments(CurrentSpline);
-				}
-
 			}
 
 			if (IsDrawerMode)
@@ -51,7 +40,7 @@ namespace SplineEditor.Editor
 				DrawCurveModeSceneGUI();
 			}
 
-			if (showPointsHandles)
+			if (CurrentSpline.drawPoints)
 			{
 				DrawPoints();
 			}
@@ -247,19 +236,6 @@ namespace SplineEditor.Editor
 				point = spline.GetPoint(i / (float)curveSteps);
 				Handles.color = editorSettings.DirectionLineColor;
 				Handles.DrawLine(point, point - spline.GetDirection(i / (float)curveSteps) * editorSettings.DirectionScale);
-			}
-		}
-
-		private static void DrawSplineSegments(BezierSpline spline)
-		{
-			var point = spline.GetPoint(1f);
-			Handles.color = editorSettings.SegmentsColor;
-			var curveSteps = editorSettings.CurveStepsCount * spline.CurvesCount;
-			for (int i = curveSteps - 1; i >= 0; i--)
-			{
-				var size = HandleUtility.GetHandleSize(point);
-				point = spline.GetPoint(i / (float)curveSteps);
-				Handles.Button(point, Quaternion.identity, size * editorSettings.HandleSegmentSize, size * editorSettings.HandleSegmentSize, Handles.DotHandleCap);
 			}
 		}
 

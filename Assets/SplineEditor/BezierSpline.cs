@@ -32,6 +32,19 @@ namespace SplineEditor
 
 		#endregion
 
+		#region Public Fields
+
+		[HideInInspector]
+		public bool drawPoints = true;
+		[HideInInspector]
+		public bool drawDirections = false;
+		[HideInInspector]
+		public bool showTransformHandle = true;
+		[HideInInspector]
+		public bool AlwaysDrawSplineOnScene = true;
+
+		#endregion
+
 		#region Properties
 
 		/// <summary>

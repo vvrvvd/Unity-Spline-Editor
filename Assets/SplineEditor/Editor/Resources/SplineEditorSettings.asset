@@ -21,12 +21,11 @@ MonoBehaviour:
   FreeModeColor: {r: 0, g: 1, b: 0, a: 1}
   AlignedModeColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   MirroredModeColor: {r: 0, g: 1, b: 1, a: 1}
-  AddCurveLength: 1
   SelectedCurveColor: {r: 0, g: 0, b: 1, a: 1}
   TangentLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   SplineWidth: 2
   SplineColor: {r: 1, g: 0, b: 0, a: 1}
-  ScaleDrawerHandleOnScreen: 0
+  ScaleDrawerHandleOnScreen: 1
   DrawerModeHandleSize: 0.2
   DrawerModeHandleColor: {r: 0, g: 1, b: 0, a: 1}
   DrawModePointColor: {r: 0, g: 0, b: 1, a: 1}

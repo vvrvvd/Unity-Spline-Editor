@@ -14,6 +14,7 @@ namespace SplineEditor.Editor
         private bool isCurveEditorEnabled = false;
 
         private int buttonsLayoutIndex = 2;
+        private Vector2 scrollPos = Vector2.zero;
 
         [MenuItem("Window/Spline Editor")]
         static void Initialize()
@@ -68,6 +69,7 @@ namespace SplineEditor.Editor
             }
         }
 
+
         private void OnGUI()
         {
             repaintScene = false;
@@ -79,6 +81,7 @@ namespace SplineEditor.Editor
                 LoadSettings();
             }
 
+            scrollPos = GUILayout.BeginScrollView(scrollPos, GUILayout.ExpandHeight(true));
             EditorGUILayout.BeginVertical();
             GUILayout.Space(10);
 			DrawHeader();
@@ -96,6 +99,8 @@ namespace SplineEditor.Editor
             GUILayout.Space(3);
             DrawDrawerToolOptions();
 			EditorGUILayout.EndVertical();
+            EditorGUILayout.EndScrollView();
+
             //Hack for getting hover mouse visuals before showing tooltip when using custom GUI.skin pt.2
             if (Event.current.type == EventType.MouseMove)
             {

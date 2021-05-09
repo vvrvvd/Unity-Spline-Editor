@@ -258,7 +258,7 @@ namespace SplineEditor.Editor
 			CurrentSpline = target as BezierSpline;
 			TryLoadEditorSettings();
 
-			InitializeGUI();
+			InitializeTools();
 			InitializeSceneGUI();
 			InitializeFlags();
 			InitializeDrawCurveMode();
@@ -273,7 +273,7 @@ namespace SplineEditor.Editor
 
 			CurrentSpline = null;
 			CurrentEditor = null;
-			ReleaseGUI();
+			ReleaseTools();
 		}
 
 		private void OnSceneGUI()
@@ -306,7 +306,7 @@ namespace SplineEditor.Editor
 
 			InvokeScheduledActions();
 			DrawSceneGUI();
-			DrawGUI();
+			UpdateTools();
 			UpdateSplineStates();
 
 			if(stopEventsOnInitialization)

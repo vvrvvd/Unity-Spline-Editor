@@ -141,7 +141,7 @@ namespace SplineEditor.Editor
 
 			Handles.DrawBezier(p0, p3, p1, p2, editorSettings.DrawerModeCurveColor, null, editorSettings.SplineWidth * 1.5f);
 
-			if (showPointsHandles)
+			if (CurrentSpline.drawPoints)
 			{
 				if (firstControlPointSet)
 				{
