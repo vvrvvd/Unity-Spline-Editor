@@ -7,14 +7,9 @@ namespace SplineEditor.Editor
 	public partial class SplineEditorWindow : EditorWindow
 	{
 
-		#region Window Styles
+		#region Static Fields
 
-		private const string WindowTitle = "Spline Editor";
-
-		#endregion
-
-		#region Tools Styles
-
+		private static string WindowTitle { get; } = "Spline Editor";
 		private static GUILayoutOption ToolsSettingsButtonWidth { get; } = GUILayout.Width(30);
 		private static GUILayoutOption ToolsSettingsButtonHeight { get; } = GUILayout.Height(30);
 		private static GUILayoutOption ToolsHeaderToolbarWidth { get; } = GUILayout.Width(128);
@@ -134,6 +129,8 @@ namespace SplineEditor.Editor
 
 		#endregion
 
+		#region Private Fields
+
 		private bool useText = false;
 		private bool useImages = false;
 
@@ -142,6 +139,10 @@ namespace SplineEditor.Editor
 		private GUIStyle headerLabelStyle;
 		private GUIStyle drawerButtonStyle;
 		private GUIStyle settingsButtonStyle;
+
+		#endregion
+
+		#region Private Methods
 
 		private void InitializeStyles(SplineEditorConfiguration editorSettings)
 		{
@@ -202,6 +203,8 @@ namespace SplineEditor.Editor
 			DrawCurveButtonContent.tooltip = useText ? DrawCurveButtonTooltip : DrawCurveButtonTitle;
 
 		}
+
+		#endregion
 
 	}
 }
