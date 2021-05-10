@@ -15,20 +15,20 @@ namespace SplineEditor.Editor
 			ScheduleAddCurve(addCurveLength);
 		}
 
-		[ShortcutAttribute("Spline Editor/Split Curve", KeyCode.M, ShortcutModifiers.Action)]
-		private static void SplitCurveShortcut()
-		{
-			ScheduleSplitCurve(splitCurveValue);
-		}
-
 		[ShortcutAttribute("Spline Editor/Remove Curve", KeyCode.End, ShortcutModifiers.Action)]
 		private static void RemoveSelectedCurveShortcut()
 		{
 			ScheduleRemoveSelectedCurve();
 		}
 
-		[ShortcutAttribute("Spline Editor/Cast Curve Points", KeyCode.U, ShortcutModifiers.Action)]
-		private static void CastCurvePointsShortcut()
+		[ShortcutAttribute("Spline Editor/Split Curve", KeyCode.M, ShortcutModifiers.Action)]
+		private static void SplitCurveShortcut()
+		{
+			ScheduleSplitCurve(splitCurveValue);
+		}
+
+		[ShortcutAttribute("Spline Editor/Cast Spline", KeyCode.U, ShortcutModifiers.Action)]
+		private static void CastSplineShortcut()
 		{
 			if(currentSpline==null)
 			{
@@ -39,19 +39,30 @@ namespace SplineEditor.Editor
 			ScheduleCastSpline(customDirection);
 		}
 
-		[ShortcutAttribute("Spline Editor/Factor Curve", KeyCode.G, ShortcutModifiers.Action)]
+		[ShortcutAttribute("Spline Editor/Cast Spline To Camera View", KeyCode.T, ShortcutModifiers.Action)]
+		private static void CastSplineToCameraShortcut()
+		{
+			if (currentSpline == null)
+			{
+				return;
+			}
+
+			ScheduleCastSplineToCameraView();
+		}
+
+		[ShortcutAttribute("Spline Editor/Factor Spline", KeyCode.G, ShortcutModifiers.Action)]
 		private static void FactorSplineShortcut()
 		{
 			ScheduleFactorSpline();
 		}
 
-		[ShortcutAttribute("Spline Editor/Simplify Curve", KeyCode.H, ShortcutModifiers.Action)]
+		[ShortcutAttribute("Spline Editor/Simplify Spline", KeyCode.H, ShortcutModifiers.Action)]
 		private static void SimplifySplineShortcut()
 		{
 			ScheduleSimplifySpline();
 		}
 
-		[ShortcutAttribute("Spline Editor/Toggle Draw Spline Mode", KeyCode.Slash, ShortcutModifiers.Action)]
+		[ShortcutAttribute("Spline Editor/Toggle Drawer Tool", KeyCode.Slash, ShortcutModifiers.Action)]
 		private static void ToggleDrawSplineModeShortcut()
 		{
 			ToggleDrawSplineMode();
