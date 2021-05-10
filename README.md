@@ -1,7 +1,7 @@
 <img src="docs/images/image-banner.png" align="middle" width="3000"/>
 
 # Unity Spline Editor
-[![Unity 2020.0+](https://img.shields.io/badge/unity-2018.4%2B-blue.svg)](https://unity3d.com/get-unity/download) [![license badge](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Unity 2020.0+](https://img.shields.io/badge/unity-2020.0%2B-blue.svg)](https://unity3d.com/get-unity/download) [![license badge](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 ## Introduction
 **Unity Spline Editor** is an open-source tool for creating and managing quadratic bezier curves in Unity Editor. 
 ## Features
