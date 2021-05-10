@@ -28,7 +28,7 @@ Although the tool has been built and tested in Unity 2020.2 it should work in th
 Unity 2020.2 or newer. It should also work in the previous versions but I haven't tested it yet.
 
 ## Overview
- <img src="https://i.imgur.com/o3CVT8e.gif" width="600" height="432.75">
+ <img src="https://i.imgur.com/o3CVT8e.gif" width="640" height="461.6">
  
  ![gif](https://i.imgur.com/uVQE4iX.gif) 
 
