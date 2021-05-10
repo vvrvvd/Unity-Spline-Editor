@@ -44,8 +44,7 @@ Unity 2020.2 or newer. It should also work in the previous versions but I haven'
 
 ### Editing Curve <a name="editing-curve"></a>
 
-Editor window can be opened by going to `Window->Spline Editor` on the Unity toolbar.
-Spline can be edited by adding, removing, splitting, factoring or simplifying. Additionaly every control point has three modes that can influence a neighbour control point. When spline is looped then the first and the last points are treated as the same point so they share the same position and mode.
+Editor window can be opened by going to `Window->Spline Editor` on the Unity toolbar. Spline can be edited by adding, removing or splitting curves. Additionaly every control point has three modes that can influence a neighbour control point. When spline is looped the first and the last points are treated as the same point so they share the same position and mode although they are still two distinct points.
 
  <img src="https://i.imgur.com/o3CVT8e.gif">
  <img src="https://i.imgur.com/uVQE4iX.gif">
