@@ -29,19 +29,22 @@ Unity 2020.2 or newer. It should also work in the previous versions but I haven'
 
 ## Overview
 
- ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/readme/Gifs/CurveEditor.gif)
+ ![gif](https://i.imgur.com/o3CVT8e.gif)
  
- ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/readme/Gifs/SplineSceneConfig.gif) 
+ ![gif](https://i.imgur.com/uVQE4iX.gif) 
+
  
- ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/readme/Gifs/FactorSimplifySpline.gif) 
+ ![gif](https://i.imgur.com/AfDWVpm.gif) 
  
- ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/readme/Gifs/CastSpline.gif) 
+ ![gif](https://i.imgur.com/6DTlYlx.gif) 
  
- ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/readme/Gifs/CastPoints.gif) 
+ ![gif](https://i.imgur.com/cpnBNMR.gif) 
  
- ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/readme/Gifs/DrawSpline.gif) 
+ ![gif](https://i.imgur.com/aYKMNxq.gif) 
+  
+ ![gif](https://i.imgur.com/4jYvQq6.gif) 
  
- ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/readme/Gifs/ConfigureColors.gif) 
+ ![gif](https://i.imgur.com/GZn0Hin.gif) 
  
  ## License
  
