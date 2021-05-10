@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 369c6a24507d66f4e8dd3585a43e11a0, type: 3}
+  m_Name: SplineEditorSettings
+  m_EditorClassIdentifier: 
+  guiSkin: {fileID: 11400000, guid: f8399d3ad1b6b9146a7395a5c9cfb8fc, type: 2}
+  ScalePointOnScreen: 1
+  MainPointSize: 0.04
+  TangentPointSize: 0.04
+  BeginAndEndPointsScale: 2
+  PointColor: {r: 1, g: 1, b: 1, a: 1}
+  FreeModeColor: {r: 0, g: 1, b: 0, a: 1}
+  AlignedModeColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  MirroredModeColor: {r: 0, g: 1, b: 1, a: 1}
+  SelectedCurveColor: {r: 0, g: 0, b: 1, a: 1}
+  TangentLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  SplineWidth: 2
+  SplineColor: {r: 1, g: 0, b: 0, a: 1}
+  ScaleDrawerHandleOnScreen: 1
+  DrawerModeHandleSize: 0.2
+  DrawerModeHandleColor: {r: 0, g: 1, b: 0, a: 1}
+  DrawModePointColor: {r: 0, g: 0, b: 1, a: 1}
+  DrawerModeCurveColor: {r: 0, g: 0, b: 1, a: 1}
+  settingsIcon: {fileID: 2800000, guid: decd528ac6789664d986bbf3e2d3f438, type: 3}
+  imageLayoutIcon: {fileID: 2800000, guid: 0d98d02c60a2dce49a563b3205966726, type: 3}
+  addCurveIcon: {fileID: 2800000, guid: b533686a755bb3647a09723cff0d3f4c, type: 3}
+  removeCurveIcon: {fileID: 2800000, guid: 69f1345bb6876c74c8b15986395cc2ed, type: 3}
+  splitCurveIcon: {fileID: 2800000, guid: 87a9e12a238de4e4aaabc0908ef2f303, type: 3}
+  factorSplineIcon: {fileID: 2800000, guid: 63d46d7c06fbd0e4dafade535f08e7dd, type: 3}
+  simplifySplineIcon: {fileID: 2800000, guid: 132b1a15d2101ef46a0ed0d05edac179, type: 3}
+  castSplineIcon: {fileID: 2800000, guid: 4b03b212f73224240bcc58600352b89c, type: 3}
+  castToCameraSplineIcon: {fileID: 2800000, guid: 80c20be2f943fdb4aa52b2c90c605ab2, type: 3}
+  drawerToolIcon: {fileID: 2800000, guid: 852c57626ee14504c8177efd140dac25, type: 3}
