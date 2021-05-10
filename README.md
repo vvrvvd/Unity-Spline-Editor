@@ -60,7 +60,7 @@ Splines can be casted to custom transform, self (when custom transform is set to
 
 ### Drawer Tool <a name="drawer-tool"></a>
 
-Drawer tool let you freely draw spline in the scene view. Use additional parameters like smoothing acute angles or segment length to adjust the tool.
+Drawer tool let you freely draw spline in the scene view. Use additional parameters like smoothing acute angles or segment length to adjust the tool to your needs.
 
  <img src="https://i.imgur.com/4jYvQq6.gif">
 
