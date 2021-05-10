@@ -1,7 +1,7 @@
 # Unity Spline Editor
 [![license badge](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 ## Introduction
-Unity Package for creating and managing Bezier splines.
+**Unity Spline Editor** is an open-source tool for creating and managing bezier splines in Unity Editor. 
 ## System Requirements
 Unity 2020.x or newer
 ## Examples
