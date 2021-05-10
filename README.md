@@ -29,7 +29,7 @@ Unity 2020.2 or newer. It should also work in the previous versions but I haven'
 
 ## Overview
 
- ![gif](https://i.imgur.com/o3CVT8e.gif)
+ ![gif](https://i.imgur.com/o3CVT8e.gif){:height="50%" width="50%"}
  
  ![gif](https://i.imgur.com/uVQE4iX.gif) 
 
