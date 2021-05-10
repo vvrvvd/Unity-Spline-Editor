@@ -7,7 +7,7 @@
 - Creating and managing bezier splines on Scene View
 - Three modes for control points: Free, Aligned and Mirrored
 - Separate window for the tool
-- Splitting curve by a split point value
+- Splitting curves by split point value
 - Quick factoring and simplifying splines
 - Casting splines to either self, custom transform or camera using Physics Raycast
 - Casting control points to current mouse position using Physics Raycast
