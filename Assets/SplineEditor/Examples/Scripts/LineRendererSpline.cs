@@ -38,6 +38,11 @@ namespace SplineEditor
 				lineRenderer = GetComponent<LineRenderer>();
 			}
 
+			if(spline==null || lineRenderer == null)
+			{
+				return;
+			}
+
 			lineRenderer.positionCount = segmentsCount+1;
 
 			for(var i=0; i<=segmentsCount; i++)
@@ -46,6 +51,12 @@ namespace SplineEditor
 				t = segmentsCount == 0 ? 0 : t;
 				var position = spline.GetPoint(t);
 				lineRenderer.SetPosition(i, position);
+			}
+
+			if (spline.IsLoop)
+			{
+				lineRenderer.positionCount += 1;
+				lineRenderer.SetPosition(segmentsCount+1, spline.GetPoint(0));
 			}
 
 		}

@@ -83,6 +83,9 @@ namespace SplineEditor.Editor
 
             SplineEditor.UpdateSplineStates();
 
+            isCurveEditorEnabled &= SplineEditor.CurrentSpline != null;
+            isSplineEditorEnabled &= SplineEditor.CurrentSpline != null;
+
             scrollPos = GUILayout.BeginScrollView(scrollPos, GUILayout.ExpandHeight(true));
             EditorGUILayout.BeginVertical();
             GUILayout.Space(10);
