@@ -28,11 +28,16 @@ Although the tool has been built and tested in Unity 2020.2 it should work in th
 Unity 2020.2 or newer. It should also work in the previous versions but I haven't tested it yet.
 
 ## Overview
+
+### Editing Curve
+
  <img src="https://i.imgur.com/o3CVT8e.gif">
  
  <img src="https://i.imgur.com/uVQE4iX.gif">
  
  <img src="https://i.imgur.com/AfDWVpm.gif">
+
+### Casting Spline
 
  <img src="https://i.imgur.com/6DTlYlx.gif">
 
@@ -40,7 +45,11 @@ Unity 2020.2 or newer. It should also work in the previous versions but I haven'
 
  <img src="https://i.imgur.com/aYKMNxq.gif">
 
+### Drawer Tool
+
  <img src="https://i.imgur.com/4jYvQq6.gif">
+
+### Settings
 
  <img src="https://i.imgur.com/GZn0Hin.gif">
  
