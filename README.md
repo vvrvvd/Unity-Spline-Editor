@@ -9,14 +9,14 @@ Although the tool has been built and tested in Unity 2020.2 it should work in th
 
 ## Features
 
-- Creating and managing bezier splines on Scene View
+- Creating and managing quadratic bezier splines in Scene View
 - Three modes for control points: Free, Aligned and Mirrored
 - Separate window for the tool
 - Splitting curves by split point value
 - Quick factoring and simplifying splines
 - Casting splines to either self, custom transform or camera using Physics Raycast
 - Casting control points to current mouse position using Physics Raycast
-- Drawer tool for drawing splines on Scene View
+- Drawer tool for drawing splines in Scene View
 - Three buttons layouts types: Image, Text and Image & Text
 - Adjustable editor settings (colors, sizes etc.)
 - Adjustable shortcuts through Unity Shortcuts manager
