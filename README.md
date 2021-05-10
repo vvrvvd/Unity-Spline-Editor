@@ -29,12 +29,19 @@ Unity 2020.2 or newer. It should also work in the previous versions but I haven'
 
 ## Overview
 
- ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/main/Gifs/BaseSpline.gif)
- ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/main/Gifs/DrawCurve.gif) 
- ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/main/Gifs/FactorSpline.gif) 
- ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/main/Gifs/LineRenderer.gif) 
- ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/main/Gifs/CastingCurve.gif) 
- ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/main/Gifs/CastingPointsWithMouse.gif) 
+ ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/main/Gifs/CurveEditor.gif)
+ 
+ ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/main/Gifs/SplineSceneConfig.gif) 
+ 
+ ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/main/Gifs/FactorSimplifySpline.gif) 
+ 
+ ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/main/Gifs/CastSpline.gif) 
+ 
+ ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/main/Gifs/CastPoints.gif) 
+ 
+ ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/main/Gifs/DrawSpline.gif) 
+ 
+ ![Demo CountPages alpha](https://github.com/vvrvvd/Spline-Me/blob/main/Gifs/ConfigureColors.gif) 
  
  ## License
  
