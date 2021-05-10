@@ -44,11 +44,17 @@ Unity 2020.2 or newer. It should also work in the previous versions but I haven'
 
 ### Editing Curve <a name="editing-curve"></a>
 
+Editor window can be opened by going to `Window->Spline Editor` on the Unity toolbar.
+
+Spline can be edited by adding, removing, splitting, factoring or simplifying. Additionaly every control point has three modes that can influence a neighbour control point.
+
  <img src="https://i.imgur.com/o3CVT8e.gif">
  <img src="https://i.imgur.com/uVQE4iX.gif">
  <img src="https://i.imgur.com/AfDWVpm.gif">
 
 ### Casting Spline <a name="casting-spline"></a>
+
+Spline can be casted to custom transform, self (when custom transform is set to null) or to current scene camera view. Casting is implemented with Physics Raycast so it works only with colliders. 
 
  <img src="https://i.imgur.com/6DTlYlx.gif">
  <img src="https://i.imgur.com/cpnBNMR.gif">
@@ -56,9 +62,13 @@ Unity 2020.2 or newer. It should also work in the previous versions but I haven'
 
 ### Drawer Tool <a name="drawer-tool"></a>
 
+Drawer tool let you freely draw spline in the scene view. Use additional parameters like smoothing acute angles or segment length to adjust the tool.
+
  <img src="https://i.imgur.com/4jYvQq6.gif">
 
 ### Settings <a name="settings"></a>
+
+Settings can be accessed by going to `Edit->Project Settings->Spline Editor` on the Unity toolbar or by clicking on the gear icon in the right corner of Spline Editor window.
 
  <img src="https://i.imgur.com/GZn0Hin.gif">
  
