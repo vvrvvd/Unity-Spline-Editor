@@ -205,7 +205,7 @@ namespace SplineEditor.Editor
 				var p2 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 2].position);
 				var p3 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 3].position);
 
-				var splineColor = i == selectedSplineIndex ? editorSettings.SelectedCurveColor : editorSettings.SplineColor;
+				var splineColor = (i == selectedSplineIndex && currentSpline.drawPoints) ? editorSettings.SelectedCurveColor : editorSettings.SplineColor;
 				Handles.DrawBezier(p0, p3, p1, p2, splineColor, null, editorSettings.SplineWidth * 1.5f);
 			}
 		}

@@ -50,27 +50,32 @@ namespace SplineEditor.Editor
 
         private void DrawAddCurveButton()
 		{
-
+            var prevEnabled = GUI.enabled;
             GUI.enabled &= SplineEditor.CanNewCurveBeAdded;
             if (GUILayout.Button(AddCurveButtonContent, buttonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
             {
                 SplineEditor.ScheduleAddCurve(addCurveLength);
                 repaintScene = true;
             }
+
+            GUI.enabled = prevEnabled;
         }
 
         private void DrawRemoveCurveButton()
 		{
+            var prevEnabled = GUI.enabled;
             GUI.enabled &= SplineEditor.CanSelectedCurveBeRemoved;
             if (GUILayout.Button(RemoveCurveButtonContent, buttonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
             {
                 SplineEditor.ScheduleRemoveSelectedCurve();
                 repaintScene = true;
             }
+            GUI.enabled = prevEnabled;
         }
 
         private void DrawSplitCurveSection()
 		{
+            var prevEnabled = GUI.enabled;
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             GUI.enabled &= SplineEditor.IsAnyPointSelected;
@@ -81,6 +86,7 @@ namespace SplineEditor.Editor
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
+            GUI.enabled = prevEnabled;
         }
 
         private void DrawCurveParametersSection()

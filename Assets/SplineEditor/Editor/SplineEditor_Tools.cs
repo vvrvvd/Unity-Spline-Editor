@@ -52,6 +52,9 @@ namespace SplineEditor.Editor
 			else if (!CurrentSpline.showTransformHandle && Tools.current != Tool.None)
 			{
 				HideTools();
+			} else if(CurrentSpline.showTransformHandle && Tools.current != savedTool)
+			{
+				savedTool = Tools.current;
 			}
 
 		}
