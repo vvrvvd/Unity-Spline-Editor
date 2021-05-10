@@ -1,6 +1,19 @@
 # Unity Spline Editor
 [![Unity 2020.2+](https://img.shields.io/badge/unity-2020.2%2B-blue.svg)](https://unity3d.com/get-unity/download) [![license badge](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-## Introduction
+
+## Table Of Contents
+
+- [Introduction](#introduction)
+- [Features](#features)
+- [System Requirements](#system-requirements)
+- [Overview](#overview)
+	- [Editing Curve](#editing-curve)
+	- [Casting Spline](#casting-spline)
+	- [Drawer Tool](#drawer-tool)
+	- [Settings](#settings)
+- [License](#license)
+
+## Introduction <a name="introduction"></a>
 
 **Unity Spline Editor** is an open-source tool for creating and managing quadratic bezier curves in Unity Editor. 
 
@@ -8,7 +21,7 @@ The tool has been written to bring editting splines through a separate tool wind
 
 Although the tool has been built and tested in Unity 2020.2 it should work in the previous versions as well.
 
-## Features
+## Features <a name="features"></a>
 
 - Separate tools window for Spline Editor
 - Creating and managing quadratic bezier splines in Scene View
@@ -23,32 +36,32 @@ Although the tool has been built and tested in Unity 2020.2 it should work in th
 - Adjustable shortcuts through Unity Shortcuts manager
 - Example scripts showing how the tool may be used along with Line Renderer
 
-## System Requirements
+## System Requirements <a name="system-requirements"></a>
 
 Unity 2020.2 or newer. It should also work in the previous versions but I haven't tested it yet.
 
-## Overview
+## Overview <a name="overview"></a>
 
-### Editing Curve
+### Editing Curve <a name="editing-curve"></a>
 
  <img src="https://i.imgur.com/o3CVT8e.gif">
  <img src="https://i.imgur.com/uVQE4iX.gif">
  <img src="https://i.imgur.com/AfDWVpm.gif">
 
-### Casting Spline
+### Casting Spline <a name="casting-spline"></a>
 
  <img src="https://i.imgur.com/6DTlYlx.gif">
  <img src="https://i.imgur.com/cpnBNMR.gif">
  <img src="https://i.imgur.com/aYKMNxq.gif">
 
-### Drawer Tool
+### Drawer Tool <a name="drawer-tool"></a>
 
  <img src="https://i.imgur.com/4jYvQq6.gif">
 
-### Settings
+### Settings <a name="settings"></a>
 
  <img src="https://i.imgur.com/GZn0Hin.gif">
  
- ## License
+ ## License <a name="license"></a>
  
 [MIT](LICENSE)
