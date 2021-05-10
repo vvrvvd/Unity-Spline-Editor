@@ -3,7 +3,7 @@
 ## Introduction
 **Unity Spline Editor** is an open-source tool for creating and managing quadratic bezier curves in Unity Editor. 
 
-The tool has been written to bring editting splines through a separate tool window in Unity. The tool let you do the basic operations like adding, removing or splitting the curve but also provides you with options to factor, simplify, draw or cast the spline to camera view. You can also adjust how the spline is displayed in the editor through settings window. 
+The tool has been written to bring editting splines through a separate tool window in Unity. The tool let you do the basic operations like **adding**, **removing** or **splitting** the curve but also provides you with options to **factor**, **simplify**, **draw** or **cast the spline to camera view**. You can also adjust how the spline is displayed in the editor through settings window. 
 
 Although the tool has been built and tested in Unity 2020.2 it should work in the previous versions as well.
 
