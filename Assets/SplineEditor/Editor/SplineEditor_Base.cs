@@ -8,6 +8,8 @@ namespace SplineEditor.Editor
 	public partial class SplineEditor : UnityEditor.Editor
 	{
 
+		public const string SplineEditorSettingsName = "SplineEditorSettings";
+
 		#region Static Fields
 
 		internal static event Action OnSplineModified;
@@ -248,7 +250,7 @@ namespace SplineEditor.Editor
 				return;
 			}
 			
-			editorSettings = Resources.Load<SplineEditorConfiguration>("SplineEditorSettings");
+			editorSettings = Resources.Load<SplineEditorConfiguration>(SplineEditorSettingsName);
 		}
 
 		private void OnEnable()

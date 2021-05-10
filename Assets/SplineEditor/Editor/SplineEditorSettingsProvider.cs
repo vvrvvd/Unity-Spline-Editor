@@ -1,40 +1,59 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
+using UnityEngine;
 
-class SplineEditorSettingsProvider : SettingsProvider
+namespace SplineEditor.Editor
 {
-    const string k_MyCustomSettingsPath = "Resources/SplineEditorWindowSettings.asset";
-    public SplineEditorSettingsProvider(string path, SettingsScope scope)
-        : base(path, scope) { }
 
-    public static bool IsSettingsAvailable()
+    public class SplineEditorSettingsProvider : SettingsProvider
     {
-        return File.Exists(k_MyCustomSettingsPath);
-    }
+        private static string SettingsPath => $"Resources/{SplineEditor.SplineEditorSettingsName}.asset";
+        private static UnityEditor.Editor cachedEditor;
 
-    [SettingsProvider]
-    public static SettingsProvider CreateMyCustomSettingsProvider()
-    {
-        // First parameter is the path in the Settings window.
-        // Second parameter is the scope of this setting: it only appears in the Project Settings window.
-        var provider = new SettingsProvider("Project/Spline Editor", SettingsScope.Project)
+        public SplineEditorSettingsProvider(string path, SettingsScope scope)
+            : base(path, scope) { }
+
+        public static bool IsSettingsAvailable()
         {
-            // By default the last token of the path is used as display name if no label is provided.
-            label = "Spline Editor",
-            guiHandler = (searchContext) =>
+            return File.Exists(SettingsPath);
+        }
+
+        [SettingsProvider]
+        public static SettingsProvider CreateMyCustomSettingsProvider()
+        {
+            var settingsScriptable = Resources.Load(SplineEditor.SplineEditorSettingsName);
+
+            if(cachedEditor==null)
+			{
+                UnityEditor.Editor.CreateCachedEditor(settingsScriptable, null, ref cachedEditor);
+			}
+
+            var provider = new SettingsProvider("Project/Spline Editor", SettingsScope.Project)
             {
-                //var settings = MyCustomSettings.GetSerializedSettings();
-                //EditorGUILayout.PropertyField(settings.FindProperty("m_Number"), new GUIContent("My Number"));
-                //EditorGUILayout.PropertyField(settings.FindProperty("m_SomeString"), new GUIContent("My String"));
-                //settings.ApplyModifiedPropertiesWithoutUndo();
-            },
+                label = "Spline Editor",
+                guiHandler = (searchContext) =>
+                {
+                    var prevLabelWidth = EditorGUIUtility.labelWidth;
+                    EditorGUIUtility.labelWidth = 250;
+                    EditorGUI.indentLevel++;
+                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                    EditorGUILayout.Space(10);
+                    cachedEditor.OnInspectorGUI();
+                    EditorGUILayout.Space(10);
+                    EditorGUILayout.EndVertical();
+                    EditorGUILayout.Space(20);
+                    EditorGUI.indentLevel--;
+                    EditorGUIUtility.labelWidth = prevLabelWidth;
+                },
 
-            // Populate the search keywords to enable smart search filtering and label highlighting:
-            keywords = new HashSet<string>(new[] { "Number", "Some String" })
-        };
+                // Populate the search keywords to enable smart search filtering and label highlighting:
+                keywords = new HashSet<string>(new[] { "Number", "Some String" })
+            };
 
-        return provider;
+            return provider;
+        }
+
     }
 
 }

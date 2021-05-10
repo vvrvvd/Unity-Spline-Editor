@@ -60,7 +60,7 @@ namespace SplineEditor.Editor
 
         private void LoadSettings()
         {
-            editorSettings = Resources.Load<SplineEditorConfiguration>("SplineEditorSettings");
+            editorSettings = Resources.Load<SplineEditorConfiguration>(SplineEditor.SplineEditorSettingsName);
 
             if (editorSettings == null)
             {
