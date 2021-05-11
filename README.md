@@ -6,6 +6,7 @@
 - [Introduction](#introduction)
 - [Features](#features)
 - [System Requirements](#system-requirements)
+- [Installation](#installation)
 - [Overview](#overview)
 	- [Spline Editor Window](#spline-editor-window)
 	- [Casting Spline](#casting-spline)
@@ -39,6 +40,14 @@ Although the tool has been built and tested in Unity 2020.2 it should work in th
 ## System Requirements <a name="system-requirements"></a>
 
 Unity 2020.2 or newer. It should also work in the previous versions but I haven't tested it yet.
+
+## Installation <a name="installation"></a>
+
+1. The package is available in Unity Package Manager via git URL. Follow up [this](https://docs.unity3d.com/Manual/upm-ui-giturl.html) Unity page for detailed instructions. Git URL:
+```
+https://github.com/vvrvvd/Unity-Spline-Editor.git#upm
+```
+2. You can also install Spline Editor by simply downloading repository zip file and copying Assets folder content to your Unity project.
 
 ## Overview <a name="overview"></a>
 
