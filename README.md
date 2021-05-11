@@ -1,11 +1,12 @@
 # Unity Spline Editor
-[![Unity 2020.2+](https://img.shields.io/badge/unity-2020.2%2B-blue.svg)](https://unity3d.com/get-unity/download) [![license badge](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Unity 2019.4+](https://img.shields.io/badge/unity-2019.4%2B-blue.svg)](https://unity3d.com/get-unity/download) [![license badge](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ## Table Of Contents
 
 - [Introduction](#introduction)
 - [Features](#features)
 - [System Requirements](#system-requirements)
+- [Installation](#installation)
 - [Overview](#overview)
 	- [Spline Editor Window](#spline-editor-window)
 	- [Casting Spline](#casting-spline)
@@ -18,8 +19,6 @@
 **Unity Spline Editor** is an open-source tool for creating and managing quadratic bezier curves in Unity Editor. 
 
 The tool was written to bring quadratic bezier splines to Unity. The tool let you do the basic operations like **adding**, **removing** or **splitting** curves but also provides you with options to **factor**, **simplify**, **draw** or **cast splines to camera view**. You can also adjust how splines are displayed in the editor through settings window. 
-
-Although the tool has been built and tested in Unity 2020.2 it should work in the previous versions as well.
 
 ## Features <a name="features"></a>
 
@@ -38,7 +37,15 @@ Although the tool has been built and tested in Unity 2020.2 it should work in th
 
 ## System Requirements <a name="system-requirements"></a>
 
-Unity 2020.2 or newer. It should also work in the previous versions but I haven't tested it yet.
+Unity 2019.4 or newer.
+
+## Installation <a name="installation"></a>
+
+1. The package is available in Unity Package Manager via git URL. Follow up [this](https://docs.unity3d.com/Manual/upm-ui-giturl.html) Unity page for detailed instructions. Git URL:
+```
+https://github.com/vvrvvd/Unity-Spline-Editor.git#upm
+```
+2. You can also install Spline Editor by simply downloading repository zip file and copying Assets folder content to your Unity project.
 
 ## Overview <a name="overview"></a>
 
