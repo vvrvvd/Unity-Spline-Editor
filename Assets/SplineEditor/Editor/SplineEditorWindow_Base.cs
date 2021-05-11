@@ -6,7 +6,6 @@ namespace SplineEditor.Editor
 
 	public partial class SplineEditorWindow : EditorWindow
 	{
-
         private static SplineEditorConfiguration editorSettings = default;
 
         private bool repaintScene = false;
@@ -17,7 +16,7 @@ namespace SplineEditor.Editor
         private Vector2 scrollPos = Vector2.zero;
 
         [MenuItem("Window/Spline Editor")]
-        static void Initialize()
+        public static void Initialize()
         {
             SplineEditorWindow window = (SplineEditorWindow)EditorWindow.GetWindow(typeof(SplineEditorWindow), false, WindowTitle);
             window.LoadSettings();

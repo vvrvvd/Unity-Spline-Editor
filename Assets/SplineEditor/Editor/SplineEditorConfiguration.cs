@@ -7,6 +7,8 @@ namespace SplineEditor.Editor
 	public class SplineEditorConfiguration : ScriptableObject
 	{
 
+		[Header("General")]
+		public bool OpenSplineEditorWithSpline= true;
 		public GUISkin guiSkin = default;
 
 		[Header("Point")]

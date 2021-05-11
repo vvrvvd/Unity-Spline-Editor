@@ -255,10 +255,16 @@ namespace SplineEditor.Editor
 
 		private void OnEnable()
 		{
+			TryLoadEditorSettings();
+
+			if (editorSettings!=null && editorSettings.OpenSplineEditorWithSpline)
+			{
+				SplineEditorWindow.Initialize();
+			}
+
 			stopEventsOnInitialization = true;
 			CurrentEditor = this;
 			CurrentSpline = target as BezierSpline;
-			TryLoadEditorSettings();
 
 			InitializeTools();
 			InitializeSceneGUI();

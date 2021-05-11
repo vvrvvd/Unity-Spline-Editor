@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 369c6a24507d66f4e8dd3585a43e11a0, type: 3}
   m_Name: SplineEditorSettings
   m_EditorClassIdentifier: 
+  OpenSplineEditorWithSpline: 1
   guiSkin: {fileID: 11400000, guid: f8399d3ad1b6b9146a7395a5c9cfb8fc, type: 2}
   ScalePointOnScreen: 1
   MainPointSize: 0.04
