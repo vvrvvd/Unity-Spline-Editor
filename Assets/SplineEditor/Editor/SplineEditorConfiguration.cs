@@ -44,6 +44,8 @@ namespace SplineEditor.Editor
 		public Texture removeCurveIcon;
 		public Texture splitCurveIcon;
 		[Space]
+		public Texture closeLoopIcon;
+		public Texture openLoopIcon;
 		public Texture factorSplineIcon;
 		public Texture simplifySplineIcon;
 		public Texture castSplineIcon;

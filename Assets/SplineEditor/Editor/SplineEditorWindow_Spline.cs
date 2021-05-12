@@ -157,6 +157,14 @@ namespace SplineEditor.Editor
 			GUILayout.Space(10);
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
+			GUI.enabled = isGroupEnabled;
+
+			if (GUILayout.Button(CloseLoopButtonContent, buttonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
+			{
+				SplineEditor.ScheduleToggleCloseLoop();
+				repaintScene = true;
+			}
+
 			if (GUILayout.Button(FactorSplineButtonContent, buttonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
 			{
 				SplineEditor.ScheduleFactorSpline();

@@ -14,8 +14,8 @@ namespace SplineEditor.Editor
 		private static GUILayoutOption ToolsSettingsButtonHeight { get; } = GUILayout.Height(30);
 		private static GUILayoutOption ToolsHeaderToolbarWidth { get; } = GUILayout.Width(128);
 		private static GUILayoutOption ToolsHeaderToolbarHeight { get; } = GUILayout.Height(18);
-		private static GUILayoutOption ToolsButtonsWidth { get; } = GUILayout.Width(110);
-		private static GUILayoutOption ToolsButtonsHeight { get; } = GUILayout.Height(50);
+		private static GUILayoutOption ToolsButtonsWidth { get; } = GUILayout.Width(90);
+		private static GUILayoutOption ToolsButtonsHeight { get; } = GUILayout.Height(40);
 		private static GUILayoutOption ToolsPointPositionWidth { get; } = GUILayout.Width(275);
 		private static GUILayoutOption ToolsPointPopupLabelWidth { get; } = GUILayout.Width(50);
 		private static GUILayoutOption ToolsPointPopupWidth { get; } = GUILayout.Width(80);
@@ -80,13 +80,17 @@ namespace SplineEditor.Editor
 		#region Spline Styles
 
 		private const string SplineOptionsTitle = "Spline";
+		private const string CloseLoopButtonTitle = "Close Loop";
+		private const string CloseLoopButtonTooltip = "Loop spline by adding closing curve.";
+		private const string OpenLoopButtonTitle = "Open Loop";
+		private const string OpenLoopButtonTooltip = "Open spline by removing last closing curve.";
 		private const string FactorSplineButtonTitle = "Factor Spline";
 		private const string FactorSplineButtonTooltip = "Factor spline by adding mid points to every curve.";
 		private const string SimplifySplineButtonTitle = "Simplify Spline";
 		private const string SimplifySplineButtonTooltip = "Simplify spline by removing every second curve.";
 		private const string CastSplineButtonTitle = "Cast Spline";
 		private const string CastSplineButtonTooltip = "Cast spline regarding to cast transform or self (transform == null).";
-		private const string CastSplineToCameraButtonTitle = "Cast Spline To Camera View";
+		private const string CastSplineToCameraButtonTitle = "Cast To Camera";
 		private const string CastSplineToCameraButtonTooltip = "Cast spline regarding to camera view.";
 		private const string CastTransformFieldLabel = "Cast Transform";
 		private const string LoopToggleFieldLabel = "Loop";
@@ -96,6 +100,7 @@ namespace SplineEditor.Editor
 		private const string ShowTransformHandleFieldLabel = "Show Transform Handle";
 		private const string AlwaysDrawOnSceneFieldLabel = "Always Draw On Scene";
 
+		private static GUIContent CloseLoopButtonContent= new GUIContent();
 		private static GUIContent FactorSplineButtonContent = new GUIContent();
 		private static GUIContent SimplifyButtonContent = new GUIContent();
 		private static GUIContent CastSplineContent = new GUIContent();
@@ -181,6 +186,17 @@ namespace SplineEditor.Editor
 			SplitCurveButtonContent.tooltip = useText ? SplitCurveButtonTooltip : SplitCurveButtonTitle;
 
 			//spline
+			CloseLoopButtonContent.text = useText ? CloseLoopButtonTitle : string.Empty;
+			CloseLoopButtonContent.image = useImages ? editorSettings.closeLoopIcon : null;
+			CloseLoopButtonContent.tooltip = useText ? CloseLoopButtonTooltip : CloseLoopButtonTitle;
+
+			if (SplineEditor.CurrentSpline!=null && SplineEditor.CurrentSpline.IsLoop)
+			{
+				CloseLoopButtonContent.text = useText ? OpenLoopButtonTitle : string.Empty;
+			CloseLoopButtonContent.image = useImages ? editorSettings.openLoopIcon : null;
+				CloseLoopButtonContent.tooltip = useText ? OpenLoopButtonTooltip: OpenLoopButtonTitle;
+			}
+
 			FactorSplineButtonContent.text = useText ? FactorSplineButtonTitle : string.Empty;
 			FactorSplineButtonContent.image = useImages ? editorSettings.factorSplineIcon : null;
 			FactorSplineButtonContent.tooltip = useText ? FactorSplineButtonTooltip : FactorSplineButtonTitle;

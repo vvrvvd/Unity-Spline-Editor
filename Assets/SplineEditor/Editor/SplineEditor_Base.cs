@@ -498,6 +498,15 @@ namespace SplineEditor.Editor
 			wasSplineModified = true;
 		}
 
+		private void ToggleCloseLoop()
+		{
+			Undo.RecordObject(CurrentSpline, "Toggle Close Loop");
+			CurrentSpline.ToggleCloseLoop();
+			CurrentEditor.SelectIndex(0);
+
+			wasSplineModified = true;
+		}
+
 		private void FactorCurve()
 		{
 			Undo.RecordObject(CurrentSpline, "Factor Curve");

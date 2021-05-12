@@ -426,6 +426,47 @@ namespace SplineEditor
 		}
 
 		/// <summary>
+		/// Loops spline by adding closing path curve.
+		/// If beginning and ending points are in the same position then path isn't created and spline is simply looped.
+		/// </summary>
+		public void ToggleCloseLoop()
+		{
+
+
+			var prevInvokeEvents = invokeEvents;
+			invokeEvents = false;
+			if (IsLoop)
+			{
+				IsLoop = false;
+				RemoveCurve(CurvesCount - 1, false);
+			}
+			else { 
+
+				if (points[0].position != points[PointsCount-1].position)
+				{
+					var p0 = points[PointsCount - 1].position;
+					var p1 = p0 - (points[PointsCount - 2].position - p0);
+					var p3 = points[0].position;
+					var p2 = p3 - (points[1].position - p3);
+
+					SetControlPointMode(0, BezierControlPointMode.Aligned);
+					SetControlPointMode(PointsCount-1, BezierControlPointMode.Aligned);
+
+					AppendCurve(p1, p2, p3, BezierControlPointMode.Aligned, false);
+				}
+
+				IsLoop = true;
+			}
+
+
+			invokeEvents = prevInvokeEvents;
+			if (invokeEvents)
+			{
+				OnSplineChanged?.Invoke();
+			}
+		}
+
+		/// <summary>
 		/// Factors the spline by adding mid curve points for every curve.
 		/// </summary>
 		public void FactorSpline()
