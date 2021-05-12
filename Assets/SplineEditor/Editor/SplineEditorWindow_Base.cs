@@ -15,16 +15,18 @@ namespace SplineEditor.Editor
         private int buttonsLayoutIndex = 2;
         private Vector2 scrollPos = Vector2.zero;
 
+        private bool initializeStyles = false;
+
         [MenuItem("Window/Spline Editor")]
         public static void Initialize()
         {
             SplineEditorWindow window = (SplineEditorWindow)EditorWindow.GetWindow(typeof(SplineEditorWindow), false, WindowTitle);
+            window.initializeStyles = true;
             window.LoadSettings();
-            window.InitializeStyles(editorSettings);
             window.Show();
         }
 
-		private void OnEnable()
+        private void OnEnable()
 		{
             SplineEditor.OnSplineModified += OnSplineModified;
             SplineEditor.OnSelectedSplineChanged += OnSelectedSplineChanged;
@@ -78,6 +80,12 @@ namespace SplineEditor.Editor
             if(editorSettings==null)
 			{
                 LoadSettings();
+            }
+
+            if(initializeStyles)
+			{
+                InitializeStyles(editorSettings);
+                initializeStyles = false;
             }
 
             SplineEditor.UpdateSplineStates();
