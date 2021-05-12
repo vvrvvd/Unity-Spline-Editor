@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 namespace SplineEditor
 {
@@ -19,6 +20,25 @@ namespace SplineEditor
 
 		#endregion
 
+		#region Events
+
+		public event Action OnSplineChanged;
+
+		#endregion
+
+		#region Public Fields
+
+		[HideInInspector]
+		public bool drawPoints = true;
+		[HideInInspector]
+		public bool drawDirections = false;
+		[HideInInspector]
+		public bool showTransformHandle = true;
+		[HideInInspector]
+		public bool alwaysDrawSplineOnScene = true;
+
+		#endregion
+
 		#region Editor Fields
 
 		[SerializeField]
@@ -32,16 +52,9 @@ namespace SplineEditor
 
 		#endregion
 
-		#region Public Fields
+		#region Private Fields
 
-		[HideInInspector]
-		public bool drawPoints = true;
-		[HideInInspector]
-		public bool drawDirections = false;
-		[HideInInspector]
-		public bool showTransformHandle = true;
-		[HideInInspector]
-		public bool AlwaysDrawSplineOnScene = true;
+		private bool invokeEvents = true;
 
 		#endregion
 
@@ -210,6 +223,9 @@ namespace SplineEditor
 		/// <param name="mode"></param>
 		public void SetControlPointMode(int pointIndex, BezierControlPointMode mode)
 		{
+			var prevInvokeEvents = invokeEvents;
+			invokeEvents = false;
+
 			var modeIndex = (pointIndex + 1) / 3;
 			modes[modeIndex] = mode;
 
@@ -226,6 +242,12 @@ namespace SplineEditor
 			}
 
 			ApplyContraints(pointIndex);
+
+			invokeEvents = prevInvokeEvents;
+			if(invokeEvents)
+			{
+				OnSplineChanged?.Invoke();
+			}
 		}
 
 		#endregion
@@ -241,6 +263,9 @@ namespace SplineEditor
 		/// <param name="updateAttachedSidePoints">If the control point at pointIndex is starting or ending curve point (pointIndex % 3 == 0) and this value is set to true then control points attached to this point will also updated.</param>
 		public void UpdatePoint(int pointIndex, Vector3 position, bool applyConstraints = true, bool updateAttachedSidePoints = true)
 		{
+			var prevInvokeEvents = invokeEvents;
+			invokeEvents = false;
+
 			if (updateAttachedSidePoints && pointIndex % 3 == 0)
 			{
 				var delta = position - Points[pointIndex].position;
@@ -283,6 +308,12 @@ namespace SplineEditor
 			{
 				ApplyContraints(pointIndex);
 			}
+
+			invokeEvents = prevInvokeEvents;
+			if (invokeEvents)
+			{
+				OnSplineChanged?.Invoke();
+			}
 		}
 
 		/// <summary>
@@ -295,7 +326,10 @@ namespace SplineEditor
 		/// <param name="addAtBeginning">Should new curve be added at the beginning of spline.</param>
 		public void AppendCurve(Vector3 p1, Vector3 p2, Vector3 p3, BezierControlPointMode mode, bool addAtBeginning = true)
 		{
-			if(!addAtBeginning || IsLoop)
+			var prevInvokeEvents = invokeEvents;
+			invokeEvents = false;
+
+			if (!addAtBeginning || IsLoop)
 			{
 				//Add at the end of the spline
 				AddPoint(p1);
@@ -323,6 +357,11 @@ namespace SplineEditor
 				ApplyContraints(3);
 			}
 
+			invokeEvents = prevInvokeEvents;
+			if (invokeEvents)
+			{
+				OnSplineChanged?.Invoke();
+			}
 		}
 
 		/// <summary>
@@ -331,6 +370,9 @@ namespace SplineEditor
 		/// <param name="curveIndex"></param>
 		public void RemoveCurve(int curveIndex, bool removeFirstPoints)
 		{
+			var prevInvokeEvents = invokeEvents;
+			invokeEvents = false;
+
 			var isLastCurve = !removeFirstPoints && ((isLoop && curveIndex == CurvesCount) || (!isLoop && curveIndex == CurvesCount - 1));
 			var isStartCurve = removeFirstPoints && curveIndex == 0;
 			var isMidCurve = (IsLoop && curveIndex == 1 && CurvesCount == 2);
@@ -375,6 +417,12 @@ namespace SplineEditor
 			}
 
 			UpdatePoint(nextPointIndex, Points[nextPointIndex].position);
+
+			invokeEvents = prevInvokeEvents;
+			if (invokeEvents)
+			{
+				OnSplineChanged?.Invoke();
+			}
 		}
 
 		/// <summary>
@@ -382,9 +430,18 @@ namespace SplineEditor
 		/// </summary>
 		public void FactorSpline()
 		{
+			var prevInvokeEvents = invokeEvents;
+			invokeEvents = false;
+
 			for (var i = 0; i < CurvesCount; i += 2)
 			{
 				InsertCurve(i, 0.5f);
+			}
+
+			invokeEvents = prevInvokeEvents;
+			if (invokeEvents)
+			{
+				OnSplineChanged?.Invoke();
 			}
 		}
 
@@ -393,13 +450,22 @@ namespace SplineEditor
 		/// </summary>
 		public void SimplifySpline()
 		{
+			var prevInvokeEvents = invokeEvents;
+			invokeEvents = false;
+
 			for (var i = 1; i < CurvesCount; i++)
 			{
 				RemoveCurveAndRecalculateControlPoints(i);
 				if (i >= CurvesCount - 1)
 				{
-					return;
+					i = CurvesCount;
 				}
+			}
+
+			invokeEvents = prevInvokeEvents;
+			if (invokeEvents)
+			{
+				OnSplineChanged?.Invoke();
 			}
 		}
 
@@ -414,6 +480,9 @@ namespace SplineEditor
 			{
 				return;
 			}
+
+			var prevInvokeEvents = invokeEvents;
+			invokeEvents = false;
 
 			var startPointIndex = curveIndex * 3;
 
@@ -459,6 +528,12 @@ namespace SplineEditor
 
 			var modeIndex = (startPointIndex + 3) / 3;
 			modes.Insert(modeIndex, BezierControlPointMode.Free);
+
+			invokeEvents = prevInvokeEvents;
+			if (invokeEvents)
+			{
+				OnSplineChanged?.Invoke();
+			}
 		}
 
 		#endregion

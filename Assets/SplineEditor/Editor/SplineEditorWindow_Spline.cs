@@ -116,13 +116,13 @@ namespace SplineEditor.Editor
 
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			var previousAlwaysDrawOnScene = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.AlwaysDrawSplineOnScene : previousAlwaysDrawOnSceneState;
+			var previousAlwaysDrawOnScene = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.alwaysDrawSplineOnScene : previousAlwaysDrawOnSceneState;
 			GUILayout.Label(AlwaysDrawOnSceneFieldContent);
 			nextLoopState = GUILayout.Toggle(previousAlwaysDrawOnScene, string.Empty);
 			if (nextLoopState != previousAlwaysDrawOnScene)
 			{
 				Undo.RecordObject(SplineEditor.CurrentSpline, "Toggle Always Draw On Scene");
-				SplineEditor.CurrentSpline.AlwaysDrawSplineOnScene = nextLoopState;
+				SplineEditor.CurrentSpline.alwaysDrawSplineOnScene = nextLoopState;
 				EditorUtility.SetDirty(SplineEditor.CurrentSpline);
 				repaintScene = true;
 			}
