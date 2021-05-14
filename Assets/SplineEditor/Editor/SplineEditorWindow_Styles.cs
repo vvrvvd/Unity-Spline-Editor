@@ -51,9 +51,12 @@ namespace SplineEditor.Editor
 		private const string PointGroupTitle = "Point";
 		private const string PointPositionLabel = "Position";
 		private const string PointModeLabel = "Mode";
+		private const string ApplyToAllPointsLabel = "Apply To All";
+		private const string ApplyToAllPointsTooltip = "Apply currently selected mode to all control points.";
 
 		private static GUIContent PointPositionContent = new GUIContent(PointPositionLabel);
 		private static GUIContent PointModeContent = new GUIContent(PointModeLabel);
+		private static GUIContent ApplyToAllPoinstButtonContent = new GUIContent(ApplyToAllPointsLabel);
 
 		#endregion
 
@@ -93,7 +96,6 @@ namespace SplineEditor.Editor
 		private const string CastSplineToCameraButtonTitle = "Cast To Camera";
 		private const string CastSplineToCameraButtonTooltip = "Cast spline regarding to camera view.";
 		private const string CastTransformFieldLabel = "Cast Transform";
-		private const string LoopToggleFieldLabel = "Loop";
 		private const string LengthSplineFieldLabel = "Length";
 
 		private const string DrawPointsFieldLabel = "Draw Points";
@@ -106,7 +108,6 @@ namespace SplineEditor.Editor
 		private static GUIContent CastSplineContent = new GUIContent();
 		private static GUIContent CastSplineToCameraContent = new GUIContent();
 		private static GUIContent CastTransformFieldContent = new GUIContent(CastTransformFieldLabel);
-		private static GUIContent LoopToggleFieldContent = new GUIContent(LoopToggleFieldLabel);
 		private static GUIContent LengthSplineFieldContent = new GUIContent(LengthSplineFieldLabel);
 		private static GUIContent DrawPointsFieldContent = new GUIContent(DrawPointsFieldLabel);
 		private static GUIContent ShowTransformHandleFieldContent = new GUIContent(ShowTransformHandleFieldLabel);
@@ -171,6 +172,11 @@ namespace SplineEditor.Editor
 			//header
 			layoutsButtonsContent[1].image = editorSettings.imageLayoutIcon;
 			layoutsButtonsContent[2].image = editorSettings.imageLayoutIcon;
+
+			//points
+			ApplyToAllPoinstButtonContent.text = useText ? ApplyToAllPointsLabel : string.Empty;
+			ApplyToAllPoinstButtonContent.image = useImages ? editorSettings.applyToAllPointsIcon : null;
+			ApplyToAllPoinstButtonContent.tooltip = useText ? ApplyToAllPointsTooltip : ApplyToAllPointsLabel;
 
 			//curve
 			AddCurveButtonContent.text = useText ? AddCurveButtonTitle : string.Empty;

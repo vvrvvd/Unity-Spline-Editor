@@ -462,10 +462,7 @@ namespace SplineEditor.Editor
 		{
 			Undo.RecordObject(CurrentSpline, "Cast Curve Points");
 			var pointsCount = CurrentSpline.PointsCount;
-			for (var i = 0; i < pointsCount; i += 3)
-			{
-				CurrentSpline.SetControlPointMode(i, BezierSpline.BezierControlPointMode.Free);
-			}
+			CurrentSpline.SetAllControlPointsMode(BezierSpline.BezierControlPointMode.Free);
 
 			var newPointsPositions = new Vector3[pointsCount];
 			for (var i = 0; i < pointsCount; i++)

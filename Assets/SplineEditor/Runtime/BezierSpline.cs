@@ -1,6 +1,6 @@
-using UnityEngine;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace SplineEditor
 {
@@ -15,7 +15,8 @@ namespace SplineEditor
 		{
 			Free = 0,
 			Aligned = 1,
-			Mirrored = 2
+			Mirrored = 2,
+			Auto = 3
 		}
 
 		#endregion
@@ -144,6 +145,30 @@ namespace SplineEditor
 		#region Getters & Setters
 
 		/// <summary>
+		/// If spline is looping then returns next index taking into account the loop 
+		/// e.g. -1 index in looping spline is considered as index at PointsCount - 1 
+		/// </summary>
+		/// <param name="pointIndex"></param>
+		/// <returns></returns>
+		public int GetLoopingIndex(int pointIndex)
+		{
+
+			if((pointIndex < 0 || pointIndex >= points.Count))
+			{
+				if(isLoop)
+				{
+					return pointIndex < 0 ? points.Count - 1 + pointIndex : pointIndex - points.Count - 1;
+				}
+				else
+				{
+					return -1;
+				}
+			}
+
+			return pointIndex;
+		}
+
+		/// <summary>
 		/// Calculates the spline point position at given t.
 		/// </summary>
 		/// <param name="t"></param>
@@ -263,6 +288,12 @@ namespace SplineEditor
 		/// <param name="updateAttachedSidePoints">If the control point at pointIndex is starting or ending curve point (pointIndex % 3 == 0) and this value is set to true then control points attached to this point will also updated.</param>
 		public void UpdatePoint(int pointIndex, Vector3 position, bool applyConstraints = true, bool updateAttachedSidePoints = true)
 		{
+			var pointMode = GetControlPointMode(pointIndex);
+			if (pointIndex % 3 != 0 && pointMode == BezierControlPointMode.Auto)
+			{
+				return;
+			}
+
 			var prevInvokeEvents = invokeEvents;
 			invokeEvents = false;
 
@@ -431,8 +462,6 @@ namespace SplineEditor
 		/// </summary>
 		public void ToggleCloseLoop()
 		{
-
-
 			var prevInvokeEvents = invokeEvents;
 			invokeEvents = false;
 			if (IsLoop)
@@ -449,10 +478,7 @@ namespace SplineEditor
 					var p3 = points[0].position;
 					var p2 = p3 - (points[1].position - p3);
 
-					SetControlPointMode(0, BezierControlPointMode.Aligned);
-					SetControlPointMode(PointsCount-1, BezierControlPointMode.Aligned);
-
-					AppendCurve(p1, p2, p3, BezierControlPointMode.Aligned, false);
+					AppendCurve(p1, p2, p3, modes[0], false);
 				}
 
 				IsLoop = true;
@@ -503,6 +529,8 @@ namespace SplineEditor
 				}
 			}
 
+			ApplyAutoSetToAllControlPoints();
+
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
@@ -526,9 +554,6 @@ namespace SplineEditor
 			invokeEvents = false;
 
 			var startPointIndex = curveIndex * 3;
-
-			SetControlPointMode(startPointIndex, BezierControlPointMode.Free);
-			SetControlPointMode(startPointIndex + 3, BezierControlPointMode.Free);
 
 			var p0 = points[startPointIndex].position;
 
@@ -568,7 +593,31 @@ namespace SplineEditor
 			AddPoint(rightControlPoint, startPointIndex + 4);
 
 			var modeIndex = (startPointIndex + 3) / 3;
-			modes.Insert(modeIndex, BezierControlPointMode.Free);
+			var prevMode = modes[modeIndex-1];
+			modes.Insert(modeIndex, prevMode);
+
+			ApplyAutoSetToAllControlPoints();
+
+			invokeEvents = prevInvokeEvents;
+			if (invokeEvents)
+			{
+				OnSplineChanged?.Invoke();
+			}
+		}
+
+		/// <summary>
+		/// Sets all control points on spline to selected mode
+		/// </summary>
+		/// <param name="mode"></param>
+		public void SetAllControlPointsMode(BezierControlPointMode mode)
+		{
+			var prevInvokeEvents = invokeEvents;
+			invokeEvents = false;
+
+			for (var i = 0; i < PointsCount; i+=3)
+			{
+				SetControlPointMode(i, mode);
+			}
 
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
@@ -609,14 +658,16 @@ namespace SplineEditor
 
 		private void ApplyContraints(int pointIndex)
 		{
-			var modeIndex = (pointIndex + 1) / 3;
-			var mode = modes[modeIndex];
-			if (mode == BezierControlPointMode.Free || (!IsLoop && (modeIndex == 0 || modeIndex == modes.Count - 1)))
+			var curveIndex = (pointIndex + 1) / 3;
+			var mode = modes[curveIndex];
+
+			if ((mode == BezierControlPointMode.Free || mode == BezierControlPointMode.Auto) || (!IsLoop && (curveIndex == 0 || curveIndex == modes.Count - 1)))
 			{
+				ApplyAffectedAutoSetControlPoints(pointIndex);
 				return;
 			}
 
-			var middleIndex = modeIndex * 3;
+			var middleIndex = curveIndex * 3;
 			int fixedIndex, enforcedIndex;
 			if (pointIndex <= middleIndex)
 			{
@@ -659,6 +710,121 @@ namespace SplineEditor
 			}
 
 			Points[enforcedIndex].position = middle + enforcedTangent;
+			ApplyAffectedAutoSetControlPoints(pointIndex);
+		}
+
+		private void ApplyAutoSetToAllControlPoints()
+		{
+			for(var i=0; i < PointsCount; i+=3)
+			{
+				ApplyAffectedAutoSetControlPoints(i);
+			}
+		}
+
+		private void ApplyAffectedAutoSetControlPoints(int pointIndex)
+		{
+			var curveIndex = (pointIndex + 1) / 3;
+			var mode = modes[curveIndex];
+			var curvesCount = CurvesCount;
+
+			var applyAutoConstraintsToNextNeighbour = curveIndex < curvesCount - 1 && modes[curveIndex + 1] == BezierControlPointMode.Auto;
+			var applyAutoConstraintsToPreviousNeighbour = curveIndex > 0 && modes[curveIndex - 1] == BezierControlPointMode.Auto;
+
+			if (applyAutoConstraintsToNextNeighbour)
+			{
+				ApplyAutoSetControlPoints(curveIndex + 1);
+			}
+
+			if (applyAutoConstraintsToPreviousNeighbour)
+			{
+				ApplyAutoSetControlPoints(curveIndex - 1);
+			}
+
+			if (mode == BezierControlPointMode.Auto)
+			{
+				ApplyAutoSetControlPoints(curveIndex);
+			}
+
+			ApplyAutoSetControlPointsToEdgePoints();
+		}
+
+		private void ApplyAutoSetControlPoints(int curveIndex)
+		{
+			if(modes[curveIndex]!=BezierControlPointMode.Auto)
+			{
+				return;
+			}
+
+			var startPointIndex = curveIndex * 3;
+			var startPointPosition = Points[startPointIndex].position;
+			var previousPointPosition = startPointPosition;
+			var nextPointPosition = startPointPosition;
+
+			if(curveIndex > 0 || isLoop)
+			{
+				var loopedIndex = GetLoopingIndex(startPointIndex - 3);
+				previousPointPosition = Points[loopedIndex].position;
+			} 
+
+			if(curveIndex < CurvesCount || isLoop)
+			{
+				var loopedIndex = GetLoopingIndex(startPointIndex + 3);
+				nextPointPosition = Points[loopedIndex].position;
+			}
+
+			var prevDistance = (previousPointPosition - startPointPosition);
+			var nextDistance = (nextPointPosition - startPointPosition);
+			var dir = (prevDistance.normalized - nextDistance.normalized).normalized;
+
+			var prevControlPointIndex = GetLoopingIndex(startPointIndex - 1);
+			var nextControlPointIndex = GetLoopingIndex(startPointIndex + 1);
+
+			if(prevControlPointIndex != -1)
+			{
+				var updatedPosition = Points[startPointIndex].position + dir * prevDistance.magnitude * 0.5f;
+				Points[prevControlPointIndex].position = updatedPosition;
+			}
+
+			if(nextControlPointIndex != -1)
+			{
+				var updatedPosition = Points[startPointIndex].position - dir * nextDistance.magnitude * 0.5f;
+				Points[nextControlPointIndex].position = updatedPosition;
+			}
+
+		}
+
+		private void ApplyAutoSetControlPointsToEdgePoints()
+		{
+			if (isLoop)
+			{
+				if (CurvesCount == 2 && modes[0] == BezierControlPointMode.Auto && modes[1] == BezierControlPointMode.Auto)
+				{
+					Vector3 dirAnchorAToB = (points[3].position - points[0].position).normalized;
+					float dstBetweenAnchors = (points[0].position - points[3].position).magnitude;
+					Vector3 perp = Vector3.Cross(dirAnchorAToB, Vector3.up);
+					points[1].position = points[0].position + perp * dstBetweenAnchors / 2f;
+					points[5].position = points[0].position - perp * dstBetweenAnchors / 2f;
+					points[2].position = points[3].position + perp * dstBetweenAnchors / 2f;
+					points[4].position = points[3].position - perp * dstBetweenAnchors / 2f;
+				}
+				else
+				{
+					ApplyAutoSetControlPoints(0);
+					ApplyAutoSetControlPoints(CurvesCount-1);
+				}
+			}
+			else
+			{
+				if(modes[0] == BezierControlPointMode.Auto)
+				{
+					points[1].position = (points[0].position + points[2].position) * 0.5f;
+				}
+
+				if(modes[modes.Count-1] == BezierControlPointMode.Auto)
+				{
+					points[points.Count - 2].position = (points[points.Count - 1].position + points[points.Count - 3].position) * 0.5f;
+				}
+			}
 		}
 
 		private void RemoveCurveAndRecalculateControlPoints(int curveIndex)
@@ -677,8 +843,6 @@ namespace SplineEditor
 			var pointOnCurve2 = GetPoint(t, false);
 
 			BezierUtils.GetInverseControlPoints(p0, p3, pointOnCurve1, pointOnCurve2, 0.25f, 0.75f, out var p1, out var p2);
-			SetControlPointMode(p0Index, BezierControlPointMode.Free);
-			SetControlPointMode(p3Index, BezierControlPointMode.Free);
 			UpdatePoint(p0Index + 1, p1);
 			UpdatePoint(p3Index - 1, p2);
 

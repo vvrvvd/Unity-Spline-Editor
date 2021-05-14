@@ -20,6 +20,7 @@ namespace SplineEditor.Editor
 		public Color FreeModeColor = Color.green;
 		public Color AlignedModeColor = Color.yellow;
 		public Color MirroredModeColor = Color.cyan;
+		public Color AutoModeColor = Color.grey;
 
 		[Header("Curve")]
 		public Color SelectedCurveColor = Color.blue;
@@ -39,6 +40,8 @@ namespace SplineEditor.Editor
 		[Header("Image buttons")]
 		public Texture settingsIcon;
 		public Texture imageLayoutIcon;
+		[Space]
+		public Texture applyToAllPointsIcon;
 		[Space]
 		public Texture addCurveIcon;
 		public Texture removeCurveIcon;
