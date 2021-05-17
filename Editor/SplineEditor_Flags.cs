@@ -14,6 +14,7 @@ namespace SplineEditor.Editor
 		private static bool removeSelectedCurveFlag;
 		private static bool castSplineFlag;
 		private static bool castSplineToCameraFlag;
+		private static bool closeLoopFlag;
 		private static bool factorSplineFlag;
 		private static bool simplifySplineFlag;
 		private static bool drawSplineModeFlag;
@@ -37,6 +38,11 @@ namespace SplineEditor.Editor
 		internal static void ScheduleRemoveSelectedCurve()
 		{
 			removeSelectedCurveFlag = true;
+		}
+
+		internal static void ScheduleToggleCloseLoop()
+		{
+			closeLoopFlag = true;
 		}
 
 		internal static void ScheduleFactorSpline()
@@ -83,6 +89,7 @@ namespace SplineEditor.Editor
 
 		private void InitializeFlags()
 		{
+			closeLoopFlag = false;
 			factorSplineFlag = false;
 			simplifySplineFlag = false;
 			addCurveFlag = false;
@@ -106,6 +113,12 @@ namespace SplineEditor.Editor
 				SplitCurve(splitCurveValue);
 				splitCurveFlag = false;
 			}	
+
+			if(closeLoopFlag)
+			{
+				ToggleCloseLoop();
+				closeLoopFlag = false;
+			}
 
 			if (factorSplineFlag)
 			{

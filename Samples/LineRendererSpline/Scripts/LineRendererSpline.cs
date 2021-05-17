@@ -4,6 +4,7 @@ namespace SplineEditor
 {
 
 	[ExecuteInEditMode]
+	[RequireComponent(typeof(BezierSpline))]
 	[RequireComponent(typeof(LineRenderer))]
 	public class LineRendererSpline : MonoBehaviour
 	{
@@ -15,17 +16,6 @@ namespace SplineEditor
 
 		private void OnValidate()
 		{
-			segmentsCount = Mathf.Max(0, segmentsCount);
-			if(_prevSegmentsCount!=segmentsCount)
-			{
-				_prevSegmentsCount = segmentsCount;
-				UpdateLinePoints();
-			}
-		}
-
-		private void UpdateLinePoints()
-		{
-
 			if (spline == null)
 			{
 				spline = GetComponent<BezierSpline>();
@@ -36,6 +26,26 @@ namespace SplineEditor
 				lineRenderer = GetComponent<LineRenderer>();
 			}
 
+			segmentsCount = Mathf.Max(0, segmentsCount);
+			if (_prevSegmentsCount != segmentsCount)
+			{
+				_prevSegmentsCount = segmentsCount;
+				UpdateLinePoints();
+			}
+		}
+
+		private void OnEnable()
+		{
+			spline.OnSplineChanged += UpdateLinePoints;
+		}
+
+		private void OnDisable()
+		{
+			spline.OnSplineChanged -= UpdateLinePoints;
+		}
+
+		private void UpdateLinePoints()
+		{
 			if(spline==null || lineRenderer == null)
 			{
 				return;
@@ -63,7 +73,6 @@ namespace SplineEditor
 		{
 			UpdateLinePoints();
 		}
-
 	}
 
 }
