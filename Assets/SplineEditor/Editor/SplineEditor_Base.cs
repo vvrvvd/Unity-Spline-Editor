@@ -462,10 +462,7 @@ namespace SplineEditor.Editor
 		{
 			Undo.RecordObject(CurrentSpline, "Cast Curve Points");
 			var pointsCount = CurrentSpline.PointsCount;
-			for (var i = 0; i < pointsCount; i += 3)
-			{
-				CurrentSpline.SetControlPointMode(i, BezierSpline.BezierControlPointMode.Free);
-			}
+			CurrentSpline.SetAllControlPointsMode(BezierSpline.BezierControlPointMode.Free);
 
 			var newPointsPositions = new Vector3[pointsCount];
 			for (var i = 0; i < pointsCount; i++)
@@ -494,6 +491,15 @@ namespace SplineEditor.Editor
 					CurrentSpline.UpdatePoint(i + 1, newPointsPositions[i + 1], false, false);
 				}
 			}
+
+			wasSplineModified = true;
+		}
+
+		private void ToggleCloseLoop()
+		{
+			Undo.RecordObject(CurrentSpline, "Toggle Close Loop");
+			CurrentSpline.ToggleCloseLoop();
+			CurrentEditor.SelectIndex(0);
 
 			wasSplineModified = true;
 		}

@@ -106,6 +106,17 @@ namespace SplineEditor.Editor
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			if (GUILayout.Button(ApplyToAllPoinstButtonContent, buttonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
+			{
+				Undo.RecordObject(currentSpline, "Change All Points Mode");
+				currentSpline.SetAllControlPointsMode(mode);
+				repaintScene = true;
+			}
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
 			previousPointMode = mode;
 		}
 
