@@ -7,8 +7,7 @@ namespace SplineEditor.Editor
 	public partial class SplineEditorWindow : EditorWindow
 	{
 
-		private float previousLoopLength = 0f;
-		private bool previousLoopState = false;
+		private float previousSplineLength = 0f;
 		private Transform customTransform = null;
 
 		private bool isSplineSectionFolded = true;
@@ -38,8 +37,11 @@ namespace SplineEditor.Editor
 			GUILayout.BeginVertical();
 
 			GUILayout.Space(5);
-			DrawLoopToggle();
+
 			DrawSplineTogglesInspector();
+
+			GUILayout.Space(5);
+
 			DrawLengthField();
 			GUILayout.Space(5);
 
@@ -48,25 +50,6 @@ namespace SplineEditor.Editor
 
 		}
 
-		private void DrawLoopToggle()
-		{
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			var prevLoopState = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.IsLoop : previousLoopState;
-			GUILayout.Label(LoopToggleFieldContent);
-			var nextLoopState = GUILayout.Toggle(prevLoopState, string.Empty);
-			if (nextLoopState != prevLoopState)
-			{
-				Undo.RecordObject(SplineEditor.CurrentSpline, "Set Looped");
-				SplineEditor.CurrentSpline.IsLoop = nextLoopState;
-				EditorUtility.SetDirty(SplineEditor.CurrentSpline);
-				repaintScene = true;
-			}
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-
-			previousLoopState = nextLoopState;
-		}
 
 		private bool previousDrawPointsState = true;
 		private bool previousShowTransformHandleState = true;
@@ -116,13 +99,13 @@ namespace SplineEditor.Editor
 
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			var previousAlwaysDrawOnScene = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.AlwaysDrawSplineOnScene : previousAlwaysDrawOnSceneState;
+			var previousAlwaysDrawOnScene = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.alwaysDrawSplineOnScene : previousAlwaysDrawOnSceneState;
 			GUILayout.Label(AlwaysDrawOnSceneFieldContent);
 			nextLoopState = GUILayout.Toggle(previousAlwaysDrawOnScene, string.Empty);
 			if (nextLoopState != previousAlwaysDrawOnScene)
 			{
 				Undo.RecordObject(SplineEditor.CurrentSpline, "Toggle Always Draw On Scene");
-				SplineEditor.CurrentSpline.AlwaysDrawSplineOnScene = nextLoopState;
+				SplineEditor.CurrentSpline.alwaysDrawSplineOnScene = nextLoopState;
 				EditorUtility.SetDirty(SplineEditor.CurrentSpline);
 				repaintScene = true;
 			}
@@ -139,11 +122,11 @@ namespace SplineEditor.Editor
 
 			var prevEnabled = GUI.enabled;
 			GUI.enabled = false;
-			var currentLength = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.Length : previousLoopLength;
+			var currentLength = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.Length : previousSplineLength;
 			GUILayout.Label(LengthSplineFieldContent);
 			GUILayout.Label(currentLength.ToString());
 
-			previousLoopLength = currentLength;
+			previousSplineLength = currentLength;
 			GUI.enabled = prevEnabled;
 
 			GUILayout.FlexibleSpace();
@@ -157,6 +140,14 @@ namespace SplineEditor.Editor
 			GUILayout.Space(10);
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
+			GUI.enabled = isGroupEnabled;
+
+			if (GUILayout.Button(CloseLoopButtonContent, buttonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
+			{
+				SplineEditor.ScheduleToggleCloseLoop();
+				repaintScene = true;
+			}
+
 			if (GUILayout.Button(FactorSplineButtonContent, buttonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
 			{
 				SplineEditor.ScheduleFactorSpline();

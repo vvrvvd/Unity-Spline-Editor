@@ -75,11 +75,27 @@ namespace SplineEditor.Editor
 		private Vector3 DrawPoint(int index)
 		{
 			var mode = CurrentSpline.GetControlPointMode(index);
-			var modeIndex = (int)mode;
-			var modeColor = modeIndex == 0 ? editorSettings.FreeModeColor : modeIndex == 1 ? editorSettings.AlignedModeColor : editorSettings.MirroredModeColor;
+			var modeColor = GetModeColor(mode);
 			var pointColor = index % 3 == 0 ? editorSettings.PointColor : modeColor;
 
 			return DrawPoint(index, pointColor);
+		}
+
+		private Color GetModeColor(BezierSpline.BezierControlPointMode mode)
+		{
+			switch (mode)
+			{
+				case BezierSpline.BezierControlPointMode.Free:
+					return editorSettings.FreeModeColor;
+				case BezierSpline.BezierControlPointMode.Aligned:
+					return editorSettings.AlignedModeColor;
+				case BezierSpline.BezierControlPointMode.Mirrored:
+					return editorSettings.MirroredModeColor;
+				case BezierSpline.BezierControlPointMode.Auto:
+					return editorSettings.AutoModeColor;
+			}
+
+			return Color.cyan;
 		}
 
 		private Vector3 DrawPoint(int index, Color pointColor)
