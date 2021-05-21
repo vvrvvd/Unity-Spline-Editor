@@ -346,8 +346,6 @@ namespace SplineEditor
 					distance += Vector3.Distance(prevPoint, nextPoint);
 				}
 
-
-
 				var alpha = segmentLength / distance;
 				nextPoint = Vector3.Lerp(prevPoint, nextPoint, alpha);
 

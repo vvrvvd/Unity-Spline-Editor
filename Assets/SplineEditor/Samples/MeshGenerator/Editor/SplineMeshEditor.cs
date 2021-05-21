@@ -25,33 +25,33 @@ namespace SplineEditor.MeshGenerator.Editor
 
 			if (GUILayout.Button("Generate Mesh"))
 			{
-				splineMesh.GenerateMesh();
+				splineMesh.ConstructMesh();
 			}
 		}
 
-		private void OnSceneGUI()
-		{
-			if(splineMesh.BezierSpline==null)
-			{
-				return;
-			}
+		//private void OnSceneGUI()
+		//{
+		//	if(splineMesh.BezierSpline==null)
+		//	{
+		//		return;
+		//	}
 
-			if((splineMesh.BezierSpline.IsLoop && segmentPoints.Length != splineMesh.segmentsCount) || (!splineMesh.BezierSpline.IsLoop && segmentPoints.Length != splineMesh.segmentsCount+1))
-			{
-				var newArraySize = splineMesh.BezierSpline.IsLoop ? splineMesh.segmentsCount : splineMesh.segmentsCount + 1;
-				Array.Resize(ref segmentPoints, newArraySize);
-			}
+		//	if((splineMesh.BezierSpline.IsLoop && segmentPoints.Length != splineMesh.segmentsCount) || (!splineMesh.BezierSpline.IsLoop && segmentPoints.Length != splineMesh.segmentsCount+1))
+		//	{
+		//		var newArraySize = splineMesh.BezierSpline.IsLoop ? splineMesh.segmentsCount : splineMesh.segmentsCount + 1;
+		//		Array.Resize(ref segmentPoints, newArraySize);
+		//	}
 
-			splineMesh.BezierSpline.GetEvenlySpacedPointsNonAlloc(splineMesh.segmentsCount, segmentPoints, splineMesh.precision);
+		//	splineMesh.BezierSpline.GetEvenlySpacedPointsNonAlloc(splineMesh.segmentsCount, segmentPoints, splineMesh.precision);
 
-			Handles.color = Color.blue;
-			for(var i=0; i<segmentPoints.Length; i++)
-			{
-				var point = segmentPoints[i];
-				var size = HandleUtility.GetHandleSize(point);
-				Handles.Button(point, Quaternion.identity, size*0.1f, size*0.1f, Handles.DotHandleCap);
-			}
-		}
+		//	Handles.color = Color.blue;
+		//	for(var i=0; i<segmentPoints.Length; i++)
+		//	{
+		//		var point = segmentPoints[i];
+		//		var size = HandleUtility.GetHandleSize(point);
+		//		Handles.Button(point, Quaternion.identity, size*0.1f, size*0.1f, Handles.DotHandleCap);
+		//	}
+		//}
 	}
 
 }
