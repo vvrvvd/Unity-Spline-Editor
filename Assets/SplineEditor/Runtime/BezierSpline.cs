@@ -97,24 +97,6 @@ namespace SplineEditor
 			}
 		}
 
-		/// <summary>
-		/// Returns the entire spline length using quadratic curve approximation for every cubic spline.
-		/// </summary>
-		public float Length
-		{
-			get
-			{
-				var lengthSum = 0f;
-				var curveCount = CurvesCount;
-				for (var i = 0; i < curveCount; i++)
-				{
-					lengthSum += BezierUtils.GetCubicLength(points[i * 3].position, points[i * 3 + 1].position, points[i * 3 + 2].position, points[i * 3 + 3].position);
-				}
-
-				return lengthSum;
-			}
-		}
-
 		#endregion
 
 		#region Initialize
@@ -143,6 +125,60 @@ namespace SplineEditor
 		#region Public Methods
 
 		#region Getters & Setters
+
+		/// <summary>
+		/// Returns the spline length using line iteration approximation.
+		/// </summary>
+		/// <param name="useWorldScale"></param>
+		/// <returns></returns>
+		public float GetLinearLength(bool useWorldScale = true)
+		{
+			var lengthSum = 0f;
+			var iterationsCount = 1000;
+			var t = 0f;
+			var prevPoint = GetPoint(t, useWorldScale);
+			for (var i = 1; i < iterationsCount; i++)
+			{
+				t += (float)i / iterationsCount;
+				var nextPoint = GetPoint(t, useWorldScale);
+				lengthSum += Vector3.Distance(prevPoint, nextPoint);
+				prevPoint = nextPoint;
+			}
+
+			return lengthSum;
+		}
+
+		/// <summary>
+		/// Returns the spline length using quadratic curve approximation for every cubic spline.
+		/// </summary>
+		/// <param name="useWorldScale"></param>
+		/// <returns></returns>
+		public float GetQuadraticLength(bool useWorldScale = true)
+		{
+
+			var lengthSum = 0f;
+			var curveCount = CurvesCount;
+
+			for (var i = 0; i < curveCount; i++)
+			{
+				var p0 = points[i * 3].position;
+				var p1 = points[i * 3 + 1].position;
+				var p2 = points[i * 3 + 2].position;
+				var p3 = points[i * 3 + 3].position;
+
+				if(useWorldScale)
+				{
+					p0 = transform.TransformPoint(p0);
+					p1 = transform.TransformPoint(p1);
+					p2 = transform.TransformPoint(p2);
+					p3 = transform.TransformPoint(p3);
+				}
+
+				lengthSum += BezierUtils.GetCubicLength(p0, p1, p2, p3);
+			}
+
+			return lengthSum;
+		}
 
 		/// <summary>
 		/// If spline is looping then returns next index taking into account the loop 
@@ -272,6 +308,73 @@ namespace SplineEditor
 			if(invokeEvents)
 			{
 				OnSplineChanged?.Invoke();
+			}
+		}
+
+		public Vector3[] GetEvenlySpacedPoints(int segmentsCount, float precision = 0.001f, bool useWorldSpace = true)
+		{
+			var results = new Vector3[segmentsCount];
+			GetEvenlySpacedPointsNonAlloc(segmentsCount, results, precision, useWorldSpace);
+
+			return results;
+		}
+
+		public void GetEvenlySpacedPointsNonAlloc(int segmentsCount, Vector3[] results, float precision = 0.001f, bool useWorldSpace = true)
+		{
+			if(segmentsCount == 0 || results == null || results.Length==0)
+			{
+				return;
+			}
+
+			var splineLength = GetLinearLength(false);
+			var segmentLength = splineLength / segmentsCount;
+
+			var t = precision;
+			var prevPoint = points[0].position;
+			results[0] = prevPoint;
+			var pointsProcessed = 1;
+			for(var i=1; i< segmentsCount && i<results.Length; i++)
+			{
+
+				var nextPoint = GetPoint(t, false);
+				var distance = Vector3.Distance(prevPoint, nextPoint);
+				while (distance < segmentLength && t < 1f)
+				{
+					t += precision;
+					prevPoint = nextPoint;
+					nextPoint = GetPoint(t, false);
+					distance += Vector3.Distance(prevPoint, nextPoint);
+				}
+
+
+
+				var alpha = segmentLength / distance;
+				nextPoint = Vector3.Lerp(prevPoint, nextPoint, alpha);
+
+				if (t >= 1f)
+				{
+					t -= precision;
+				}
+
+				results[i] = nextPoint;
+				prevPoint = nextPoint;
+				pointsProcessed++;
+			}
+
+
+			if (!IsLoop && results.Length > segmentsCount)
+			{
+				results[segmentsCount] = GetPoint(1f, false);
+				pointsProcessed++;
+			}
+
+			if (useWorldSpace)
+			{
+
+				for (var i = 0; i < pointsProcessed; i++)
+				{
+					results[i] = transform.TransformPoint(results[i]);
+				}
 			}
 		}
 

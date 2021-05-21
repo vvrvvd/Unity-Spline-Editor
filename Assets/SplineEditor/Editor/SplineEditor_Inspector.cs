@@ -27,7 +27,7 @@ namespace SplineEditor.Editor
 			var prevEnabled = GUI.enabled;
 			GUI.enabled = false;
 
-			EditorGUILayout.FloatField("Length", CurrentSpline.Length);
+			EditorGUILayout.FloatField("Length", CurrentSpline.GetQuadraticLength(true));
 
 			GUI.enabled = prevEnabled;
 		}

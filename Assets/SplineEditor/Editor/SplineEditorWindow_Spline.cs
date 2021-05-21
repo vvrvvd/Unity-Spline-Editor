@@ -122,7 +122,7 @@ namespace SplineEditor.Editor
 
 			var prevEnabled = GUI.enabled;
 			GUI.enabled = false;
-			var currentLength = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.Length : previousSplineLength;
+			var currentLength = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.GetLinearLength(true) : previousSplineLength;
 			GUILayout.Label(LengthSplineFieldContent);
 			GUILayout.Label(currentLength.ToString());
 
