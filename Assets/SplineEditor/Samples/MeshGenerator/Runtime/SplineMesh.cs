@@ -15,7 +15,7 @@ namespace SplineEditor.MeshGenerator
 
 		#region Public Fields
 
-		public int segmentsCount = 10;
+		public float spacing = 1f;
 		public float precision = 0.01f;
 		public float width = 5f;
 
@@ -24,24 +24,42 @@ namespace SplineEditor.MeshGenerator
 		#region Private Fields
 
 
+		[SerializeField, HideInInspector]
 		private MeshFilter meshFilter;
+		[SerializeField, HideInInspector]
 		private MeshRenderer meshRenderer;
+		[SerializeField, HideInInspector]
 		private BezierSpline bezierSpline;
 
 		private Mesh mesh;
 
 		private Vector3[] uvs;
-		private Vector3[] normals;
 		private Vector3[] vertices;
-		private Vector3[] segmentPoints;
+		private BezierSpline.BezierPath bezierPath;
 
 		#endregion
 
 		#region Properties
 
+		public int SegmentCounts
+		{
+			//TODO: Cache
+			get
+			{
+				var count = (int)(BezierSpline.GetLinearLength(false) / spacing);
+
+				if (!BezierSpline.IsLoop)
+				{
+					count += 1;
+				}
+				return count;
+			}
+		}
+
 		public MeshFilter MeshFilter => meshFilter;
 		public MeshRenderer MeshRenderer => meshRenderer;
 		public BezierSpline BezierSpline => bezierSpline;
+		public BezierSpline.BezierPath BezierPath => bezierPath;
 
 		#endregion
 
@@ -50,10 +68,25 @@ namespace SplineEditor.MeshGenerator
 		private void OnValidate()
 		{
 			precision = Mathf.Max(precision, 0.001f);
-			segmentsCount = Mathf.Max(segmentsCount, 1);
+			spacing = Mathf.Max(spacing, 0.1f);
 
 			ResizePointsArray();
 			GenerateMesh();
+
+			if (meshFilter == null)
+			{
+				meshFilter = GetComponent<MeshFilter>();
+			}
+
+			if (meshRenderer == null)
+			{
+				meshRenderer = GetComponent<MeshRenderer>();
+			}
+
+			if (bezierSpline == null)
+			{
+				bezierSpline = GetComponent<BezierSpline>();
+			}
 
 			bezierSpline.OnSplineChanged -= GenerateMesh;
 			bezierSpline.OnSplineChanged += GenerateMesh;
@@ -61,9 +94,20 @@ namespace SplineEditor.MeshGenerator
 
 		private void Awake()
 		{
-			meshFilter = GetComponent<MeshFilter>();
-			meshRenderer = GetComponent<MeshRenderer>();
-			bezierSpline = GetComponent<BezierSpline>();
+			if (meshFilter == null)
+			{
+				meshFilter = GetComponent<MeshFilter>();
+			}
+
+			if (meshRenderer == null)
+			{
+				meshRenderer = GetComponent<MeshRenderer>();
+			}
+
+			if (bezierSpline == null)
+			{
+				bezierSpline = GetComponent<BezierSpline>();
+			}
 
 			Assert.IsNotNull(meshFilter);
 			Assert.IsNotNull(meshRenderer);
@@ -87,50 +131,47 @@ namespace SplineEditor.MeshGenerator
 			meshFilter.sharedMesh = mesh;
 		}
 
+		//TODO: Move it
+
 		public Mesh ConstructMesh()
 		{
-			GenerateEvenlySpacedPoints();
+			int[] triangleMap = { 0, 2, 1, 1, 2, 3 };
+
+			ResizePointsArray();
+			BezierSpline.GetEvenlySpacedPoints(spacing, bezierPath, precision, false);
+			bezierPath.RecalculateNormals(bezierSpline.IsLoop);
 
 			var isLoop = BezierSpline.IsLoop;
-			var verts = new Vector3[segmentPoints.Length * 2];
+			var verts = new Vector3[bezierPath.points.Length * 2];
 			var uvs = new Vector2[verts.Length];
-			var numTris = 2 * (segmentPoints.Length - 1) + (isLoop ? 2 : 0);
+			var numTris = 2 * (bezierPath.points.Length - 1) + (isLoop ? 2 : 1);
 			var tris = new int[numTris * 3];
 			var vertIndex = 0;
 			var triIndex = 0;
 
-			for (int i = 0; i < segmentPoints.Length; i++)
+			//TODO: Add auto normals
+			var usePathNormals = true;
+
+			for (int i = 0; i < bezierPath.points.Length; i++)
 			{
-				var forward = Vector3.zero;
-				if (i < segmentPoints.Length - 1 || isLoop)
-				{
-					forward += segmentPoints[(i + 1) % segmentPoints.Length] - segmentPoints[i];
-				}
-				if (i > 0 || isLoop)
-				{
-					forward += segmentPoints[i] - segmentPoints[(i - 1 + segmentPoints.Length) % segmentPoints.Length];
-				}
 
-				forward.Normalize();
-				var left = new Vector3(-forward.y, forward.x);
+				var up = usePathNormals ? Vector3.Cross(bezierPath.tangents[i], bezierPath.normals[i]) : Vector3.up;
+				var right = usePathNormals ? bezierPath.normals[i] : Vector3.Cross(up, bezierPath.tangents[i]);
 
-				verts[vertIndex] = segmentPoints[i] + left * width * .5f;
-				verts[vertIndex + 1] = segmentPoints[i] - left * width * .5f;
+				verts[vertIndex] = bezierPath.points[i] - right * width * .5f;
+				verts[vertIndex + 1] = bezierPath.points[i] + right * width * .5f;
 
-				float completionPercent = i / (float)(segmentPoints.Length - 1);
+				float completionPercent = i / (float)(bezierPath.points.Length - 1);
 				float v = 1 - Mathf.Abs(2 * completionPercent - 1);
 				uvs[vertIndex] = new Vector2(0, v);
 				uvs[vertIndex + 1] = new Vector2(1, v);
 
-				if (i < segmentPoints.Length - 1 || isLoop)
+				if (i < bezierPath.points.Length - 1 || isLoop)
 				{
-					tris[triIndex] = vertIndex;
-					tris[triIndex + 1] = (vertIndex + 2) % verts.Length;
-					tris[triIndex + 2] = vertIndex + 1;
-
-					tris[triIndex + 3] = vertIndex + 1;
-					tris[triIndex + 4] = (vertIndex + 2) % verts.Length;
-					tris[triIndex + 5] = (vertIndex + 3) % verts.Length;
+					for (int j = 0; j < triangleMap.Length; j++)
+					{
+						tris[triIndex + j] = (vertIndex + triangleMap[j]) % verts.Length;
+					}
 				}
 
 				vertIndex += 2;
@@ -149,14 +190,6 @@ namespace SplineEditor.MeshGenerator
 
 		#region Private Methods
 
-
-
-		private void GenerateEvenlySpacedPoints()
-		{
-			ResizePointsArray();
-			BezierSpline.GetEvenlySpacedPointsNonAlloc(segmentsCount, segmentPoints, precision, false);
-		}
-
 		private void ResizePointsArray()
 		{
 			if (BezierSpline == null)
@@ -164,15 +197,19 @@ namespace SplineEditor.MeshGenerator
 				return;
 			}
 
-			if (segmentPoints == null)
+			var segmentsCount = SegmentCounts;
+
+			if (bezierPath == null)
 			{
-				segmentPoints = new Vector3[segmentsCount];
+				bezierPath = new BezierSpline.BezierPath(segmentsCount);
 			}
 
-			if ((BezierSpline.IsLoop && segmentPoints.Length != segmentsCount) || (!BezierSpline.IsLoop && segmentPoints.Length != segmentsCount + 1))
+			if (bezierPath.points.Length != spacing)
 			{
-				var newArraySize = BezierSpline.IsLoop ? segmentsCount : segmentsCount + 1;
-				Array.Resize(ref segmentPoints, newArraySize);
+				var newArraySize = segmentsCount;
+				Array.Resize(ref bezierPath.points, newArraySize);
+				Array.Resize(ref bezierPath.normals, newArraySize);
+				Array.Resize(ref bezierPath.tangents, newArraySize);
 			}
 		}
 

@@ -64,7 +64,7 @@ namespace SplineEditor
 		/// <summary>
 		/// Number of curves in the splines.
 		/// </summary>
-		public int CurvesCount => Mathf.Max(0 ,(PointsCount - 1) / 3);
+		public int CurvesCount => Mathf.Max(0, (PointsCount - 1) / 3);
 
 		/// <summary>
 		/// Number of points in the spline.
@@ -166,7 +166,7 @@ namespace SplineEditor
 				var p2 = points[i * 3 + 2].position;
 				var p3 = points[i * 3 + 3].position;
 
-				if(useWorldScale)
+				if (useWorldScale)
 				{
 					p0 = transform.TransformPoint(p0);
 					p1 = transform.TransformPoint(p1);
@@ -189,9 +189,9 @@ namespace SplineEditor
 		public int GetLoopingIndex(int pointIndex)
 		{
 
-			if((pointIndex < 0 || pointIndex >= points.Count))
+			if ((pointIndex < 0 || pointIndex >= points.Count))
 			{
-				if(isLoop)
+				if (isLoop)
 				{
 					return pointIndex < 0 ? points.Count - 1 + pointIndex : pointIndex - points.Count - 1;
 				}
@@ -305,40 +305,34 @@ namespace SplineEditor
 			ApplyContraints(pointIndex);
 
 			invokeEvents = prevInvokeEvents;
-			if(invokeEvents)
+			if (invokeEvents)
 			{
 				OnSplineChanged?.Invoke();
 			}
 		}
 
-		public Vector3[] GetEvenlySpacedPoints(int segmentsCount, float precision = 0.001f, bool useWorldSpace = true)
+		public void GetEvenlySpacedPoints(float spacing, BezierPath bezierPath, float precision = 0.001f, bool useWorldSpace = true)
 		{
-			var results = new Vector3[segmentsCount];
-			GetEvenlySpacedPointsNonAlloc(segmentsCount, results, precision, useWorldSpace);
+			var spacedPoints = new List<Vector3>();
+			var tangents = new List<Vector3>();
 
-			return results;
-		}
-
-		public void GetEvenlySpacedPointsNonAlloc(int segmentsCount, Vector3[] results, float precision = 0.001f, bool useWorldSpace = true)
-		{
-			if(segmentsCount == 0 || results == null || results.Length==0)
+			if (bezierPath.points == null || bezierPath.points.Length == 0)
 			{
 				return;
 			}
 
 			var splineLength = GetLinearLength(false);
-			var segmentLength = splineLength / segmentsCount;
+			var segmentsCount = (int)(splineLength / spacing)+1;
 
 			var t = precision;
 			var prevPoint = points[0].position;
-			results[0] = prevPoint;
-			var pointsProcessed = 1;
-			for(var i=1; i< segmentsCount && i<results.Length; i++)
+			spacedPoints.Add(prevPoint);
+			tangents.Add(GetDirection(0f));
+			for (var i = 1; i < segmentsCount ; i++)
 			{
-
 				var nextPoint = GetPoint(t, false);
 				var distance = Vector3.Distance(prevPoint, nextPoint);
-				while (distance < segmentLength && t < 1f)
+				while (distance < spacing && t < 1f)
 				{
 					t += precision;
 					prevPoint = nextPoint;
@@ -346,34 +340,122 @@ namespace SplineEditor
 					distance += Vector3.Distance(prevPoint, nextPoint);
 				}
 
-				var alpha = segmentLength / distance;
+				var alpha = spacing / distance;
 				nextPoint = Vector3.Lerp(prevPoint, nextPoint, alpha);
+				spacedPoints.Add(nextPoint);
+
+				t = t + (alpha - 1) * precision;
+
+				tangents.Add(GetDirection(t));
+				prevPoint = nextPoint;
 
 				if (t >= 1f)
 				{
-					t -= precision;
+					break;
 				}
 
-				results[i] = nextPoint;
-				prevPoint = nextPoint;
-				pointsProcessed++;
 			}
 
-
-			if (!IsLoop && results.Length > segmentsCount)
+			if (!IsLoop)
 			{
-				results[segmentsCount] = GetPoint(1f, false);
-				pointsProcessed++;
+				spacedPoints.Add(GetPoint(1f, false));
+				tangents.Add(GetDirection(1f));
 			}
+
+			bezierPath.points = spacedPoints.ToArray();
+			bezierPath.tangents = tangents.ToArray();
+			bezierPath.normals = tangents.ToArray();
+
+			bezierPath.RecalculateNormals(IsLoop);
 
 			if (useWorldSpace)
 			{
 
-				for (var i = 0; i < pointsProcessed; i++)
+				for (var i = 0; i < bezierPath.points.Length; i++)
 				{
-					results[i] = transform.TransformPoint(results[i]);
+					bezierPath.points[i] = transform.TransformPoint(bezierPath.points[i]);
 				}
 			}
+		}
+
+		//TODO: Move this
+		public class BezierPath
+		{
+			public Vector3[] points;
+			public Vector3[] normals;
+			public Vector3[] tangents;
+
+			public BezierPath(int segmentPoints)
+			{
+				this.points = new Vector3[segmentPoints];
+				this.normals = new Vector3[segmentPoints];
+				this.tangents = new Vector3[segmentPoints];
+			}
+
+			public BezierPath(Vector3[] points, Vector3[] tangents, Vector3[] normals, bool isLoop)
+			{
+				this.points = points;
+				this.normals = normals;
+				this.tangents = tangents;
+
+				RecalculateNormals(isLoop);
+			}
+
+			public void RecalculateNormals(bool isLoop)
+			{
+				if(normals.Length < points.Length)
+				{
+					Array.Resize(ref normals, points.Length);
+				}
+
+				var lastRotationAxis = -Vector3.forward;
+
+				for (var i = 0; i < points.Length; i++)
+				{
+					if (i == 0)
+					{
+						normals[0] = Vector3.Cross(lastRotationAxis, tangents[0]).normalized;
+					}
+					else
+					{
+						// First reflection
+						Vector3 offset = (points[i] - points[i - 1]);
+						float sqrDst = offset.sqrMagnitude;
+						Vector3 r = lastRotationAxis - offset * 2 / sqrDst * Vector3.Dot(offset, lastRotationAxis);
+						Vector3 t = tangents[i - 1] - offset * 2 / sqrDst * Vector3.Dot(offset, tangents[i - 1]);
+
+						// Second reflection
+						Vector3 v2 = tangents[i] - t;
+						float c2 = Vector3.Dot(v2, v2);
+
+						Vector3 finalRot = r - v2 * 2 / c2 * Vector3.Dot(v2, r);
+						Vector3 n = Vector3.Cross(finalRot, tangents[i]).normalized;
+						normals[i] = n;
+						lastRotationAxis = finalRot;
+					}
+				}
+
+				if (isLoop)
+				{
+					// Get angle between first and last normal (if zero, they're already lined up, otherwise we need to correct)
+					float normalsAngleErrorAcrossJoin = Vector3.SignedAngle(normals[normals.Length - 1], normals[0], tangents[0]);
+					// Gradually rotate the normals along the path to ensure start and end normals line up correctly
+					if (Mathf.Abs(normalsAngleErrorAcrossJoin) > 0.1f) // don't bother correcting if very nearly correct
+					{
+						for (int i = 1; i < normals.Length; i++)
+						{
+							float t = (i / (normals.Length - 1f));
+							float angle = normalsAngleErrorAcrossJoin * t;
+							Quaternion rot = Quaternion.AngleAxis(angle, tangents[i]);
+
+							//TODO: Flipping normals
+							normals[i] = rot * normals[i] * ((false/*bezierPath.FlipNormals*/) ? -1 : 1);
+						}
+					}
+
+				}
+			}
+
 		}
 
 		#endregion
@@ -521,7 +603,8 @@ namespace SplineEditor
 			else if (isMidCurve)
 			{
 				startCurveIndex += 2;
-			} else if(!removeFirstPoints)
+			}
+			else if (!removeFirstPoints)
 			{
 				startCurveIndex += 3;
 			}
@@ -570,9 +653,10 @@ namespace SplineEditor
 				IsLoop = false;
 				RemoveCurve(CurvesCount - 1, false);
 			}
-			else { 
+			else
+			{
 
-				if (points[0].position != points[PointsCount-1].position)
+				if (points[0].position != points[PointsCount - 1].position)
 				{
 					var p0 = points[PointsCount - 1].position;
 					var p1 = p0 - (points[PointsCount - 2].position - p0);
@@ -646,7 +730,7 @@ namespace SplineEditor
 		public void InsertCurve(int curveIndex, float t)
 		{
 			t = Mathf.Clamp01(t);
-			if(t == 0f || t == 1f)
+			if (t == 0f || t == 1f)
 			{
 				return;
 			}
@@ -674,7 +758,7 @@ namespace SplineEditor
 
 			var p3 = points[startPointIndex + 3].position;
 
-			newT = (curveIndex + t + (1f - t)*0.4f) / CurvesCount;
+			newT = (curveIndex + t + (1f - t) * 0.4f) / CurvesCount;
 			pointOnCurve1 = GetPoint(newT, false);
 
 			newT = (curveIndex + t + (1f - t) * 0.8f) / CurvesCount;
@@ -694,7 +778,7 @@ namespace SplineEditor
 			AddPoint(rightControlPoint, startPointIndex + 4);
 
 			var modeIndex = (startPointIndex + 3) / 3;
-			var prevMode = modes[modeIndex-1];
+			var prevMode = modes[modeIndex - 1];
 			modes.Insert(modeIndex, prevMode);
 
 			ApplyAutoSetToAllControlPoints();
@@ -715,7 +799,7 @@ namespace SplineEditor
 			var prevInvokeEvents = invokeEvents;
 			invokeEvents = false;
 
-			for (var i = 0; i < PointsCount; i+=3)
+			for (var i = 0; i < PointsCount; i += 3)
 			{
 				SetControlPointMode(i, mode);
 			}
@@ -816,7 +900,7 @@ namespace SplineEditor
 
 		private void ApplyAutoSetToAllControlPoints()
 		{
-			for(var i=0; i < PointsCount; i+=3)
+			for (var i = 0; i < PointsCount; i += 3)
 			{
 				ApplyAffectedAutoSetControlPoints(i);
 			}
@@ -851,7 +935,7 @@ namespace SplineEditor
 
 		private void ApplyAutoSetControlPoints(int curveIndex)
 		{
-			if(modes[curveIndex]!=BezierControlPointMode.Auto)
+			if (modes[curveIndex] != BezierControlPointMode.Auto)
 			{
 				return;
 			}
@@ -861,13 +945,13 @@ namespace SplineEditor
 			var previousPointPosition = startPointPosition;
 			var nextPointPosition = startPointPosition;
 
-			if(curveIndex > 0 || isLoop)
+			if (curveIndex > 0 || isLoop)
 			{
 				var loopedIndex = GetLoopingIndex(startPointIndex - 3);
 				previousPointPosition = Points[loopedIndex].position;
-			} 
+			}
 
-			if(curveIndex < CurvesCount || isLoop)
+			if (curveIndex < CurvesCount || isLoop)
 			{
 				var loopedIndex = GetLoopingIndex(startPointIndex + 3);
 				nextPointPosition = Points[loopedIndex].position;
@@ -880,13 +964,13 @@ namespace SplineEditor
 			var prevControlPointIndex = GetLoopingIndex(startPointIndex - 1);
 			var nextControlPointIndex = GetLoopingIndex(startPointIndex + 1);
 
-			if(prevControlPointIndex != -1)
+			if (prevControlPointIndex != -1)
 			{
 				var updatedPosition = Points[startPointIndex].position + dir * prevDistance.magnitude * 0.5f;
 				Points[prevControlPointIndex].position = updatedPosition;
 			}
 
-			if(nextControlPointIndex != -1)
+			if (nextControlPointIndex != -1)
 			{
 				var updatedPosition = Points[startPointIndex].position - dir * nextDistance.magnitude * 0.5f;
 				Points[nextControlPointIndex].position = updatedPosition;
@@ -911,17 +995,17 @@ namespace SplineEditor
 				else
 				{
 					ApplyAutoSetControlPoints(0);
-					ApplyAutoSetControlPoints(CurvesCount-1);
+					ApplyAutoSetControlPoints(CurvesCount - 1);
 				}
 			}
 			else
 			{
-				if(modes[0] == BezierControlPointMode.Auto)
+				if (modes[0] == BezierControlPointMode.Auto)
 				{
 					points[1].position = (points[0].position + points[2].position) * 0.5f;
 				}
 
-				if(modes[modes.Count-1] == BezierControlPointMode.Auto)
+				if (modes[modes.Count - 1] == BezierControlPointMode.Auto)
 				{
 					points[points.Count - 2].position = (points[points.Count - 1].position + points[points.Count - 3].position) * 0.5f;
 				}

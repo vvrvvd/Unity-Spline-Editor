@@ -11,12 +11,9 @@ namespace SplineEditor.MeshGenerator.Editor
 
 		private SplineMesh splineMesh;
 
-		private Vector3[] segmentPoints;
-
 		private void OnEnable()
 		{
 			splineMesh = target as SplineMesh;
-			segmentPoints = new Vector3[splineMesh.segmentsCount+1];
 		}
 
 		public override void OnInspectorGUI()
@@ -29,29 +26,33 @@ namespace SplineEditor.MeshGenerator.Editor
 			}
 		}
 
-		//private void OnSceneGUI()
-		//{
-		//	if(splineMesh.BezierSpline==null)
-		//	{
-		//		return;
-		//	}
+		private void OnSceneGUI()
+		{
+			if (splineMesh.BezierSpline == null)
+			{
+				return;
+			}
 
-		//	if((splineMesh.BezierSpline.IsLoop && segmentPoints.Length != splineMesh.segmentsCount) || (!splineMesh.BezierSpline.IsLoop && segmentPoints.Length != splineMesh.segmentsCount+1))
-		//	{
-		//		var newArraySize = splineMesh.BezierSpline.IsLoop ? splineMesh.segmentsCount : splineMesh.segmentsCount + 1;
-		//		Array.Resize(ref segmentPoints, newArraySize);
-		//	}
+			var segmentPoints = splineMesh.BezierPath.points;
+			var normals = splineMesh.BezierPath.normals;
 
-		//	splineMesh.BezierSpline.GetEvenlySpacedPointsNonAlloc(splineMesh.segmentsCount, segmentPoints, splineMesh.precision);
-
-		//	Handles.color = Color.blue;
-		//	for(var i=0; i<segmentPoints.Length; i++)
-		//	{
-		//		var point = segmentPoints[i];
-		//		var size = HandleUtility.GetHandleSize(point);
-		//		Handles.Button(point, Quaternion.identity, size*0.1f, size*0.1f, Handles.DotHandleCap);
-		//	}
-		//}
+			var prevEnabled = GUI.enabled;
+			GUI.enabled = false;
+			Handles.color = Color.blue;
+			for (var i = 0; i < segmentPoints.Length; i++)
+			{
+				var point = splineMesh.transform.TransformPoint(segmentPoints[i]);
+				var size = HandleUtility.GetHandleSize(point);
+				var normal = normals[i];
+				var normalLength = 5f;
+				var handleSize = 0.05f;
+				Handles.color = Color.blue;
+				Handles.Button(point, Quaternion.identity, size * handleSize, size * handleSize, Handles.DotHandleCap);
+				Handles.color = Color.green;
+				Handles.DrawLine(point, point + normal * normalLength);
+			}
+			GUI.enabled = prevEnabled;
+		}
 	}
 
 }
