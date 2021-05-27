@@ -19,6 +19,8 @@ namespace SplineEditor.MeshGenerator
 		public float precision = 0.01f;
 		public float width = 5f;
 
+		public Vector3[] normals;
+
 		#endregion
 
 		#region Private Fields
@@ -35,7 +37,8 @@ namespace SplineEditor.MeshGenerator
 
 		private Vector3[] uvs;
 		private Vector3[] vertices;
-		private BezierSpline.BezierPath bezierPath;
+
+		private SplinePath bezierPath;
 
 		#endregion
 
@@ -59,7 +62,7 @@ namespace SplineEditor.MeshGenerator
 		public MeshFilter MeshFilter => meshFilter;
 		public MeshRenderer MeshRenderer => meshRenderer;
 		public BezierSpline BezierSpline => bezierSpline;
-		public BezierSpline.BezierPath BezierPath => bezierPath;
+		public SplinePath SplinePath => bezierPath;
 
 		#endregion
 
@@ -156,7 +159,7 @@ namespace SplineEditor.MeshGenerator
 			{
 
 				var up = usePathNormals ? Vector3.Cross(bezierPath.tangents[i], bezierPath.normals[i]) : Vector3.up;
-				var right = usePathNormals ? bezierPath.normals[i] : Vector3.Cross(up, bezierPath.tangents[i]);
+				var right = usePathNormals ? Vector3.Cross(bezierPath.normals[i], bezierPath.tangents[i]) : Vector3.Cross(up, bezierPath.tangents[i]);
 
 				verts[vertIndex] = bezierPath.points[i] - right * width * .5f;
 				verts[vertIndex + 1] = bezierPath.points[i] + right * width * .5f;
@@ -186,6 +189,61 @@ namespace SplineEditor.MeshGenerator
 			return mesh;
 		}
 
+		public void RecalculateNormals(bool isLoop)
+		{
+			if (normals.Length < points.Length)
+			{
+				Array.Resize(ref normals, points.Length);
+			}
+
+			var lastRotationAxis = -Vector3.forward;
+
+			for (var i = 0; i < points.Length; i++)
+			{
+				if (i == 0)
+				{
+					normals[0] = Vector3.Cross(lastRotationAxis, tangents[0]).normalized;
+				}
+				else
+				{
+					// First reflection
+					Vector3 offset = (points[i] - points[i - 1]);
+					float sqrDst = offset.sqrMagnitude;
+					Vector3 r = lastRotationAxis - offset * 2 / sqrDst * Vector3.Dot(offset, lastRotationAxis);
+					Vector3 t = tangents[i - 1] - offset * 2 / sqrDst * Vector3.Dot(offset, tangents[i - 1]);
+
+					// Second reflection
+					Vector3 v2 = tangents[i] - t;
+					float c2 = Vector3.Dot(v2, v2);
+
+					Vector3 finalRot = r - v2 * 2 / c2 * Vector3.Dot(v2, r);
+					Vector3 n = Vector3.Cross(finalRot, tangents[i]).normalized;
+					normals[i] = n;
+					lastRotationAxis = finalRot;
+				}
+			}
+
+			if (isLoop)
+			{
+				// Get angle between first and last normal (if zero, they're already lined up, otherwise we need to correct)
+				float normalsAngleErrorAcrossJoin = Vector3.SignedAngle(normals[normals.Length - 1], normals[0], tangents[0]);
+				// Gradually rotate the normals along the path to ensure start and end normals line up correctly
+				if (Mathf.Abs(normalsAngleErrorAcrossJoin) > 0.1f) // don't bother correcting if very nearly correct
+				{
+					for (int i = 1; i < normals.Length; i++)
+					{
+						float t = (i / (normals.Length - 1f));
+						float angle = normalsAngleErrorAcrossJoin * t;
+						Quaternion rot = Quaternion.AngleAxis(angle, tangents[i]);
+
+						//TODO: Flipping normals
+						normals[i] = rot * normals[i] * ((false/*bezierPath.FlipNormals*/) ? -1 : 1);
+					}
+				}
+
+			}
+		}
+
 		#endregion
 
 		#region Private Methods
@@ -201,7 +259,7 @@ namespace SplineEditor.MeshGenerator
 
 			if (bezierPath == null)
 			{
-				bezierPath = new BezierSpline.BezierPath(segmentsCount);
+				bezierPath = new SplinePath(segmentsCount);
 			}
 
 			if (bezierPath.points.Length != spacing)
@@ -214,7 +272,5 @@ namespace SplineEditor.MeshGenerator
 		}
 
 		#endregion
-
-	}
 
 }

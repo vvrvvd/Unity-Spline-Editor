@@ -33,8 +33,8 @@ namespace SplineEditor.MeshGenerator.Editor
 				return;
 			}
 
-			var segmentPoints = splineMesh.BezierPath.points;
-			var normals = splineMesh.BezierPath.normals;
+			var segmentPoints = splineMesh.SplinePath.points;
+			var normals = splineMesh.SplinePath.normals;
 
 			var prevEnabled = GUI.enabled;
 			GUI.enabled = false;

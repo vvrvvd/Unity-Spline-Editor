@@ -378,84 +378,6 @@ namespace SplineEditor
 			}
 		}
 
-		//TODO: Move this
-		public class BezierPath
-		{
-			public Vector3[] points;
-			public Vector3[] normals;
-			public Vector3[] tangents;
-
-			public BezierPath(int segmentPoints)
-			{
-				this.points = new Vector3[segmentPoints];
-				this.normals = new Vector3[segmentPoints];
-				this.tangents = new Vector3[segmentPoints];
-			}
-
-			public BezierPath(Vector3[] points, Vector3[] tangents, Vector3[] normals, bool isLoop)
-			{
-				this.points = points;
-				this.normals = normals;
-				this.tangents = tangents;
-
-				RecalculateNormals(isLoop);
-			}
-
-			public void RecalculateNormals(bool isLoop)
-			{
-				if(normals.Length < points.Length)
-				{
-					Array.Resize(ref normals, points.Length);
-				}
-
-				var lastRotationAxis = -Vector3.forward;
-
-				for (var i = 0; i < points.Length; i++)
-				{
-					if (i == 0)
-					{
-						normals[0] = Vector3.Cross(lastRotationAxis, tangents[0]).normalized;
-					}
-					else
-					{
-						// First reflection
-						Vector3 offset = (points[i] - points[i - 1]);
-						float sqrDst = offset.sqrMagnitude;
-						Vector3 r = lastRotationAxis - offset * 2 / sqrDst * Vector3.Dot(offset, lastRotationAxis);
-						Vector3 t = tangents[i - 1] - offset * 2 / sqrDst * Vector3.Dot(offset, tangents[i - 1]);
-
-						// Second reflection
-						Vector3 v2 = tangents[i] - t;
-						float c2 = Vector3.Dot(v2, v2);
-
-						Vector3 finalRot = r - v2 * 2 / c2 * Vector3.Dot(v2, r);
-						Vector3 n = Vector3.Cross(finalRot, tangents[i]).normalized;
-						normals[i] = n;
-						lastRotationAxis = finalRot;
-					}
-				}
-
-				if (isLoop)
-				{
-					// Get angle between first and last normal (if zero, they're already lined up, otherwise we need to correct)
-					float normalsAngleErrorAcrossJoin = Vector3.SignedAngle(normals[normals.Length - 1], normals[0], tangents[0]);
-					// Gradually rotate the normals along the path to ensure start and end normals line up correctly
-					if (Mathf.Abs(normalsAngleErrorAcrossJoin) > 0.1f) // don't bother correcting if very nearly correct
-					{
-						for (int i = 1; i < normals.Length; i++)
-						{
-							float t = (i / (normals.Length - 1f));
-							float angle = normalsAngleErrorAcrossJoin * t;
-							Quaternion rot = Quaternion.AngleAxis(angle, tangents[i]);
-
-							//TODO: Flipping normals
-							normals[i] = rot * normals[i] * ((false/*bezierPath.FlipNormals*/) ? -1 : 1);
-						}
-					}
-
-				}
-			}
-
 		}
 
 		#endregion
@@ -1034,8 +956,9 @@ namespace SplineEditor
 			RemoveCurve(curveIndex, true);
 		}
 
-		#endregion
+	#endregion
 
-	}
+
+}
 
 }
