@@ -34,7 +34,7 @@ namespace SplineEditor.MeshGenerator.Editor
 			}
 
 			var segmentPoints = splineMesh.SplinePath.points;
-			var normals = splineMesh.SplinePath.normals;
+			var normals = splineMesh.Normals;
 
 			var prevEnabled = GUI.enabled;
 			GUI.enabled = false;

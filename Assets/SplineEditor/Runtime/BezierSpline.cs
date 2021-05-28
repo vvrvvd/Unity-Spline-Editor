@@ -311,15 +311,10 @@ namespace SplineEditor
 			}
 		}
 
-		public void GetEvenlySpacedPoints(float spacing, BezierPath bezierPath, float precision = 0.001f, bool useWorldSpace = true)
+		public void GetEvenlySpacedPoints(float spacing, SplinePath bezierPath, float precision = 0.001f, bool useWorldSpace = true)
 		{
 			var spacedPoints = new List<Vector3>();
 			var tangents = new List<Vector3>();
-
-			if (bezierPath.points == null || bezierPath.points.Length == 0)
-			{
-				return;
-			}
 
 			var splineLength = GetLinearLength(false);
 			var segmentsCount = (int)(splineLength / spacing)+1;
@@ -364,9 +359,6 @@ namespace SplineEditor
 
 			bezierPath.points = spacedPoints.ToArray();
 			bezierPath.tangents = tangents.ToArray();
-			bezierPath.normals = tangents.ToArray();
-
-			bezierPath.RecalculateNormals(IsLoop);
 
 			if (useWorldSpace)
 			{
@@ -376,8 +368,6 @@ namespace SplineEditor
 					bezierPath.points[i] = transform.TransformPoint(bezierPath.points[i]);
 				}
 			}
-		}
-
 		}
 
 		#endregion
@@ -958,7 +948,6 @@ namespace SplineEditor
 
 	#endregion
 
-
-}
+	}
 
 }
