@@ -37,19 +37,33 @@ namespace SplineEditor
 		public bool showTransformHandle = true;
 		[HideInInspector]
 		public bool alwaysDrawSplineOnScene = true;
+		[HideInInspector]
+		public bool drawNormals = false;
 
 		#endregion
 
 		#region Editor Fields
 
-		[SerializeField]
+		[SerializeField, HideInInspector]
 		private bool isLoop = default;
 
-		[SerializeField]
+		[SerializeField, HideInInspector]
+		private bool flipNormals = default;
+
+		[SerializeField, HideInInspector]
+		private float globalNormalsRotation = default;
+
+		[SerializeField, HideInInspector]
 		protected List<SplinePoint> points = default;
 
-		[SerializeField]
+		[SerializeField, HideInInspector]
 		private List<BezierControlPointMode> modes = default;
+
+		[SerializeField, HideInInspector]
+		private Vector3[] normals = default;
+
+		[SerializeField, HideInInspector]
+		private List<float> normalsRotationalOffset = default;
 
 		#endregion
 
@@ -77,6 +91,16 @@ namespace SplineEditor
 		public List<SplinePoint> Points => points;
 
 		/// <summary>
+		/// Calculated normals for Points.
+		/// </summary>
+		public Vector3[] Normals => normals;
+
+		/// <summary>
+		/// Rotational offsets of normals for Points.
+		/// </summary>
+		public List<float> NormalsOffset => normalsRotationalOffset;
+
+		/// <summary>
 		/// Returns if the spline is looped.
 		/// If true then the first and the last point are considered the same point.
 		/// </summary>
@@ -97,6 +121,38 @@ namespace SplineEditor
 			}
 		}
 
+		/// <summary>
+		/// Should normals be flipped to face opposite direction.
+		/// </summary>
+		public bool FlipNormals
+		{
+			get
+			{
+				return flipNormals;
+			}
+			set
+			{
+				flipNormals = value;
+				OnSplineChanged?.Invoke();
+			}
+		}
+
+		/// <summary>
+		/// Offset rotation of every normal along the spline direction axis at given point.
+		/// </summary>
+		public float GlobalNormalsRotation
+		{
+			get
+			{
+				return globalNormalsRotation;
+			}
+			set
+			{
+				globalNormalsRotation = value;
+				OnSplineChanged?.Invoke();
+			}
+		}
+
 		#endregion
 
 		#region Initialize
@@ -104,7 +160,8 @@ namespace SplineEditor
 		private void Reset()
 		{
 			modes = new List<BezierControlPointMode>();
-			points = new List<SplinePoint>(1000);
+			points = new List<SplinePoint>(4);
+			normalsRotationalOffset = new List<float>(2);
 
 			var p0 = new Vector3(1f, 0f, 0f);
 			var p1 = new Vector3(1.5f, 0f, 0f);
@@ -118,6 +175,9 @@ namespace SplineEditor
 
 			modes.Add(BezierControlPointMode.Free);
 			modes.Add(BezierControlPointMode.Free);
+
+			RecalculateNormals();
+			OnSplineChanged += RecalculateNormals;
 		}
 
 		#endregion
@@ -311,6 +371,14 @@ namespace SplineEditor
 			}
 		}
 
+		/// <summary>
+		/// Calculates evenly spaced points and their respective directions (tangents) across the spline with given parameters.
+		/// Points are being saved in SplinePath object.
+		/// </summary>
+		/// <param name="spacing">Distance between points.</param>
+		/// <param name="bezierPath">Object for keeping generated points parameters.</param>
+		/// <param name="precision">Precision of spline approximation used for calculating points (the lower value, the higher precision).</param>
+		/// <param name="useWorldSpace">Transform points from local space to world space.</param>
 		public void GetEvenlySpacedPoints(float spacing, SplinePath bezierPath, float precision = 0.001f, bool useWorldSpace = true)
 		{
 			var spacedPoints = new List<Vector3>();
@@ -368,6 +436,123 @@ namespace SplineEditor
 					bezierPath.points[i] = transform.TransformPoint(bezierPath.points[i]);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Recalculate normals for control points.
+		/// </summary>
+		public void RecalculateNormals()
+		{
+			var curvesCount = CurvesCount;
+			if (Normals == null)
+			{
+				normals = new Vector3[curvesCount + 1];
+			}
+
+			else if (Normals.Length != curvesCount+1)
+			{
+				Array.Resize(ref normals, curvesCount+1);
+			}
+
+			var precision = 0.001f;
+			var splineLength = GetLinearLength(false);
+			var spacing = splineLength / (PointsCount / 3) / 6;
+			var segmentsCount = (int)(splineLength / spacing) + 1;
+			
+			var lastRotationAxis = Quaternion.Euler(GlobalNormalsRotation, 0f, 0f) * ((FlipNormals ? 1 : -1) * Vector3.forward);
+			Normals[0] = Vector3.Cross(lastRotationAxis, GetPoint(0f)).normalized;
+
+			var pointIndex = 1;
+			var t = precision;
+			var prevT = 0f;
+			var prevTan = GetDirection(prevT);
+			var prevPoint = points[0].position;
+			var currentTargetT = pointIndex * (1f / CurvesCount);
+			for (var i = 1; i < segmentsCount; i++)
+			{
+				var nextPoint = GetPoint(t, false);
+				var distance = Vector3.Distance(prevPoint, nextPoint);
+				while (distance < spacing && t < 1f)
+				{
+					t += precision;
+					prevPoint = nextPoint;
+					nextPoint = GetPoint(t, false);
+					distance += Vector3.Distance(prevPoint, nextPoint);
+				}
+
+				var alpha = spacing / distance;
+				nextPoint = Vector3.Lerp(prevPoint, nextPoint, alpha);
+
+				if (t >= currentTargetT)
+				{
+					var prevNextPoint = nextPoint;
+					nextPoint = GetPoint(currentTargetT);
+					var currentTan2 = GetDirection(currentTargetT);
+
+					// First reflection
+					var offset2 = (nextPoint - prevPoint);
+					var sqrDst2 = offset2.sqrMagnitude;
+					var rot2 = lastRotationAxis - offset2 * 2 / sqrDst2 * Vector3.Dot(offset2, lastRotationAxis);
+					var tan2 = prevTan - offset2 * 2 / sqrDst2 * Vector3.Dot(offset2, prevTan);
+
+					// Second reflection
+					var v22 = currentTan2 - tan2;
+					var c22 = Vector3.Dot(v22, v22);
+
+					var finalRot2 = rot2 - v22 * 2 / c22 * Vector3.Dot(v22, rot2);
+					var targetTangent = GetDirection(currentTargetT);
+					Normals[pointIndex] = Vector3.Cross(finalRot2, targetTangent).normalized;
+					pointIndex += 1;
+					currentTargetT = pointIndex * (1f / CurvesCount);
+
+					nextPoint = prevNextPoint;
+				}
+
+				t += (alpha - 1) * precision;
+				var currentTan = GetDirection(t);
+
+				// First reflection
+				var offset = (nextPoint - prevPoint);
+				var sqrDst = offset.sqrMagnitude;
+				var rot = lastRotationAxis - offset * 2 / sqrDst * Vector3.Dot(offset, lastRotationAxis);
+				var tan = prevTan - offset * 2 / sqrDst * Vector3.Dot(offset, prevTan);
+
+				// Second reflection
+				var v2 = currentTan - tan;
+				var c2 = Vector3.Dot(v2, v2);
+
+				var finalRot = rot - v2 * 2 / c2 * Vector3.Dot(v2, rot);
+				prevTan = currentTan;
+				prevPoint = nextPoint;
+				lastRotationAxis = finalRot;
+
+
+				if (t >= 1f)
+				{
+					break;
+				}
+
+			}
+
+			if (isLoop && Normals.Length > 1)
+			{
+				// Get angle between first and last normal (if zero, they're already lined up, otherwise we need to correct)
+				float normalsAngleErrorAcrossJoin = Vector3.SignedAngle(Normals[Normals.Length - 1], Normals[0], GetDirection(0f));
+				// Gradually rotate the normals along the path to ensure start and end normals line up correctly
+				if (Mathf.Abs(normalsAngleErrorAcrossJoin) > 0.1f) // don't bother correcting if very nearly correct
+				{
+					for (int i = 1; i < Normals.Length; i++)
+					{
+						var pointT = (i / (Normals.Length - 1f));
+						var angle = normalsAngleErrorAcrossJoin * t;
+						var tangent = GetDirection(pointT);
+						Quaternion rot = Quaternion.AngleAxis(angle, tangent);
+
+						Normals[i] = rot * Normals[i];
+					}
+				}
+			}
+
 		}
 
 		#endregion

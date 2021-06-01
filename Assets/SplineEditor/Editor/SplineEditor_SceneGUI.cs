@@ -5,7 +5,7 @@ namespace SplineEditor.Editor
 {
 	public partial class SplineEditor : UnityEditor.Editor
 	{
-
+		 
 		#region Private Fields
 
 		private bool isRotating;
@@ -123,6 +123,20 @@ namespace SplineEditor.Editor
 				{
 					MovePoint(index, point);
 				}
+			}
+
+			//TODO: Test normals drawing
+			if(index % 3 == 0)
+			{
+				var normalIndex = index / 3;
+				if(currentSpline.Normals.Length <= normalIndex)
+				{ 
+					currentSpline.RecalculateNormals();
+				}
+				var normal = currentSpline.Normals[normalIndex];
+				var normalLength = 5f;
+				Handles.color = Color.green;
+				Handles.DrawLine(point, point + currentSpline.transform.TransformDirection(normal * normalLength));
 			}
 
 			return point;

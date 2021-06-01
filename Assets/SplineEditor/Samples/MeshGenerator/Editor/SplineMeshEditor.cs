@@ -48,8 +48,8 @@ namespace SplineEditor.MeshGenerator.Editor
 				var handleSize = 0.05f;
 				Handles.color = Color.blue;
 				Handles.Button(point, Quaternion.identity, size * handleSize, size * handleSize, Handles.DotHandleCap);
-				Handles.color = Color.green;
-				Handles.DrawLine(point, point + normal * normalLength);
+				Handles.color = Color.red;
+				Handles.DrawLine(point, point + splineMesh.transform.TransformDirection(normal * normalLength));
 			}
 			GUI.enabled = prevEnabled;
 		}

@@ -38,7 +38,7 @@ namespace SplineEditor.Editor
 
 		private void ToggleDrawCurveMode(bool state)
 		{
-			if (state && CurrentSpline.IsLoop)
+			if ((state && CurrentSpline.IsLoop) || IsNormalsEditorMode)
 			{
 				return;
 			}

@@ -18,7 +18,6 @@ namespace SplineEditor.MeshGenerator
 		public float spacing = 1f;
 		public float precision = 0.01f;
 		public float width = 5f;
-		public bool flipNormals = false;
 
 		#endregion
 
@@ -31,12 +30,9 @@ namespace SplineEditor.MeshGenerator
 		[SerializeField, HideInInspector]
 		private BezierSpline bezierSpline;
 
+		private bool updateMesh;
 		private Mesh mesh;
-
-		private Vector3[] uvs;
 		private Vector3[] normals;
-		private Vector3[] vertices;
-
 		private SplinePath splinePath;
 
 		#endregion
@@ -75,7 +71,7 @@ namespace SplineEditor.MeshGenerator
 			precision = Mathf.Max(precision, 0.001f);
 			spacing = Mathf.Max(spacing, 0.1f);
 
-			GenerateMesh();
+			updateMesh = true;
 
 			if (meshFilter == null)
 			{
@@ -117,7 +113,19 @@ namespace SplineEditor.MeshGenerator
 			Assert.IsNotNull(meshRenderer);
 			Assert.IsNotNull(bezierSpline);
 
+			bezierSpline.OnSplineChanged -= GenerateMesh;
 			bezierSpline.OnSplineChanged += GenerateMesh;
+		}
+
+		private void LateUpdate()
+		{
+			if (!updateMesh)
+			{
+				return;
+			}
+
+			GenerateMesh();
+			updateMesh = false;
 		}
 
 		#endregion
@@ -139,7 +147,7 @@ namespace SplineEditor.MeshGenerator
 		{
 			int[] triangleMap = { 0, 2, 1, 1, 2, 3 };
 
-			if(splinePath == null)
+			if (splinePath == null)
 			{
 				splinePath = new SplinePath();
 			}
@@ -193,7 +201,7 @@ namespace SplineEditor.MeshGenerator
 		{
 			var isLoop = bezierSpline.IsLoop;
 
-			if(Normals == null)
+			if (Normals == null)
 			{
 				Normals = new Vector3[Points.Length];
 			}
@@ -202,7 +210,7 @@ namespace SplineEditor.MeshGenerator
 				Array.Resize(ref normals, Points.Length);
 			}
 
-			var lastRotationAxis = (flipNormals ? 1 : -1) * Vector3.forward;
+			var lastRotationAxis = Quaternion.Euler(bezierSpline.GlobalNormalsRotation, 0f, 0f) * ((bezierSpline.FlipNormals ? 1 : -1) * Vector3.forward);
 			for (var i = 0; i < Points.Length; i++)
 			{
 				if (i == 0)
@@ -212,17 +220,17 @@ namespace SplineEditor.MeshGenerator
 				else
 				{
 					// First reflection
-					Vector3 offset = (Points[i] - Points[i - 1]);
-					float sqrDst = offset.sqrMagnitude;
-					Vector3 r = lastRotationAxis - offset * 2 / sqrDst * Vector3.Dot(offset, lastRotationAxis);
-					Vector3 t = Tangents[i - 1] - offset * 2 / sqrDst * Vector3.Dot(offset, Tangents[i - 1]);
+					var offset = (Points[i] - Points[i - 1]);
+					var sqrDst = offset.sqrMagnitude;
+					var rot = lastRotationAxis - offset * 2 / sqrDst * Vector3.Dot(offset, lastRotationAxis);
+					var tan = Tangents[i - 1] - offset * 2 / sqrDst * Vector3.Dot(offset, Tangents[i - 1]);
 
 					// Second reflection
-					Vector3 v2 = Tangents[i] - t;
-					float c2 = Vector3.Dot(v2, v2);
+					var v2 = Tangents[i] - tan;
+					var c2 = Vector3.Dot(v2, v2);
 
-					Vector3 finalRot = r - v2 * 2 / c2 * Vector3.Dot(v2, r);
-					Vector3 n = Vector3.Cross(finalRot, Tangents[i]).normalized;
+					var finalRot = rot - v2 * 2 / c2 * Vector3.Dot(v2, rot);
+					var n = Vector3.Cross(finalRot, Tangents[i]).normalized;
 					Normals[i] = n;
 					lastRotationAxis = finalRot;
 				}
@@ -244,7 +252,6 @@ namespace SplineEditor.MeshGenerator
 						Normals[i] = rot * Normals[i];
 					}
 				}
-
 			}
 		}
 
@@ -253,6 +260,7 @@ namespace SplineEditor.MeshGenerator
 		#region Private Methods
 
 		#endregion
+
 	}
 
 }

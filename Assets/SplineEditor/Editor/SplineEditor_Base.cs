@@ -194,6 +194,23 @@ namespace SplineEditor.Editor
 			}
 		}
 
+
+		private static bool isNormalsEditorMode;
+		internal static bool IsNormalsEditorMode
+		{
+			get => isNormalsEditorMode;
+			set
+			{
+				if (isNormalsEditorMode == value)
+				{
+					return;
+				}
+
+				isNormalsEditorMode = value;
+				wasSplineModified = true;
+			}
+		}
+
 		internal static bool DrawCurveSmoothAcuteAngles = true;
 		internal static float DrawCurveSegmentLength = 1f;
 		internal static float DrawCurveFirstPointHook = 0.33f;
@@ -201,6 +218,7 @@ namespace SplineEditor.Editor
 
 		private static bool wasSplineModified = false;
 		private static bool stopEventsOnInitialization = false;
+		private static float previousGlobalNormalsRotation = 0f;
 		private static SplineEditorConfiguration editorSettings;
 
 		#endregion
@@ -224,7 +242,13 @@ namespace SplineEditor.Editor
 			CanNewCurveBeAdded = !IsSplineLooped;
 			CanSplineBeSimplified = CanSplineBeLooped && (!CurrentSpline.IsLoop || CurrentSpline.CurvesCount > 2);
 			CanSelectedCurveBeRemoved = IsAnyPointSelected && CanSplineBeLooped && (!CurrentSpline.IsLoop || CurrentSpline.CurvesCount > 2);
-			
+
+			if (CurrentSpline!=null && CurrentSpline.GlobalNormalsRotation != previousGlobalNormalsRotation)
+			{
+				previousGlobalNormalsRotation = CurrentSpline.GlobalNormalsRotation;
+				wasSplineModified = true;
+			}
+
 			if(CurrentEditor!=null && IsSplineLooped && IsDrawerMode)
 			{
 				CurrentEditor.ToggleDrawCurveMode(false);

@@ -133,6 +133,22 @@ namespace SplineEditor.Editor
 
 		#endregion
 
+		#region Normals Editor Styles
+
+		private const string NormalsEditorGroupTitle = "Normals";
+		private const string NormalsEditorButtonTitle = "Normals Editor";
+		private const string NormalsEditorButtonTooltip = "Edit spline normals.";
+		private const string NormalsEditorGlobalRotationLabel = "Global rotation";
+		private const string DrawNormalsToggleFieldLabel = "Draw Normals";
+		private const string FlipNormalsToggleFieldLabel = "Flip Normals";
+
+		private static GUIContent NormalsEditorButtonContent = new GUIContent();
+		private static GUIContent NormalsEditorGlobalRotationContent = new GUIContent(NormalsEditorGlobalRotationLabel);
+		private static GUIContent DrawNormalsToggleFieldContent = new GUIContent(DrawNormalsToggleFieldLabel);
+		private static GUIContent FlipNormalsToggleFieldContent = new GUIContent(FlipNormalsToggleFieldLabel);
+
+		#endregion
+
 		#endregion
 
 		#region Private Fields
@@ -143,7 +159,7 @@ namespace SplineEditor.Editor
 		private GUIStyle buttonStyle;
 		private GUIStyle groupsStyle;
 		private GUIStyle headerLabelStyle;
-		private GUIStyle drawerButtonStyle;
+		private GUIStyle toggleButtonStyle;
 		private GUIStyle settingsButtonStyle;
 
 		#endregion
@@ -155,7 +171,7 @@ namespace SplineEditor.Editor
 			buttonStyle = editorSettings.guiSkin.FindStyle("button");
 			groupsStyle = new GUIStyle(EditorStyles.helpBox);
 			headerLabelStyle = editorSettings.guiSkin.FindStyle("Header");
-			drawerButtonStyle = editorSettings.guiSkin.FindStyle("DrawerButton");
+			toggleButtonStyle = editorSettings.guiSkin.FindStyle("ToggleButton");
 			settingsButtonStyle = editorSettings.guiSkin.FindStyle("SettingsButton");
 		}
 
@@ -163,7 +179,7 @@ namespace SplineEditor.Editor
 		{
 			buttonStyle = editorSettings.guiSkin.FindStyle("button");
 			headerLabelStyle = editorSettings.guiSkin.FindStyle("Header");
-			drawerButtonStyle = editorSettings.guiSkin.FindStyle("DrawerButton");
+			toggleButtonStyle = editorSettings.guiSkin.FindStyle("ToggleButton");
 			settingsButtonStyle = editorSettings.guiSkin.FindStyle("SettingsButton");
 
 			useText = buttonsLayoutIndex == 0 || buttonsLayoutIndex == 2;
@@ -223,6 +239,11 @@ namespace SplineEditor.Editor
 			DrawCurveButtonContent.text = useText ? DrawCurveButtonTitle : string.Empty;
 			DrawCurveButtonContent.image = useImages ? editorSettings.drawerToolIcon : null;
 			DrawCurveButtonContent.tooltip = useText ? DrawCurveButtonTooltip : DrawCurveButtonTitle;
+
+			//normals
+			NormalsEditorButtonContent.text = useText ? NormalsEditorButtonTitle : string.Empty;
+			NormalsEditorButtonContent.image = useImages ? editorSettings.normalsEditorToolIcon : null;
+			NormalsEditorButtonContent.tooltip = useText ? NormalsEditorButtonTooltip : NormalsEditorButtonTitle;
 
 		}
 

@@ -44,7 +44,7 @@ namespace SplineEditor.Editor
 
 			GUI.enabled = isSplineEditorEnabled && !SplineEditor.CurrentSpline.IsLoop;
 			var toggleState = isSplineEditorEnabled && isDrawerMode;
-			if (GUILayout.Toggle(toggleState, DrawCurveButtonContent, drawerButtonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
+			if (GUILayout.Toggle(toggleState, DrawCurveButtonContent, toggleButtonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
 			{
 				SplineEditor.ToggleDrawSplineMode();
 				repaintScene = true;
@@ -54,7 +54,7 @@ namespace SplineEditor.Editor
 			GUILayout.EndHorizontal();
 		}
 
-		private static void DrawSmoothAnglesToggle()
+		private void DrawSmoothAnglesToggle()
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
@@ -63,7 +63,7 @@ namespace SplineEditor.Editor
 			GUILayout.EndHorizontal();
 		}
 
-		private static void DrawSecondPointHookSlider()
+		private void DrawSecondPointHookSlider()
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
@@ -73,7 +73,7 @@ namespace SplineEditor.Editor
 			GUILayout.EndHorizontal();
 		}
 
-		private static void DrawFirstPointHookSlider()
+		private void DrawFirstPointHookSlider()
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
@@ -83,7 +83,7 @@ namespace SplineEditor.Editor
 			GUILayout.EndHorizontal();
 		}
 
-		private static void DrawSegmentLengthField()
+		private void DrawSegmentLengthField()
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
