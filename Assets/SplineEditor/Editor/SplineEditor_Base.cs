@@ -383,6 +383,7 @@ namespace SplineEditor.Editor
 		private void UpdateSelectedIndex(int pointIndex)
 		{
 			SelectedPointIndex = pointIndex;
+			lastRotation = handleRotation;
 
 			if (pointIndex != -1)
 			{

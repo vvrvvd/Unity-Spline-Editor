@@ -14,7 +14,7 @@ namespace SplineEditor.MeshGenerator
 
 		#region Const Fields
 
-		private const float Precision = 0.001f;
+		private const float Precision = 0.0001f;
 
 		#endregion
 

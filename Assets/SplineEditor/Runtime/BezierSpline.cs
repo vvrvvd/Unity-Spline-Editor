@@ -63,6 +63,12 @@ namespace SplineEditor
 		private Vector3[] normals = default;
 
 		[SerializeField, HideInInspector]
+		private float[] normalsAngularOffsets = default;
+
+		[SerializeField, HideInInspector]
+		private Vector3[] tangents = default;
+
+		[SerializeField, HideInInspector]
 		private List<float> normalsRotationalOffset = default;
 
 		#endregion
@@ -94,6 +100,16 @@ namespace SplineEditor
 		/// Calculated normals for Points.
 		/// </summary>
 		public Vector3[] Normals => normals;
+
+		/// <summary>
+		/// Manually set angular offsets for Points.
+		/// </summary>
+		public float[] NormalsAngularOffsets => normalsAngularOffsets;
+
+		/// <summary>
+		/// Calculated tangents for Points.
+		/// </summary>
+		public Vector3[] Tangents => tangents;
 
 		/// <summary>
 		/// Rotational offsets of normals for Points.
@@ -420,8 +436,6 @@ namespace SplineEditor
 				currentPoint = Vector3.Lerp(prevPoint, currentPoint, alpha);
 				spacedPoints.Add(currentPoint);
 
-				t = t + (alpha - 1f) * precision;
-
 				tangents.Add(GetDirection(t));
 
 				var prevTan = tangents[tangents.Count - 2];
@@ -478,14 +492,17 @@ namespace SplineEditor
 			if (Normals == null)
 			{
 				normals = new Vector3[curvesCount + 1];
+				tangents = new Vector3[normals.Length];
+				normalsAngularOffsets = new float[normals.Length];
 			}
-
 			else if (Normals.Length != curvesCount + 1)
 			{
 				Array.Resize(ref normals, curvesCount + 1);
+				Array.Resize(ref tangents, Normals.Length);
+				Array.Resize(ref normalsAngularOffsets, normals.Length);
 			}
 
-			var precision = 0.001f;
+			var precision = 0.0001f;
 			var splineLength = GetLinearLength(precision: 0.0001f, useWorldScale: false);
 			var spacing = Mathf.Max((splineLength) / (curvesCount * 1000f), 0.1f);
 
@@ -495,8 +512,10 @@ namespace SplineEditor
 			var pointIndex = 1;
 			var currentTargetT = pointIndex * (1f / CurvesCount);
 			var distance = 0f;
-			var targetDistance = GetLinearLength(targetT: currentTargetT, precision: 0.0001f, useWorldScale: false);
+			var targetDistance = GetLinearLength(targetT: currentTargetT, precision: 0.00001f, useWorldScale: false);
 			Normals[0] = normalsPath.normals[0];
+			Tangents[0] = normalsPath.tangents[0];
+			NormalsAngularOffsets[0] = 0f;
 			for (var i = 1; i < normalsPath.points.Length; i++)
 			{
 				distance += Vector3.Distance(normalsPath.points[i - 1], normalsPath.points[i]);
@@ -504,6 +523,8 @@ namespace SplineEditor
 				{
 					var alpha = (targetDistance / distance);
 					Normals[pointIndex] = Vector3.Lerp(normalsPath.normals[i-1], normalsPath.normals[i], alpha);
+					Tangents[pointIndex] = Vector3.Lerp(normalsPath.tangents[i - 1], normalsPath.tangents[i], alpha);
+					NormalsAngularOffsets[pointIndex] = 0f;
 
 					pointIndex += 1;
 					currentTargetT = pointIndex * (1f / CurvesCount);
@@ -519,10 +540,12 @@ namespace SplineEditor
 			if (isLoop)
 			{
 				Normals[Normals.Length - 1] = normalsPath.normals[0];
+				Tangents[Tangents.Length - 1] = normalsPath.tangents[0];
 			}
 			else
 			{
 				Normals[Normals.Length - 1] = normalsPath.normals[normalsPath.normals.Length - 1];
+				Tangents[Tangents.Length - 1] = normalsPath.tangents[normalsPath.tangents.Length - 1];
 			}
 
 		}

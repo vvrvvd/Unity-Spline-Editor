@@ -5,7 +5,7 @@ namespace SplineEditor.Editor
 {
 	public partial class SplineEditor : UnityEditor.Editor
 	{
-		 
+
 		#region Private Fields
 
 		private bool isRotating;
@@ -104,7 +104,7 @@ namespace SplineEditor.Editor
 			var size = editorSettings.ScalePointOnScreen ? HandleUtility.GetHandleSize(point) : 1f;
 
 			Handles.color = pointColor;
-			var handleSize = index % 3 == 0 ? editorSettings.MainPointSize :  editorSettings.TangentPointSize;
+			var handleSize = index % 3 == 0 ? editorSettings.MainPointSize : editorSettings.TangentPointSize;
 
 			if (Handles.Button(point, handleRotation, size * handleSize, size * handleSize, Handles.DotHandleCap))
 			{
@@ -125,17 +125,20 @@ namespace SplineEditor.Editor
 				}
 			}
 
-			if(currentSpline.drawNormals && index % 3 == 0)
+			if (currentSpline.drawNormals && index % 3 == 0)
 			{
 				var normalIndex = index / 3;
-				if(currentSpline.Normals.Length <= normalIndex)
-				{ 
+				if (currentSpline.Normals.Length <= normalIndex)
+				{
 					currentSpline.RecalculateNormals();
 				}
 				var normal = currentSpline.Normals[normalIndex];
+				var normalAngularOffset = currentSpline.NormalsAngularOffsets[normalIndex];
+				var rightVector = Vector3.Cross(currentSpline.Normals[normalIndex], currentSpline.Tangents[normalIndex]);
+				var normalRotation = Quaternion.AngleAxis(normalAngularOffset, currentSpline.Tangents[normalIndex]);
 				var normalLength = 5f;
 				Handles.color = Color.green;
-				Handles.DrawLine(point, point + currentSpline.transform.TransformDirection(normal * normalLength));
+				Handles.DrawLine(point, point + currentSpline.transform.TransformDirection((normalRotation * normal) * normalLength));
 			}
 
 			return point;
@@ -178,12 +181,14 @@ namespace SplineEditor.Editor
 
 		private void RotateLocal(int index, Vector3 point)
 		{
-			if (isNormalsEditorMode)
+			if (!isNormalsEditorMode)
 			{
 				var normalIndex = index / 3;
 				EditorGUI.BeginChangeCheck();
-				var normalRotation = Quaternion.LookRotation(currentSpline.Normals[normalIndex]);
-				var rotation = Handles.DoRotationHandle(normalRotation, point);
+				var normalAngularOffset = currentSpline.NormalsAngularOffsets[normalIndex];
+				var normalRotation = Quaternion.AngleAxis(normalAngularOffset, currentSpline.Tangents[normalIndex]);
+				var normalHandleRotation = normalRotation * Quaternion.LookRotation(currentSpline.Tangents[normalIndex]);
+				var rotation = Handles.DoRotationHandle(normalHandleRotation, point);
 				if (EditorGUI.EndChangeCheck())
 				{
 					if (!isRotating)
@@ -191,16 +196,28 @@ namespace SplineEditor.Editor
 						lastRotation = rotation;
 						isRotating = true;
 					}
-					var rotationEuler = rotation.eulerAngles;
-					var rotationDiff = rotation * Quaternion.Inverse(lastRotation);
+
 					Undo.RecordObject(CurrentSpline, "Rotate Normal Vector");
-					currentSpline.Normals[normalIndex] = (rotationDiff * currentSpline.Normals[normalIndex]).normalized;
+					var normalAngle = Vector3.SignedAngle(rotation * currentSpline.Normals[normalIndex], currentSpline.Normals[normalIndex], -currentSpline.Tangents[normalIndex]);
+					currentSpline.NormalsAngularOffsets[normalIndex] = normalAngle;
+					if (currentSpline.IsLoop)
+					{
+						if (normalIndex == 0)
+						{
+							currentSpline.NormalsAngularOffsets[currentSpline.Normals.Length - 1] = currentSpline.NormalsAngularOffsets[0];
+						}
+						else if (normalIndex == currentSpline.Normals.Length - 1)
+						{
+							currentSpline.NormalsAngularOffsets[0] = currentSpline.NormalsAngularOffsets[currentSpline.Normals.Length - 1];
+						}
+					}
+
 					lastRotation = rotation;
 					wasSplineModified = true;
 				}
 				else if (isRotating && currentEvent.type == EventType.MouseUp)
 				{
-					lastRotation = normalRotation;
+					lastRotation = normalHandleRotation;
 					isRotating = false;
 					wasSplineModified = true;
 				}
