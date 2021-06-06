@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -13,16 +12,27 @@ namespace SplineEditor.MeshGenerator
 	public class SplineMesh : MonoBehaviour
 	{
 
+		#region Const Fields
+
+		private const float Precision = 0.001f;
+
+		#endregion
+
 		#region Public Fields
 
-		public float spacing = 1f;
-		public float precision = 0.01f;
 		public float width = 5f;
+		public float spacing = 1f;
+		public bool drawPoints = true;
+		public bool drawNormals = false;
 
 		#endregion
 
 		#region Private Fields
 
+		private bool updateMesh;
+
+		[SerializeField, HideInInspector]
+		private Mesh cachedMesh;
 		[SerializeField, HideInInspector]
 		private MeshFilter meshFilter;
 		[SerializeField, HideInInspector]
@@ -30,27 +40,39 @@ namespace SplineEditor.MeshGenerator
 		[SerializeField, HideInInspector]
 		private BezierSpline bezierSpline;
 
-		private bool updateMesh;
-		private Mesh mesh;
-		private Vector3[] normals;
-		private SplinePath splinePath;
+		#endregion
+
+		#region Internal Fields
+
+		[SerializeField, HideInInspector]
+		internal SplinePath splinePath;
 
 		#endregion
 
 		#region Properties
 
+		/// <summary>
+		/// Points on generated on the spline to create the mesh
+		/// </summary>
 		public Vector3[] Points
 		{
 			get => splinePath.points;
 			set => splinePath.points = value;
 		}
 
+		/// <summary>
+		/// Normals corresponding to the points on mesh.
+		/// Generated based on Tangents.
+		/// </summary>
 		public Vector3[] Normals
 		{
-			get => normals;
-			set => normals = value;
+			get => splinePath.normals;
+			set => splinePath.normals = value;
 		}
 
+		/// <summary>
+		/// Tangents of the points on the mesh based on the spline.
+		/// </summary>
 		public Vector3[] Tangents
 		{
 			get => splinePath.tangents;
@@ -60,7 +82,6 @@ namespace SplineEditor.MeshGenerator
 		public MeshFilter MeshFilter => meshFilter;
 		public MeshRenderer MeshRenderer => meshRenderer;
 		public BezierSpline BezierSpline => bezierSpline;
-		public SplinePath SplinePath => splinePath;
 
 		#endregion
 
@@ -68,7 +89,6 @@ namespace SplineEditor.MeshGenerator
 
 		private void OnValidate()
 		{
-			precision = Mathf.Max(precision, 0.001f);
 			spacing = Mathf.Max(spacing, 0.1f);
 
 			updateMesh = true;
@@ -132,6 +152,9 @@ namespace SplineEditor.MeshGenerator
 
 		#region Public Methods
 
+		/// <summary>
+		/// Constructs and assigned mesh based on the spline. 
+		/// </summary>
 		public void GenerateMesh()
 		{
 			if (BezierSpline == null || MeshFilter == null)
@@ -139,10 +162,18 @@ namespace SplineEditor.MeshGenerator
 				return;
 			}
 
-			mesh = ConstructMesh();
-			meshFilter.sharedMesh = mesh;
+			var splineLength = bezierSpline.GetLinearLength(precision: 0.0001f, useWorldScale: false);
+			var curvesCount = bezierSpline.CurvesCount;
+			spacing = Mathf.Max(spacing, (splineLength) / (curvesCount * 1000f));
+
+			ConstructMesh();
+			meshFilter.sharedMesh = cachedMesh;
 		}
 
+		/// <summary>
+		/// Constructs mesh based on the spline.
+		/// </summary>
+		/// <returns></returns>
 		public Mesh ConstructMesh()
 		{
 			int[] triangleMap = { 0, 2, 1, 1, 2, 3 };
@@ -152,11 +183,11 @@ namespace SplineEditor.MeshGenerator
 				splinePath = new SplinePath();
 			}
 
-			BezierSpline.GetEvenlySpacedPoints(spacing, splinePath, precision, false);
-			RecalculateNormals();
+			BezierSpline.GetEvenlySpacedPoints(spacing, splinePath, Precision, false);
 
 			var isLoop = BezierSpline.IsLoop;
 			var verts = new Vector3[Points.Length * 2];
+			var normals = new Vector3[Points.Length * 2];
 			var uvs = new Vector2[verts.Length];
 			var numTris = 2 * (Points.Length - 1) + (isLoop ? 2 : 1);
 			var tris = new int[numTris * 3];
@@ -165,12 +196,13 @@ namespace SplineEditor.MeshGenerator
 
 			for (int i = 0; i < Points.Length; i++)
 			{
-
-				var up = Vector3.Cross(Tangents[i], Normals[i]);
 				var right = Vector3.Cross(Normals[i], Tangents[i]);
 
 				verts[vertIndex] = Points[i] - right * width * .5f;
 				verts[vertIndex + 1] = Points[i] + right * width * .5f;
+
+				normals[vertIndex] = splinePath.normals[i];
+				normals[vertIndex + 1] = splinePath.normals[i];
 
 				float completionPercent = i / (float)(Points.Length - 1);
 				float v = 1 - Mathf.Abs(2 * completionPercent - 1);
@@ -189,75 +221,19 @@ namespace SplineEditor.MeshGenerator
 				triIndex += 6;
 			}
 
-			var mesh = new Mesh();
-			mesh.vertices = verts;
-			mesh.triangles = tris;
-			mesh.uv = uvs;
+			if(cachedMesh == null)
+			{
+				cachedMesh = new Mesh();
+			}
 
-			return mesh;
+			cachedMesh.Clear();
+			cachedMesh.vertices = verts;
+			cachedMesh.normals = normals;
+			cachedMesh.triangles = tris;
+			cachedMesh.uv = uvs;
+
+			return cachedMesh;
 		}
-
-		public void RecalculateNormals()
-		{
-			var isLoop = bezierSpline.IsLoop;
-
-			if (Normals == null)
-			{
-				Normals = new Vector3[Points.Length];
-			}
-			else if (Normals.Length != Points.Length)
-			{
-				Array.Resize(ref normals, Points.Length);
-			}
-
-			var lastRotationAxis = Quaternion.Euler(bezierSpline.GlobalNormalsRotation, 0f, 0f) * ((bezierSpline.FlipNormals ? 1 : -1) * Vector3.forward);
-			for (var i = 0; i < Points.Length; i++)
-			{
-				if (i == 0)
-				{
-					Normals[0] = Vector3.Cross(lastRotationAxis, Tangents[0]).normalized;
-				}
-				else
-				{
-					// First reflection
-					var offset = (Points[i] - Points[i - 1]);
-					var sqrDst = offset.sqrMagnitude;
-					var rot = lastRotationAxis - offset * 2 / sqrDst * Vector3.Dot(offset, lastRotationAxis);
-					var tan = Tangents[i - 1] - offset * 2 / sqrDst * Vector3.Dot(offset, Tangents[i - 1]);
-
-					// Second reflection
-					var v2 = Tangents[i] - tan;
-					var c2 = Vector3.Dot(v2, v2);
-
-					var finalRot = rot - v2 * 2 / c2 * Vector3.Dot(v2, rot);
-					var n = Vector3.Cross(finalRot, Tangents[i]).normalized;
-					Normals[i] = n;
-					lastRotationAxis = finalRot;
-				}
-			}
-
-			if (isLoop && Normals.Length > 1)
-			{
-				// Get angle between first and last normal (if zero, they're already lined up, otherwise we need to correct)
-				float normalsAngleErrorAcrossJoin = Vector3.SignedAngle(Normals[Normals.Length - 1], Normals[0], Tangents[0]);
-				// Gradually rotate the normals along the path to ensure start and end normals line up correctly
-				if (Mathf.Abs(normalsAngleErrorAcrossJoin) > 0.1f) // don't bother correcting if very nearly correct
-				{
-					for (int i = 1; i < Normals.Length; i++)
-					{
-						float t = (i / (Normals.Length - 1f));
-						float angle = normalsAngleErrorAcrossJoin * t;
-						Quaternion rot = Quaternion.AngleAxis(angle, Tangents[i]);
-
-						Normals[i] = rot * Normals[i];
-					}
-				}
-			}
-		}
-
-		#endregion
-
-		#region Private Methods
 
 		#endregion
 

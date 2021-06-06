@@ -99,6 +99,7 @@ namespace SplineEditor.Editor
 		private const string LengthSplineFieldLabel = "Length";
 
 		private const string DrawPointsFieldLabel = "Draw Points";
+		private const string DrawNormalsToggleFieldLabel = "Draw Normals";
 		private const string ShowTransformHandleFieldLabel = "Show Transform Handle";
 		private const string AlwaysDrawOnSceneFieldLabel = "Always Draw On Scene";
 
@@ -110,6 +111,7 @@ namespace SplineEditor.Editor
 		private static GUIContent CastTransformFieldContent = new GUIContent(CastTransformFieldLabel);
 		private static GUIContent LengthSplineFieldContent = new GUIContent(LengthSplineFieldLabel);
 		private static GUIContent DrawPointsFieldContent = new GUIContent(DrawPointsFieldLabel);
+		private static GUIContent DrawNormalsToggleFieldContent = new GUIContent(DrawNormalsToggleFieldLabel);
 		private static GUIContent ShowTransformHandleFieldContent = new GUIContent(ShowTransformHandleFieldLabel);
 		private static GUIContent AlwaysDrawOnSceneFieldContent = new GUIContent(AlwaysDrawOnSceneFieldLabel);
 
@@ -136,15 +138,10 @@ namespace SplineEditor.Editor
 		#region Normals Editor Styles
 
 		private const string NormalsEditorGroupTitle = "Normals";
-		private const string NormalsEditorButtonTitle = "Normals Editor";
-		private const string NormalsEditorButtonTooltip = "Edit spline normals.";
 		private const string NormalsEditorGlobalRotationLabel = "Global rotation";
-		private const string DrawNormalsToggleFieldLabel = "Draw Normals";
 		private const string FlipNormalsToggleFieldLabel = "Flip Normals";
 
-		private static GUIContent NormalsEditorButtonContent = new GUIContent();
 		private static GUIContent NormalsEditorGlobalRotationContent = new GUIContent(NormalsEditorGlobalRotationLabel);
-		private static GUIContent DrawNormalsToggleFieldContent = new GUIContent(DrawNormalsToggleFieldLabel);
 		private static GUIContent FlipNormalsToggleFieldContent = new GUIContent(FlipNormalsToggleFieldLabel);
 
 		#endregion
@@ -239,11 +236,6 @@ namespace SplineEditor.Editor
 			DrawCurveButtonContent.text = useText ? DrawCurveButtonTitle : string.Empty;
 			DrawCurveButtonContent.image = useImages ? editorSettings.drawerToolIcon : null;
 			DrawCurveButtonContent.tooltip = useText ? DrawCurveButtonTooltip : DrawCurveButtonTitle;
-
-			//normals
-			NormalsEditorButtonContent.text = useText ? NormalsEditorButtonTitle : string.Empty;
-			NormalsEditorButtonContent.image = useImages ? editorSettings.normalsEditorToolIcon : null;
-			NormalsEditorButtonContent.tooltip = useText ? NormalsEditorButtonTooltip : NormalsEditorButtonTitle;
 
 		}
 

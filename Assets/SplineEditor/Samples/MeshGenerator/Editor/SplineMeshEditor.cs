@@ -1,4 +1,3 @@
-using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -28,30 +27,44 @@ namespace SplineEditor.MeshGenerator.Editor
 
 		private void OnSceneGUI()
 		{
-			if (splineMesh.BezierSpline == null)
+
+			if (splineMesh.BezierSpline == null || splineMesh.splinePath == null)
 			{
 				return;
 			}
 
-			var segmentPoints = splineMesh.SplinePath.points;
-			var normals = splineMesh.Normals;
-
 			var prevEnabled = GUI.enabled;
 			GUI.enabled = false;
+
 			Handles.color = Color.blue;
-			for (var i = 0; i < segmentPoints.Length; i++)
+			for (var i = 0; i < splineMesh.splinePath.points.Length; i++)
 			{
-				var point = splineMesh.transform.TransformPoint(segmentPoints[i]);
-				var size = HandleUtility.GetHandleSize(point);
-				var normal = normals[i];
-				var normalLength = 5f;
-				var handleSize = 0.05f;
+				DrawPoint(i);
+			}
+
+			GUI.enabled = prevEnabled;
+
+		}
+
+		private void DrawPoint(int index)
+		{
+			var point = splineMesh.transform.TransformPoint(splineMesh.splinePath.points[index]);
+			var size = HandleUtility.GetHandleSize(point);
+
+			if (splineMesh.drawPoints)
+			{
+				var handleSize = 0.025f;
 				Handles.color = Color.blue;
 				Handles.Button(point, Quaternion.identity, size * handleSize, size * handleSize, Handles.DotHandleCap);
-				Handles.color = Color.red;
+			}
+
+			if (splineMesh.drawNormals)
+			{
+				var normal = splineMesh.Normals[index];
+				var normalLength = 2.5f;
+				Handles.color = Color.green;
 				Handles.DrawLine(point, point + splineMesh.transform.TransformDirection(normal * normalLength));
 			}
-			GUI.enabled = prevEnabled;
 		}
 	}
 

@@ -43,6 +43,7 @@ namespace SplineEditor.Editor
         private void OnSplineModified()
 		{
             isDrawerMode = SplineEditor.CurrentEditor != null && SplineEditor.IsDrawerMode;
+            isNormalsEditorMode = SplineEditor.CurrentEditor != null && SplineEditor.IsNormalsEditorMode;
             Repaint();
 		}
 
@@ -50,6 +51,7 @@ namespace SplineEditor.Editor
 		{
             isSplineEditorEnabled = SplineEditor.CurrentSpline != null;
             isDrawerMode = SplineEditor.CurrentEditor != null && SplineEditor.IsDrawerMode;
+            isNormalsEditorMode = SplineEditor.CurrentEditor != null && SplineEditor.IsNormalsEditorMode;
             OnSelectedCurveChanged();
         }
 

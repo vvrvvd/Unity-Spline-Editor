@@ -57,6 +57,14 @@ namespace SplineEditor.Editor
 
 		private void DrawSplineTogglesInspector()
 		{
+			DrawDrawPointsToggle();
+			DrawDrawNormalsToggle();
+			DrawShowMainTransformHandleToggle();
+			DrawAlwaysOnSCeneToggle();
+		}
+
+		private void DrawDrawPointsToggle()
+		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 			var previousDrawPoints = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.drawPoints : previousDrawPointsState;
@@ -72,12 +80,34 @@ namespace SplineEditor.Editor
 			previousDrawPointsState = nextLoopState;
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
+		}
 
+		private void DrawDrawNormalsToggle()
+		{
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			previousDrawNormals = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.drawNormals : previousDrawNormals;
+			GUILayout.Label(DrawNormalsToggleFieldContent);
+			var nextDrawNormals = GUILayout.Toggle(previousDrawNormals, string.Empty);
+			if (nextDrawNormals != previousDrawNormals)
+			{
+				Undo.RecordObject(SplineEditor.CurrentSpline, "Toggle Draw Normals");
+				SplineEditor.CurrentSpline.drawNormals = nextDrawNormals;
+				EditorUtility.SetDirty(SplineEditor.CurrentSpline);
+				repaintScene = true;
+			}
+			previousDrawNormals = nextDrawNormals;
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+		}
+
+		private void DrawShowMainTransformHandleToggle()
+		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 			var previousShowTransformHandle = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.showTransformHandle : previousShowTransformHandleState;
 			GUILayout.Label(ShowTransformHandleFieldContent);
-			nextLoopState = GUILayout.Toggle(previousShowTransformHandle, string.Empty);
+			var nextLoopState = GUILayout.Toggle(previousShowTransformHandle, string.Empty);
 			if (nextLoopState != previousShowTransformHandle)
 			{
 				Undo.RecordObject(SplineEditor.CurrentSpline, "Toggle Show Transform Handle");
@@ -96,12 +126,15 @@ namespace SplineEditor.Editor
 			previousShowTransformHandleState = nextLoopState;
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
+		}
 
+		private void DrawAlwaysOnSCeneToggle()
+		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 			var previousAlwaysDrawOnScene = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.alwaysDrawSplineOnScene : previousAlwaysDrawOnSceneState;
 			GUILayout.Label(AlwaysDrawOnSceneFieldContent);
-			nextLoopState = GUILayout.Toggle(previousAlwaysDrawOnScene, string.Empty);
+			var nextLoopState = GUILayout.Toggle(previousAlwaysDrawOnScene, string.Empty);
 			if (nextLoopState != previousAlwaysDrawOnScene)
 			{
 				Undo.RecordObject(SplineEditor.CurrentSpline, "Toggle Always Draw On Scene");
@@ -122,7 +155,7 @@ namespace SplineEditor.Editor
 
 			var prevEnabled = GUI.enabled;
 			GUI.enabled = false;
-			var currentLength = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.GetLinearLength(true) : previousSplineLength;
+			var currentLength = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.GetLinearLength(useWorldScale: true) : previousSplineLength;
 			GUILayout.Label(LengthSplineFieldContent);
 			GUILayout.Label(currentLength.ToString());
 

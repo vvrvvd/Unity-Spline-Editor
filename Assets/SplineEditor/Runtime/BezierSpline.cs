@@ -121,6 +121,7 @@ namespace SplineEditor
 			}
 		}
 
+
 		/// <summary>
 		/// Should normals be flipped to face opposite direction.
 		/// </summary>
@@ -134,6 +135,7 @@ namespace SplineEditor
 			{
 				flipNormals = value;
 				OnSplineChanged?.Invoke();
+				RecalculateNormals();
 			}
 		}
 
@@ -150,6 +152,7 @@ namespace SplineEditor
 			{
 				globalNormalsRotation = value;
 				OnSplineChanged?.Invoke();
+				RecalculateNormals();
 			}
 		}
 
@@ -177,7 +180,6 @@ namespace SplineEditor
 			modes.Add(BezierControlPointMode.Free);
 
 			RecalculateNormals();
-			OnSplineChanged += RecalculateNormals;
 		}
 
 		#endregion
@@ -190,11 +192,12 @@ namespace SplineEditor
 		/// Returns the spline length using line iteration approximation.
 		/// </summary>
 		/// <param name="useWorldScale"></param>
+		/// <param name="targetT">Up to which t should length be calculated</param>
 		/// <returns></returns>
-		public float GetLinearLength(bool useWorldScale = true)
+		public float GetLinearLength(float targetT = 1f, float precision = 0.001f, bool useWorldScale = true)
 		{
 			var lengthSum = 0f;
-			var iterationsCount = 1000;
+			var iterationsCount = (int)(1f / precision);
 			var t = 0f;
 			var prevPoint = GetPoint(t, useWorldScale);
 			for (var i = 1; i < iterationsCount; i++)
@@ -203,6 +206,11 @@ namespace SplineEditor
 				var nextPoint = GetPoint(t, useWorldScale);
 				lengthSum += Vector3.Distance(prevPoint, nextPoint);
 				prevPoint = nextPoint;
+
+				if (t >= targetT)
+				{
+					i = iterationsCount;
+				}
 			}
 
 			return lengthSum;
@@ -383,34 +391,44 @@ namespace SplineEditor
 		{
 			var spacedPoints = new List<Vector3>();
 			var tangents = new List<Vector3>();
+			var normals = new List<Vector3>();
 
-			var splineLength = GetLinearLength(false);
-			var segmentsCount = (int)(splineLength / spacing)+1;
+			var splineLength = GetLinearLength(precision: 0.0001f, useWorldScale: false);
+			var segmentsCount = Mathf.RoundToInt(splineLength / spacing) + 1;
 
 			var t = precision;
 			var prevPoint = points[0].position;
 			spacedPoints.Add(prevPoint);
 			tangents.Add(GetDirection(0f));
-			for (var i = 1; i < segmentsCount ; i++)
+
+			var lastRotationAxis = Quaternion.Euler(GlobalNormalsRotation, 0f, 0f) * ((FlipNormals ? -1 : 1) * Vector3.forward);
+			normals.Add(Vector3.Cross(lastRotationAxis, tangents[0]).normalized);
+			for (var i = 1; i < segmentsCount || t < 1; i++)
 			{
-				var nextPoint = GetPoint(t, false);
-				var distance = Vector3.Distance(prevPoint, nextPoint);
+				var currentPoint = GetPoint(t, false);
+				var distance = Vector3.Distance(prevPoint, currentPoint);
+				t += precision;
 				while (distance < spacing && t < 1f)
 				{
 					t += precision;
-					prevPoint = nextPoint;
-					nextPoint = GetPoint(t, false);
-					distance += Vector3.Distance(prevPoint, nextPoint);
+					prevPoint = currentPoint;
+					currentPoint = GetPoint(t, false);
+					distance += Vector3.Distance(prevPoint, currentPoint);
 				}
 
 				var alpha = spacing / distance;
-				nextPoint = Vector3.Lerp(prevPoint, nextPoint, alpha);
-				spacedPoints.Add(nextPoint);
+				currentPoint = Vector3.Lerp(prevPoint, currentPoint, alpha);
+				spacedPoints.Add(currentPoint);
 
-				t = t + (alpha - 1) * precision;
+				t = t + (alpha - 1f) * precision;
 
 				tangents.Add(GetDirection(t));
-				prevPoint = nextPoint;
+
+				var prevTan = tangents[tangents.Count - 2];
+				var currentTan = tangents[tangents.Count - 1];
+				normals.Add(NormalsUtils.CalculateNormal(ref lastRotationAxis, prevPoint, currentPoint, prevTan, currentTan));
+
+				prevPoint = currentPoint;
 
 				if (t >= 1f)
 				{
@@ -419,13 +437,26 @@ namespace SplineEditor
 
 			}
 
-			if (!IsLoop)
+			if (isLoop && normals.Count > 1)
 			{
-				spacedPoints.Add(GetPoint(1f, false));
-				tangents.Add(GetDirection(1f));
+				// Get angle between first and last normal (if zero, they're already lined up, otherwise we need to correct)
+				float normalsAngleErrorAcrossJoin = Vector3.SignedAngle(normals[normals.Count - 1], normals[0], tangents[0]);
+				// Gradually rotate the normals along the path to ensure start and end normals line up correctly
+				if (Mathf.Abs(normalsAngleErrorAcrossJoin) > 0.1f) // don't bother correcting if very nearly correct
+				{
+					for (int i = 1; i < normals.Count; i++)
+					{
+						float targetT = (i / (normals.Count - 1f));
+						float angle = normalsAngleErrorAcrossJoin * targetT;
+						Quaternion rot = Quaternion.AngleAxis(angle, tangents[i]);
+
+						normals[i] = rot * normals[i];
+					}
+				}
 			}
 
 			bezierPath.points = spacedPoints.ToArray();
+			bezierPath.normals = normals.ToArray();
 			bezierPath.tangents = tangents.ToArray();
 
 			if (useWorldSpace)
@@ -449,108 +480,49 @@ namespace SplineEditor
 				normals = new Vector3[curvesCount + 1];
 			}
 
-			else if (Normals.Length != curvesCount+1)
+			else if (Normals.Length != curvesCount + 1)
 			{
-				Array.Resize(ref normals, curvesCount+1);
+				Array.Resize(ref normals, curvesCount + 1);
 			}
 
 			var precision = 0.001f;
-			var splineLength = GetLinearLength(false);
-			var spacing = splineLength / (PointsCount / 3) / 6;
-			var segmentsCount = (int)(splineLength / spacing) + 1;
-			
-			var lastRotationAxis = Quaternion.Euler(GlobalNormalsRotation, 0f, 0f) * ((FlipNormals ? 1 : -1) * Vector3.forward);
-			Normals[0] = Vector3.Cross(lastRotationAxis, GetPoint(0f)).normalized;
+			var splineLength = GetLinearLength(precision: 0.0001f, useWorldScale: false);
+			var spacing = Mathf.Max((splineLength) / (curvesCount * 1000f), 0.1f);
+
+			var normalsPath = new SplinePath();
+			GetEvenlySpacedPoints(spacing, normalsPath, precision, false);
 
 			var pointIndex = 1;
-			var t = precision;
-			var prevT = 0f;
-			var prevTan = GetDirection(prevT);
-			var prevPoint = points[0].position;
 			var currentTargetT = pointIndex * (1f / CurvesCount);
-			for (var i = 1; i < segmentsCount; i++)
+			var distance = 0f;
+			var targetDistance = GetLinearLength(targetT: currentTargetT, precision: 0.0001f, useWorldScale: false);
+			Normals[0] = normalsPath.normals[0];
+			for (var i = 1; i < normalsPath.points.Length; i++)
 			{
-				var nextPoint = GetPoint(t, false);
-				var distance = Vector3.Distance(prevPoint, nextPoint);
-				while (distance < spacing && t < 1f)
+				distance += Vector3.Distance(normalsPath.points[i - 1], normalsPath.points[i]);
+				if (distance >= targetDistance)
 				{
-					t += precision;
-					prevPoint = nextPoint;
-					nextPoint = GetPoint(t, false);
-					distance += Vector3.Distance(prevPoint, nextPoint);
-				}
+					var alpha = (targetDistance / distance);
+					Normals[pointIndex] = Vector3.Lerp(normalsPath.normals[i-1], normalsPath.normals[i], alpha);
 
-				var alpha = spacing / distance;
-				nextPoint = Vector3.Lerp(prevPoint, nextPoint, alpha);
-
-				if (t >= currentTargetT)
-				{
-					var prevNextPoint = nextPoint;
-					nextPoint = GetPoint(currentTargetT);
-					var currentTan2 = GetDirection(currentTargetT);
-
-					// First reflection
-					var offset2 = (nextPoint - prevPoint);
-					var sqrDst2 = offset2.sqrMagnitude;
-					var rot2 = lastRotationAxis - offset2 * 2 / sqrDst2 * Vector3.Dot(offset2, lastRotationAxis);
-					var tan2 = prevTan - offset2 * 2 / sqrDst2 * Vector3.Dot(offset2, prevTan);
-
-					// Second reflection
-					var v22 = currentTan2 - tan2;
-					var c22 = Vector3.Dot(v22, v22);
-
-					var finalRot2 = rot2 - v22 * 2 / c22 * Vector3.Dot(v22, rot2);
-					var targetTangent = GetDirection(currentTargetT);
-					Normals[pointIndex] = Vector3.Cross(finalRot2, targetTangent).normalized;
 					pointIndex += 1;
 					currentTargetT = pointIndex * (1f / CurvesCount);
-
-					nextPoint = prevNextPoint;
+					targetDistance = GetLinearLength(targetT: currentTargetT, precision: 0.0001f, useWorldScale: false);
 				}
 
-				t += (alpha - 1) * precision;
-				var currentTan = GetDirection(t);
-
-				// First reflection
-				var offset = (nextPoint - prevPoint);
-				var sqrDst = offset.sqrMagnitude;
-				var rot = lastRotationAxis - offset * 2 / sqrDst * Vector3.Dot(offset, lastRotationAxis);
-				var tan = prevTan - offset * 2 / sqrDst * Vector3.Dot(offset, prevTan);
-
-				// Second reflection
-				var v2 = currentTan - tan;
-				var c2 = Vector3.Dot(v2, v2);
-
-				var finalRot = rot - v2 * 2 / c2 * Vector3.Dot(v2, rot);
-				prevTan = currentTan;
-				prevPoint = nextPoint;
-				lastRotationAxis = finalRot;
-
-
-				if (t >= 1f)
+				if (currentTargetT == 1)
 				{
 					break;
 				}
-
 			}
 
-			if (isLoop && Normals.Length > 1)
+			if (isLoop)
 			{
-				// Get angle between first and last normal (if zero, they're already lined up, otherwise we need to correct)
-				float normalsAngleErrorAcrossJoin = Vector3.SignedAngle(Normals[Normals.Length - 1], Normals[0], GetDirection(0f));
-				// Gradually rotate the normals along the path to ensure start and end normals line up correctly
-				if (Mathf.Abs(normalsAngleErrorAcrossJoin) > 0.1f) // don't bother correcting if very nearly correct
-				{
-					for (int i = 1; i < Normals.Length; i++)
-					{
-						var pointT = (i / (Normals.Length - 1f));
-						var angle = normalsAngleErrorAcrossJoin * t;
-						var tangent = GetDirection(pointT);
-						Quaternion rot = Quaternion.AngleAxis(angle, tangent);
-
-						Normals[i] = rot * Normals[i];
-					}
-				}
+				Normals[Normals.Length - 1] = normalsPath.normals[0];
+			}
+			else
+			{
+				Normals[Normals.Length - 1] = normalsPath.normals[normalsPath.normals.Length - 1];
 			}
 
 		}
@@ -625,6 +597,9 @@ namespace SplineEditor
 			{
 				OnSplineChanged?.Invoke();
 			}
+
+			//TODO: Apply in other event
+			RecalculateNormals();
 		}
 
 		/// <summary>
@@ -1054,6 +1029,11 @@ namespace SplineEditor
 				nextPointPosition = Points[loopedIndex].position;
 			}
 
+			if (previousPointPosition == nextPointPosition)
+			{
+				return;
+			}
+
 			var prevDistance = (previousPointPosition - startPointPosition);
 			var nextDistance = (nextPointPosition - startPointPosition);
 			var dir = (prevDistance.normalized - nextDistance.normalized).normalized;
@@ -1131,7 +1111,7 @@ namespace SplineEditor
 			RemoveCurve(curveIndex, true);
 		}
 
-	#endregion
+		#endregion
 
 	}
 

@@ -26,9 +26,7 @@ namespace SplineEditor.Editor
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
 
-				DrawDrawNormalsToggle();
 				DrawFlipNormalsToggle();
-				DrawNormalsEditorButton();
 				DrawNormalsGlobalRotationField();
 
 				GUILayout.Space(10);
@@ -38,42 +36,6 @@ namespace SplineEditor.Editor
 			EditorGUILayout.EndFoldoutHeaderGroup();
             GUI.enabled = prevEnabled;
         }
-
-		private void DrawNormalsEditorButton()
-		{
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-
-			GUI.enabled = isSplineEditorEnabled;
-			var toggleState = isSplineEditorEnabled && isNormalsEditorMode;
-			if (GUILayout.Toggle(toggleState, NormalsEditorButtonContent, toggleButtonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
-			{
-				//SplineEditor.ToggleNormalsEditorMode();
-				repaintScene = true;
-			}
-
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-		}
-
-		private void DrawDrawNormalsToggle()
-		{
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			previousDrawNormals = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.drawNormals : previousDrawNormals;
-			GUILayout.Label(DrawNormalsToggleFieldContent);
-			var nextDrawNormals = GUILayout.Toggle(previousDrawNormals, string.Empty);
-			if (nextDrawNormals != previousDrawNormals)
-			{
-				Undo.RecordObject(SplineEditor.CurrentSpline, "Toggle Draw Normals");
-				SplineEditor.CurrentSpline.drawNormals = nextDrawNormals;
-				EditorUtility.SetDirty(SplineEditor.CurrentSpline);
-				repaintScene = true;
-			}
-			previousDrawNormals = nextDrawNormals;
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-		}
 
 		private void DrawFlipNormalsToggle()
 		{
@@ -113,8 +75,6 @@ namespace SplineEditor.Editor
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
-
-
 
 	}
 
