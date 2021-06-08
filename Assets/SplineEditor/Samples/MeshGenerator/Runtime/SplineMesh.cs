@@ -79,6 +79,15 @@ namespace SplineEditor.MeshGenerator
 			set => splinePath.tangents = value;
 		}
 
+		/// <summary>
+		/// Value of parameter T on the points on mesh regarding to spline.
+		/// </summary>
+		public float[] ParametersT
+		{
+			get => splinePath.parametersT;
+			set => splinePath.parametersT = value;
+		}
+
 		public MeshFilter MeshFilter => meshFilter;
 		public MeshRenderer MeshRenderer => meshRenderer;
 		public BezierSpline BezierSpline => bezierSpline;
@@ -183,6 +192,7 @@ namespace SplineEditor.MeshGenerator
 				splinePath = new SplinePath();
 			}
 
+			BezierSpline.RecalculateNormals();
 			BezierSpline.GetEvenlySpacedPoints(spacing, splinePath, Precision, false);
 
 			var isLoop = BezierSpline.IsLoop;
@@ -196,13 +206,14 @@ namespace SplineEditor.MeshGenerator
 
 			for (int i = 0; i < Points.Length; i++)
 			{
-				var right = Vector3.Cross(Normals[i], Tangents[i]);
+				var normalVector = Normals[i];
+				var right = Vector3.Cross(normalVector, Tangents[i]);
 
 				verts[vertIndex] = Points[i] - right * width * .5f;
 				verts[vertIndex + 1] = Points[i] + right * width * .5f;
 
-				normals[vertIndex] = splinePath.normals[i];
-				normals[vertIndex + 1] = splinePath.normals[i];
+				normals[vertIndex] = normalVector;
+				normals[vertIndex + 1] = normalVector;
 
 				float completionPercent = i / (float)(Points.Length - 1);
 				float v = 1 - Mathf.Abs(2 * completionPercent - 1);

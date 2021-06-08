@@ -132,13 +132,11 @@ namespace SplineEditor.Editor
 				{
 					currentSpline.RecalculateNormals();
 				}
-				var normal = currentSpline.Normals[normalIndex];
-				var normalAngularOffset = currentSpline.NormalsAngularOffsets[normalIndex];
-				var rightVector = Vector3.Cross(currentSpline.Normals[normalIndex], currentSpline.Tangents[normalIndex]);
-				var normalRotation = Quaternion.AngleAxis(normalAngularOffset, currentSpline.Tangents[normalIndex]);
+				var normalVector = currentSpline.GetNormal(normalIndex);
+				var rightVector = Vector3.Cross(normalVector, currentSpline.Tangents[normalIndex]);
 				var normalLength = 5f;
 				Handles.color = Color.green;
-				Handles.DrawLine(point, point + currentSpline.transform.TransformDirection((normalRotation * normal) * normalLength));
+				Handles.DrawLine(point, point + currentSpline.transform.TransformDirection((normalVector) * normalLength));
 			}
 
 			return point;
@@ -199,19 +197,7 @@ namespace SplineEditor.Editor
 
 					Undo.RecordObject(CurrentSpline, "Rotate Normal Vector");
 					var normalAngle = Vector3.SignedAngle(rotation * currentSpline.Normals[normalIndex], currentSpline.Normals[normalIndex], -currentSpline.Tangents[normalIndex]);
-					currentSpline.NormalsAngularOffsets[normalIndex] = normalAngle;
-					if (currentSpline.IsLoop)
-					{
-						if (normalIndex == 0)
-						{
-							currentSpline.NormalsAngularOffsets[currentSpline.Normals.Length - 1] = currentSpline.NormalsAngularOffsets[0];
-						}
-						else if (normalIndex == currentSpline.Normals.Length - 1)
-						{
-							currentSpline.NormalsAngularOffsets[0] = currentSpline.NormalsAngularOffsets[currentSpline.Normals.Length - 1];
-						}
-					}
-
+					currentSpline.UpdateNormalAngularOffset(normalIndex, normalAngle);
 					lastRotation = rotation;
 					wasSplineModified = true;
 				}
