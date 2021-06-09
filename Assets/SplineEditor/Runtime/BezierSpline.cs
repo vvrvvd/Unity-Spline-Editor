@@ -362,9 +362,11 @@ namespace SplineEditor
 		/// <returns></returns>
 		public Vector3 GetNormal(int controlPointIndex)
 		{
+			var globalAngleOffset = GlobalNormalsRotation;
 			var normalAngularOffset = normalsAngularOffsets[controlPointIndex];
+			var globalRotation = Quaternion.AngleAxis(globalAngleOffset, Tangents[controlPointIndex]);
 			var normalRotation = Quaternion.AngleAxis(normalAngularOffset, Tangents[controlPointIndex]);
-			var normalVector = normalRotation * normals[controlPointIndex];
+			var normalVector = globalRotation * normalRotation * normals[controlPointIndex];
 
 			return normalVector;
 		}
@@ -386,12 +388,15 @@ namespace SplineEditor
 
 			curveIndex = Mathf.Clamp(curveIndex - 1, 0, normalsAngularOffsets.Length-1);
 
+			var tangent = GetDirection(t);
 			var prevPointT = curveIndex * (curveSegmentSizeT);
 			var nextPointT = (curveIndex + 1) * (curveSegmentSizeT);
 			var alpha = Mathf.InverseLerp(prevPointT, nextPointT, t);
+			var globalAngleOffset = GlobalNormalsRotation;
 			var normalAngularOffset = Mathf.Lerp(normalsAngularOffsets[curveIndex], normalsAngularOffsets[curveIndex + 1], alpha);
-			var normalRotation = Quaternion.AngleAxis(normalAngularOffset, GetDirection(t));
-			var rotatedNormalVector = normalRotation * normalVector;
+			var globalRotation = Quaternion.AngleAxis(globalAngleOffset, tangent);
+			var normalRotation = Quaternion.AngleAxis(normalAngularOffset, tangent);
+			var rotatedNormalVector = globalRotation * normalRotation * normalVector;
 
 			return rotatedNormalVector;
 		}
@@ -464,7 +469,7 @@ namespace SplineEditor
 			tangents.Add(GetDirection(0f));
 			parametersT.Add(0f);
 
-			var lastRotationAxis = Quaternion.Euler(GlobalNormalsRotation, 0f, 0f) * ((FlipNormals ? -1 : 1) * Vector3.forward);
+			var lastRotationAxis = ((FlipNormals ? -1 : 1) * Vector3.forward);
 			var normalVector = Vector3.Cross(lastRotationAxis, tangents[0]).normalized;
 			var rotatedNormalVector = GetRotatedNormal(normalVector, 0f);
 			normals.Add(rotatedNormalVector);
@@ -564,6 +569,9 @@ namespace SplineEditor
 			var spacing = Mathf.Max((splineLength) / (curvesCount * 1000f), 0.1f);
 
 			var normalsPath = new SplinePath();
+			var globalAngleCopy = globalNormalsRotation;
+			globalNormalsRotation = 0f;
+
 			var normalsOffsetCopy = new List<float>(normalsAngularOffsets);
 			for(var i=0; i<normalsAngularOffsets.Length; i++)
 			{
@@ -609,6 +617,7 @@ namespace SplineEditor
 				Tangents[Tangents.Length - 1] = normalsPath.tangents[normalsPath.tangents.Length - 1];
 			}
 
+			globalNormalsRotation = globalAngleCopy;
 			for (var i = 0; i < normalsAngularOffsets.Length; i++)
 			{
 				normalsAngularOffsets[i] = normalsOffsetCopy[i];
