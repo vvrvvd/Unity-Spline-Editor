@@ -179,7 +179,7 @@ namespace SplineEditor.Editor
 
 		private void RotateLocal(int index, Vector3 point)
 		{
-			if (!isNormalsEditorMode)
+			if (isNormalsEditorMode)
 			{
 				var normalIndex = index / 3;
 				EditorGUI.BeginChangeCheck();
@@ -198,15 +198,15 @@ namespace SplineEditor.Editor
 					}
 
 					Undo.RecordObject(CurrentSpline, "Rotate Normal Vector");
-					
-					var normalAngle = Vector3.SignedAngle(rotation * currentSpline.Normals[normalIndex], lastRotation * currentSpline.Normals[normalIndex], handleTransform.rotation*(-currentSpline.Tangents[normalIndex]));
-					currentSpline.UpdateNormalAngularOffset(normalIndex, normalAngularOffset + normalAngle);
+
+					var normalAngleDiff = Vector3.SignedAngle(rotation * currentSpline.Normals[normalIndex], lastRotation * currentSpline.Normals[normalIndex], handleTransform.rotation*(-currentSpline.Tangents[normalIndex]));
+					currentSpline.UpdateNormalAngularOffset(normalIndex, normalAngularOffset + normalAngleDiff);
 					lastRotation = rotation;
 					wasSplineModified = true;
 				}
-				else if (isRotating && currentEvent.type == EventType.MouseUp)
+				else if ((isRotating && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
 				{
-					lastRotation = normalHandleRotation;
+					lastRotation = baseHandleRotation;
 					isRotating = false;
 					wasSplineModified = true;
 				}
@@ -248,7 +248,7 @@ namespace SplineEditor.Editor
 					lastRotation = rotation;
 					wasSplineModified = true;
 				}
-				else if (isRotating && currentEvent.type == EventType.MouseUp)
+				else if ((isRotating && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
 				{
 					lastRotation = handleRotation;
 					isRotating = false;
