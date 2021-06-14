@@ -23,7 +23,7 @@ namespace SplineEditor
 
 		#region Events
 
-		public event Action OnSplineChanged;
+		public Action OnSplineChanged;
 
 		#endregion
 
@@ -151,8 +151,8 @@ namespace SplineEditor
 			set
 			{
 				flipNormals = value;
-				OnSplineChanged?.Invoke();
 				RecalculateNormals();
+				OnSplineChanged?.Invoke();
 			}
 		}
 
@@ -168,8 +168,8 @@ namespace SplineEditor
 			set
 			{
 				globalNormalsRotation = value;
-				OnSplineChanged?.Invoke();
 				RecalculateNormals();
+				OnSplineChanged?.Invoke();
 			}
 		}
 
@@ -386,7 +386,7 @@ namespace SplineEditor
 				curveIndex++;
 			}
 
-			curveIndex = Mathf.Clamp(curveIndex - 1, 0, normalsAngularOffsets.Length-1);
+			curveIndex = Mathf.Clamp(curveIndex - 1, 0, normalsAngularOffsets.Length-2);
 
 			var tangent = GetDirection(t);
 			var prevPointT = curveIndex * (curveSegmentSizeT);
@@ -441,6 +441,7 @@ namespace SplineEditor
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
@@ -693,6 +694,7 @@ namespace SplineEditor
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 
@@ -727,6 +729,7 @@ namespace SplineEditor
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
@@ -775,6 +778,7 @@ namespace SplineEditor
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
@@ -837,6 +841,7 @@ namespace SplineEditor
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
@@ -874,6 +879,7 @@ namespace SplineEditor
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
@@ -894,6 +900,7 @@ namespace SplineEditor
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
@@ -920,6 +927,7 @@ namespace SplineEditor
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
@@ -987,6 +995,7 @@ namespace SplineEditor
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
@@ -1008,6 +1017,7 @@ namespace SplineEditor
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}

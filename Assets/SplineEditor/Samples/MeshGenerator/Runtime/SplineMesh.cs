@@ -1,6 +1,10 @@
 using UnityEngine;
 using UnityEngine.Assertions;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 namespace SplineEditor.MeshGenerator
 {
 
@@ -171,6 +175,10 @@ namespace SplineEditor.MeshGenerator
 				return;
 			}
 
+#if UNITY_EDITOR
+			Undo.RecordObject(this, "Generate Bezier Spline Mesh");
+#endif
+
 			var splineLength = bezierSpline.GetLinearLength(precision: 0.0001f, useWorldScale: false);
 			var curvesCount = bezierSpline.CurvesCount;
 			spacing = Mathf.Max(spacing, (splineLength) / (curvesCount * 1000f));
@@ -232,7 +240,7 @@ namespace SplineEditor.MeshGenerator
 				triIndex += 6;
 			}
 
-			if(cachedMesh == null)
+			if (cachedMesh == null)
 			{
 				cachedMesh = new Mesh();
 			}

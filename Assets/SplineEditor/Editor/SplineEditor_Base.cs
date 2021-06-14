@@ -327,6 +327,7 @@ namespace SplineEditor.Editor
 				wasSplineModified = true;
 				var lastPoint = CurrentSpline.Points[CurrentSpline.PointsCount - 1];
 				curveDrawerPosition = lastPoint.position;
+				currentSpline?.OnSplineChanged();
 			}
 
 			if (SelectedPointIndex >= CurrentSpline.PointsCount)
