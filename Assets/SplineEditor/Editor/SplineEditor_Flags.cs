@@ -17,6 +17,7 @@ namespace SplineEditor.Editor
 		private static bool closeLoopFlag;
 		private static bool factorSplineFlag;
 		private static bool simplifySplineFlag;
+		private static bool normalsEditorModeFlag;
 		private static bool drawSplineModeFlag;
 		private static bool castSelectedPointFlag;
 		private static bool castSelectedPointShortcutFlag;
@@ -82,6 +83,11 @@ namespace SplineEditor.Editor
 		{
 			drawSplineModeFlag = !drawSplineModeFlag;
 		}
+		
+		internal static void ToggleNormalsEditorMode()
+		{
+			normalsEditorModeFlag = !normalsEditorModeFlag;
+		}
 
 		#endregion
 
@@ -94,6 +100,7 @@ namespace SplineEditor.Editor
 			simplifySplineFlag = false;
 			addCurveFlag = false;
 			removeSelectedCurveFlag = false;
+			normalsEditorModeFlag = false;
 			drawSplineModeFlag = false;
 			castSplineFlag = false;
 			castSplineToCameraFlag = false;
@@ -102,6 +109,12 @@ namespace SplineEditor.Editor
 
 		private void InvokeScheduledActions()
 		{
+			if (normalsEditorModeFlag)
+			{
+				ToggleNormalsEditorMode(!IsNormalsEditorMode);
+				normalsEditorModeFlag = false;
+			}
+
 			if (drawSplineModeFlag)
 			{
 				ToggleDrawCurveMode(!IsDrawerMode);

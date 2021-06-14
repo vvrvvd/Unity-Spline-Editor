@@ -117,7 +117,14 @@ namespace SplineEditor.Editor
 			{
 				if (savedTool == Tool.Rotate && index % 3 == 0)
 				{
-					RotateLocal(index, point);
+					if (isNormalsEditorMode)
+					{
+						RotateNormals(index, point);
+					}
+					else
+					{
+						RotatePoints(index, point);
+					}
 				}
 				else
 				{
@@ -177,83 +184,46 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private void RotateLocal(int index, Vector3 point)
+		private void RotatePoints(int index, Vector3 point)
 		{
-			if (isNormalsEditorMode)
+			EditorGUI.BeginChangeCheck();
+			var rotation = Handles.DoRotationHandle(handleRotation, point);
+			if (EditorGUI.EndChangeCheck())
 			{
-				var normalIndex = index / 3;
-				EditorGUI.BeginChangeCheck();
-				var normalAngularOffset = currentSpline.NormalsAngularOffsets[normalIndex];
-				var globalRotation = Quaternion.AngleAxis(currentSpline.GlobalNormalsRotation, currentSpline.Tangents[normalIndex]);
-				var normalRotation = globalRotation * Quaternion.AngleAxis(normalAngularOffset, currentSpline.Tangents[normalIndex]);
-				var normalHandleRotation = normalRotation * Quaternion.LookRotation(currentSpline.Tangents[normalIndex]);
-				var baseHandleRotation = handleTransform.rotation * normalHandleRotation;
-				var rotation = Handles.DoRotationHandle(baseHandleRotation, point);
-				if (EditorGUI.EndChangeCheck())
-				{
-					if (!isRotating)
-					{
-						lastRotation = baseHandleRotation;
-						isRotating = true;
-					}
-
-					Undo.RecordObject(CurrentSpline, "Rotate Normal Vector");
-
-					var normalAngleDiff = Vector3.SignedAngle(rotation * currentSpline.Normals[normalIndex], lastRotation * currentSpline.Normals[normalIndex], handleTransform.rotation*(-currentSpline.Tangents[normalIndex]));
-					currentSpline.UpdateNormalAngularOffset(normalIndex, normalAngularOffset + normalAngleDiff);
-					lastRotation = rotation;
-					wasSplineModified = true;
-				}
-				else if ((isRotating && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
-				{
-					lastRotation = baseHandleRotation;
-					isRotating = false;
-					wasSplineModified = true;
-				}
-
-			}
-			else
-			{
-
-				EditorGUI.BeginChangeCheck();
-				var rotation = Handles.DoRotationHandle(handleRotation, point);
-				if (EditorGUI.EndChangeCheck())
-				{
-					if (!isRotating)
-					{
-						lastRotation = handleRotation;
-						isRotating = true;
-					}
-
-					var rotationDiff = rotation * Quaternion.Inverse(lastRotation);
-
-					Undo.RecordObject(CurrentSpline, "Rotate Line Point");
-					var point1Index = index == CurrentSpline.PointsCount - 1 && CurrentSpline.IsLoop ? 1 : index + 1;
-					var point2Index = index == 0 && CurrentSpline.IsLoop ? CurrentSpline.PointsCount - 2 : index - 1;
-
-					if (point1Index >= 0 && point1Index < CurrentSpline.PointsCount)
-					{
-						var point1 = handleTransform.TransformPoint(CurrentSpline.Points[point1Index].position);
-						var rotatedPoint1 = Vector3Utils.RotateAround(point1, point, rotationDiff);
-						CurrentSpline.UpdatePoint(point1Index, handleTransform.InverseTransformPoint(rotatedPoint1));
-					}
-
-					if (point2Index >= 0 && point2Index < CurrentSpline.PointsCount)
-					{
-						var point2 = handleTransform.TransformPoint(CurrentSpline.Points[point2Index].position);
-						var rotatedPoint2 = Vector3Utils.RotateAround(point2, point, rotationDiff);
-						CurrentSpline.UpdatePoint(point2Index, handleTransform.InverseTransformPoint(rotatedPoint2));
-					}
-
-					lastRotation = rotation;
-					wasSplineModified = true;
-				}
-				else if ((isRotating && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
+				if (!isRotating)
 				{
 					lastRotation = handleRotation;
-					isRotating = false;
-					wasSplineModified = true;
+					isRotating = true;
 				}
+
+				var rotationDiff = rotation * Quaternion.Inverse(lastRotation);
+
+				Undo.RecordObject(CurrentSpline, "Rotate Line Point");
+				var point1Index = index == CurrentSpline.PointsCount - 1 && CurrentSpline.IsLoop ? 1 : index + 1;
+				var point2Index = index == 0 && CurrentSpline.IsLoop ? CurrentSpline.PointsCount - 2 : index - 1;
+
+				if (point1Index >= 0 && point1Index < CurrentSpline.PointsCount)
+				{
+					var point1 = handleTransform.TransformPoint(CurrentSpline.Points[point1Index].position);
+					var rotatedPoint1 = Vector3Utils.RotateAround(point1, point, rotationDiff);
+					CurrentSpline.UpdatePoint(point1Index, handleTransform.InverseTransformPoint(rotatedPoint1));
+				}
+
+				if (point2Index >= 0 && point2Index < CurrentSpline.PointsCount)
+				{
+					var point2 = handleTransform.TransformPoint(CurrentSpline.Points[point2Index].position);
+					var rotatedPoint2 = Vector3Utils.RotateAround(point2, point, rotationDiff);
+					CurrentSpline.UpdatePoint(point2Index, handleTransform.InverseTransformPoint(rotatedPoint2));
+				}
+
+				lastRotation = rotation;
+				wasSplineModified = true;
+			}
+			else if ((isRotating && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
+			{
+				lastRotation = handleRotation;
+				isRotating = false;
+				wasSplineModified = true;
 			}
 		}
 

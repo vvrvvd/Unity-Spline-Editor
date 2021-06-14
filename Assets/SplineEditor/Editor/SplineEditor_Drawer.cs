@@ -43,6 +43,7 @@ namespace SplineEditor.Editor
 				return;
 			}
 
+
 			if (IsDrawerMode != state)
 			{
 				Undo.RecordObject(CurrentSpline, "Toggle Draw Curve Mode");
@@ -52,6 +53,7 @@ namespace SplineEditor.Editor
 
 			if (state)
 			{
+				ToggleNormalsEditorMode(false);
 				var lastPoint = CurrentSpline.Points[CurrentSpline.PointsCount - 1];
 				StartDrawCurveMode(lastPoint.position);
 				SelectIndex(-1);

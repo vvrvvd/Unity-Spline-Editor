@@ -54,6 +54,8 @@ namespace SplineEditor.Editor
 		public Texture castSplineIcon;
 		public Texture castToCameraSplineIcon;
 		[Space]
+		public Texture normalsToolIcon;
+		[Space]
 		public Texture drawerToolIcon;
 
 	}

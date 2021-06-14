@@ -138,10 +138,15 @@ namespace SplineEditor.Editor
 		#region Normals Editor Styles
 
 		private const string NormalsEditorGroupTitle = "Normals";
-		private const string NormalsEditorGlobalRotationLabel = "Global rotation";
+		private const string RotateNormalsToolLabel = "Rotate Tool";
+		private const string RotateNormalsToolTooltip = "Rotate normal vectors using Unity handle.";
+		private const string NormalsEditorGlobalRotationLabel = "Global Rotation";
+		private const string NormalsEditorLocalRotationLabel = "Local Rotation";
 		private const string FlipNormalsToggleFieldLabel = "Flip Normals";
 
+		private static GUIContent NormalsEditorButtonContent = new GUIContent();
 		private static GUIContent NormalsEditorGlobalRotationContent = new GUIContent(NormalsEditorGlobalRotationLabel);
+		private static GUIContent NormalsEditorLocalRotationContent = new GUIContent(NormalsEditorLocalRotationLabel);
 		private static GUIContent FlipNormalsToggleFieldContent = new GUIContent(FlipNormalsToggleFieldLabel);
 
 		#endregion
@@ -232,11 +237,15 @@ namespace SplineEditor.Editor
 			CastSplineToCameraContent.image = useImages ? editorSettings.castToCameraSplineIcon : null;
 			CastSplineToCameraContent.tooltip = useText ? CastSplineToCameraButtonTooltip : CastSplineToCameraButtonTitle;
 
+			//normals
+			NormalsEditorButtonContent.text = useText ? RotateNormalsToolLabel : string.Empty;
+			NormalsEditorButtonContent.image = useImages ? editorSettings.normalsToolIcon : null;
+			NormalsEditorButtonContent.tooltip = useText ? RotateNormalsToolTooltip : RotateNormalsToolLabel;
+
 			//drawer
 			DrawCurveButtonContent.text = useText ? DrawCurveButtonTitle : string.Empty;
 			DrawCurveButtonContent.image = useImages ? editorSettings.drawerToolIcon : null;
 			DrawCurveButtonContent.tooltip = useText ? DrawCurveButtonTooltip : DrawCurveButtonTitle;
-
 		}
 
 		#endregion

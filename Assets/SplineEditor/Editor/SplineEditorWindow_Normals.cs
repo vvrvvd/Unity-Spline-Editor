@@ -7,11 +7,22 @@ namespace SplineEditor.Editor
 	public partial class SplineEditorWindow : EditorWindow
 	{
 
+		#region Private Fields
+
 		private bool isNormalsEditorMode = false;
         private bool isNormalsSectionFolded = true;
 		private bool previousDrawNormals = false;
 		private bool previousFlipNormals = false;
-		private float previousNormalsRotation = 0f;
+		private float previousNormalsGlobalRotation = 0f;
+		private float previousNormalLocalRotation = 0f;
+
+		#endregion
+
+		#region Initialize Normals Editor Mode
+
+		#endregion
+
+		#region Draw Scene GUI
 
 		private void DrawNormalsEditorOptions()
 		{
@@ -26,7 +37,10 @@ namespace SplineEditor.Editor
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
 
+				GUILayout.Space(10);
+				DrawRotateNormalsButton();
 				DrawFlipNormalsToggle();
+				DrawNormalLocalRotationField();
 				DrawNormalsGlobalRotationField();
 
 				GUILayout.Space(10);
@@ -36,6 +50,23 @@ namespace SplineEditor.Editor
 			EditorGUILayout.EndFoldoutHeaderGroup();
             GUI.enabled = prevEnabled;
         }
+
+		private void DrawRotateNormalsButton()
+		{
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+
+			GUI.enabled = isSplineEditorEnabled;
+			var toggleState = isSplineEditorEnabled && isNormalsEditorMode;
+			if (GUILayout.Toggle(toggleState, NormalsEditorButtonContent, toggleButtonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
+			{
+				SplineEditor.ToggleNormalsEditorMode();
+				repaintScene = true;
+			}
+
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+		}
 
 		private void DrawFlipNormalsToggle()
 		{
@@ -56,13 +87,40 @@ namespace SplineEditor.Editor
 			GUILayout.EndHorizontal();
 		}
 
+		private void DrawNormalLocalRotationField()
+		{
+			var prevEnabled = GUI.enabled;
+			var currentSpline = SplineEditor.CurrentSpline;
+			var isNormalsEditorEnabled = currentSpline != null && SplineEditor.IsAnyPointSelected && SplineEditor.SelectedPointIndex % 3 == 0;
+			var normalIndex = SplineEditor.SelectedPointIndex / 3;
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			GUI.enabled = isNormalsEditorEnabled;
+			previousNormalLocalRotation = isNormalsEditorEnabled ? currentSpline.NormalsAngularOffsets[normalIndex] : previousNormalLocalRotation;
+			var nextNormalsRotation = EditorGUILayout.FloatField(NormalsEditorLocalRotationContent, previousNormalLocalRotation);
+			if (nextNormalsRotation != previousNormalLocalRotation)
+			{
+				Undo.RecordObject(SplineEditor.CurrentSpline, "Change Normal Local Rotation");
+				currentSpline.UpdateNormalAngularOffset(normalIndex, nextNormalsRotation);
+				EditorUtility.SetDirty(SplineEditor.CurrentSpline);
+				repaintScene = true;
+			}
+
+			previousNormalLocalRotation = nextNormalsRotation;
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			GUI.enabled = prevEnabled;
+		}
+
 		private void DrawNormalsGlobalRotationField()
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			previousNormalsRotation = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.GlobalNormalsRotation : previousNormalsRotation;
-			var nextNormalsRotation = EditorGUILayout.FloatField(NormalsEditorGlobalRotationContent, previousNormalsRotation);
-			if (nextNormalsRotation != previousNormalsRotation)
+			previousNormalsGlobalRotation = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.GlobalNormalsRotation : previousNormalsGlobalRotation;
+			var nextNormalsRotation = EditorGUILayout.FloatField(NormalsEditorGlobalRotationContent, previousNormalsGlobalRotation);
+			if (nextNormalsRotation != previousNormalsGlobalRotation)
 			{
 				Undo.RecordObject(SplineEditor.CurrentSpline, "Change Normals Global Rotation");
 				SplineEditor.CurrentSpline.GlobalNormalsRotation = nextNormalsRotation;
@@ -71,11 +129,13 @@ namespace SplineEditor.Editor
 				repaintScene = true;
 			}
 
-			previousNormalsRotation = nextNormalsRotation;
+			previousNormalsGlobalRotation = nextNormalsRotation;
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
 
 	}
+
+	#endregion
 
 }

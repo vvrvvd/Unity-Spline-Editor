@@ -294,6 +294,7 @@ namespace SplineEditor.Editor
 			InitializeSceneGUI();
 			InitializeFlags();
 			InitializeDrawCurveMode();
+			InitializeNormalsEditorMode();
 		}
 
 		private void OnDisable()
