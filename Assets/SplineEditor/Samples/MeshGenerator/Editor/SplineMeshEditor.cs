@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using BezierSplineEditor = SplineEditor.Editor.SplineEditor;
 
 namespace SplineEditor.MeshGenerator.Editor
 {
@@ -9,6 +10,7 @@ namespace SplineEditor.MeshGenerator.Editor
 	{
 
 		private SplineMesh splineMesh;
+		private static float prevPointScale = 1f;
 
 		private void OnEnable()
 		{
@@ -19,10 +21,32 @@ namespace SplineEditor.MeshGenerator.Editor
 		{
 			base.OnInspectorGUI();
 
+			var prevEnabled = GUI.enabled;
+
+			var isTargetSplineSelected = BezierSplineEditor.CurrentSpline == splineMesh.BezierSpline;
+			var isMainPointSelected = BezierSplineEditor.IsAnyPointSelected && BezierSplineEditor.SelectedPointIndex % 3 == 0;
+			var isScaleFieldActive = isTargetSplineSelected && isMainPointSelected;
+
+			GUI.enabled = isScaleFieldActive;
+
+			var pointIndex = BezierSplineEditor.SelectedPointIndex / 3;
+			var currentPointScale = isScaleFieldActive ? splineMesh.BezierSpline.PointsScales[pointIndex] : prevPointScale;
+			//TODO: Add styles and refactor with functions
+			var nextPointScale = EditorGUILayout.FloatField("Point Scale", currentPointScale);
+			if (nextPointScale != currentPointScale)
+			{
+				splineMesh.BezierSpline.UpdatePointsScale(pointIndex, nextPointScale);
+			}
+
+			prevPointScale = currentPointScale;
+
+			GUI.enabled = prevEnabled;
+
 			if (GUILayout.Button("Generate Mesh"))
 			{
 				splineMesh.ConstructMesh();
 			}
+
 		}
 
 		private void OnSceneGUI()

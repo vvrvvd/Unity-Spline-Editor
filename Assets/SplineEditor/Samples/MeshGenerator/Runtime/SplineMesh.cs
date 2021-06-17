@@ -48,8 +48,9 @@ namespace SplineEditor.MeshGenerator
 
 		#region Internal Fields
 
+		//TODO: Change to property
 		[SerializeField, HideInInspector]
-		internal SplinePath splinePath;
+		public SplinePath splinePath;
 
 		#endregion
 
@@ -81,6 +82,15 @@ namespace SplineEditor.MeshGenerator
 		{
 			get => splinePath.tangents;
 			set => splinePath.tangents = value;
+		}
+
+		/// <summary>
+		/// Scale of the points on the mesh.
+		/// </summary>
+		public float[] Scale
+		{
+			get => splinePath.scales;
+			set => splinePath.scales = value;
 		}
 
 		/// <summary>
@@ -216,9 +226,9 @@ namespace SplineEditor.MeshGenerator
 			{
 				var normalVector = Normals[i];
 				var right = Vector3.Cross(normalVector, Tangents[i]);
-
-				verts[vertIndex] = Points[i] - right * width * .5f;
-				verts[vertIndex + 1] = Points[i] + right * width * .5f;
+				var scaledWidth = Scale[i];
+				verts[vertIndex] = Points[i] - right * scaledWidth * .5f;
+				verts[vertIndex + 1] = Points[i] + right * scaledWidth * .5f;
 
 				normals[vertIndex] = normalVector;
 				normals[vertIndex + 1] = normalVector;

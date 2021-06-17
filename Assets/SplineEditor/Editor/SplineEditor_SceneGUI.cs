@@ -9,6 +9,7 @@ namespace SplineEditor.Editor
 		#region Private Fields
 
 		private bool isRotating;
+		private bool isScaling;
 		private bool isDraggingPoint;
 		private Quaternion lastRotation;
 
@@ -18,6 +19,7 @@ namespace SplineEditor.Editor
 
 		private void InitializeSceneGUI()
 		{
+			isScaling = false;
 			isRotating = false;
 			isDraggingPoint = false;
 			lastRotation = Quaternion.identity;
@@ -48,13 +50,21 @@ namespace SplineEditor.Editor
 
 		private void DrawPoints()
 		{
+			Vector3 p0, p1, p2, p3;
 			for (var i = 0; i < CurrentSpline.CurvesCount; i++)
 			{
 				var curveStartIndex = i * 3;
-				var p0 = DrawPoint(curveStartIndex);
-				var p1 = DrawPoint(curveStartIndex + 1);
-				var p2 = DrawPoint(curveStartIndex + 2);
-				var p3 = handleTransform.TransformPoint(CurrentSpline.Points[curveStartIndex + 3].position);
+				if(i > 0 && i%3!=0)
+				{
+					p0 = handleTransform.TransformPoint(currentSpline.Points[i].position);
+				}
+				else
+				{
+					p0 = DrawPoint(curveStartIndex);
+				}
+				p1 = DrawPoint(curveStartIndex + 1);
+				p2 = DrawPoint(curveStartIndex + 2);
+				p3 = handleTransform.TransformPoint(CurrentSpline.Points[curveStartIndex + 3].position);
 
 				if (!IsDrawerMode || i < CurrentSpline.CurvesCount - 1)
 				{
@@ -126,6 +136,10 @@ namespace SplineEditor.Editor
 						RotatePoints(index, point);
 					}
 				}
+				else if(savedTool == Tool.Scale && index % 3 == 0)
+				{
+					ScalePoint(index, point);
+				}
 				else
 				{
 					MovePoint(index, point);
@@ -155,7 +169,7 @@ namespace SplineEditor.Editor
 			{
 				if (TryCastMousePoint(out var castedPosition))
 				{
-					Undo.RecordObject(CurrentSpline, "Cast Line Point To Mouse");
+					Undo.RecordObject(CurrentSpline, "Cast Spline Point To Mouse");
 					point = castedPosition;
 					CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
 					wasSplineModified = true;
@@ -168,19 +182,53 @@ namespace SplineEditor.Editor
 				var wasChanged = EditorGUI.EndChangeCheck();
 				if (wasChanged)
 				{
-					Undo.RecordObject(CurrentSpline, "Move Line Point");
+					Undo.RecordObject(CurrentSpline, "Move Spline Point");
 					isDraggingPoint = true;
 					CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
 					wasSplineModified = true;
 				}
 				else if ((isDraggingPoint && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
 				{
-					Undo.RecordObject(CurrentSpline, "Move Line Point");
+					Undo.RecordObject(CurrentSpline, "Move Spline Point");
 					CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
 					isDraggingPoint = false;
 					castSelectedPointFlag = false;
 					wasSplineModified = true;
 				}
+			}
+		}
+
+		private void ScalePoint(int index, Vector3 point)
+		{
+			var normalIndex = index / 3;
+
+			var normalAngularOffset = currentSpline.NormalsAngularOffsets[normalIndex];
+			var globalRotation = Quaternion.AngleAxis(currentSpline.GlobalNormalsRotation, currentSpline.Tangents[normalIndex]);
+			var normalRotation = globalRotation * Quaternion.AngleAxis(normalAngularOffset, currentSpline.Tangents[normalIndex]);
+			var normalHandleRotation = normalRotation * Quaternion.LookRotation(currentSpline.Tangents[normalIndex]);
+			var baseHandleRotation = handleTransform.rotation * normalHandleRotation;
+
+			var handleSize = HandleUtility.GetHandleSize(point);
+
+			var pointScaleIndex = index / 3;
+			var pointScale = currentSpline.PointsScales[pointScaleIndex];
+
+			EditorGUI.BeginChangeCheck();
+			var newPointScale = Handles.DoScaleHandle(Vector3.one * pointScale, point, baseHandleRotation, handleSize);
+			var wasChanged = EditorGUI.EndChangeCheck();
+			if (wasChanged)
+			{
+				Undo.RecordObject(CurrentSpline, "Scale Spline Point");
+				isScaling = true;
+				CurrentSpline.UpdatePointsScale(pointScaleIndex, newPointScale.x);
+				wasSplineModified = true;
+			}
+			else if ((isScaling && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
+			{
+				Undo.RecordObject(CurrentSpline, "Scale Spline Point");
+				CurrentSpline.UpdatePointsScale(pointScaleIndex, newPointScale.x);
+				isScaling = false;
+				wasSplineModified = true;
 			}
 		}
 
@@ -198,7 +246,7 @@ namespace SplineEditor.Editor
 
 				var rotationDiff = rotation * Quaternion.Inverse(lastRotation);
 
-				Undo.RecordObject(CurrentSpline, "Rotate Line Point");
+				Undo.RecordObject(CurrentSpline, "Rotate Spline Point");
 				var point1Index = index == CurrentSpline.PointsCount - 1 && CurrentSpline.IsLoop ? 1 : index + 1;
 				var point2Index = index == 0 && CurrentSpline.IsLoop ? CurrentSpline.PointsCount - 2 : index - 1;
 

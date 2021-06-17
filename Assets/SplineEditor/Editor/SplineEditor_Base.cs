@@ -17,7 +17,7 @@ namespace SplineEditor.Editor
 		internal static event Action OnSelectedSplineChanged;
 
 		private static BezierSpline currentSpline;
-		internal static BezierSpline CurrentSpline
+		public static BezierSpline CurrentSpline
 		{
 			get => currentSpline;
 			private set
@@ -37,7 +37,7 @@ namespace SplineEditor.Editor
 		}
 
 		private static SplineEditor currentEditor;
-		internal static SplineEditor CurrentEditor
+		public static SplineEditor CurrentEditor
 		{
 			get => currentEditor;
 			private set
@@ -53,7 +53,7 @@ namespace SplineEditor.Editor
 		}
 
 		private static int selectedPointIndex = -1;
-		internal static int SelectedPointIndex
+		public static int SelectedPointIndex
 		{
 			get => selectedPointIndex;
 			private set
@@ -74,7 +74,7 @@ namespace SplineEditor.Editor
 		}
 
 		private static int selectedCurveIndex = -1;
-		internal static int SelectedCurveIndex
+		public static int SelectedCurveIndex
 		{
 			get => selectedCurveIndex;
 			private set
@@ -85,7 +85,7 @@ namespace SplineEditor.Editor
 		}
 
 		private static bool isAnyPointSelected;
-		internal static bool IsAnyPointSelected
+		public static bool IsAnyPointSelected
 		{
 			get => isAnyPointSelected;
 			set {
@@ -99,7 +99,7 @@ namespace SplineEditor.Editor
 		}
 
 		private static bool canSelectedCurveBeRemoved;
-		internal static bool CanSelectedCurveBeRemoved
+		public static bool CanSelectedCurveBeRemoved
 		{
 			get => canSelectedCurveBeRemoved;
 			set
@@ -115,7 +115,7 @@ namespace SplineEditor.Editor
 		}
 
 		private static bool canNewCurveBeAdded;
-		internal static bool CanNewCurveBeAdded
+		public static bool CanNewCurveBeAdded
 		{
 			get => canNewCurveBeAdded;
 			set
@@ -131,7 +131,7 @@ namespace SplineEditor.Editor
 		}
 
 		private static bool isSplineLooped;
-		internal static bool IsSplineLooped
+		public static bool IsSplineLooped
 		{
 			get => isSplineLooped;
 			set
@@ -147,7 +147,7 @@ namespace SplineEditor.Editor
 		}
 
 		private static bool canSplineBeLooped;
-		internal static bool CanSplineBeLooped
+		public static bool CanSplineBeLooped
 		{
 			get => canSplineBeLooped;
 			set
@@ -163,7 +163,7 @@ namespace SplineEditor.Editor
 		}
 
 		private static bool canSplineBeSimplified;
-		internal static bool CanSplineBeSimplified
+		public static bool CanSplineBeSimplified
 		{
 			get => canSplineBeSimplified;
 			set
@@ -179,7 +179,7 @@ namespace SplineEditor.Editor
 		}
 
 		private static bool isDrawerMode;
-		internal static bool IsDrawerMode
+		public static bool IsDrawerMode
 		{
 			get => isDrawerMode;
 			set
@@ -196,7 +196,7 @@ namespace SplineEditor.Editor
 
 
 		private static bool isNormalsEditorMode;
-		internal static bool IsNormalsEditorMode
+		public static bool IsNormalsEditorMode
 		{
 			get => isNormalsEditorMode;
 			set
