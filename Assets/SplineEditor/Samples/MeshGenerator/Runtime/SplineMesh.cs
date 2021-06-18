@@ -226,7 +226,7 @@ namespace SplineEditor.MeshGenerator
 			{
 				var normalVector = Normals[i];
 				var right = Vector3.Cross(normalVector, Tangents[i]);
-				var scaledWidth = Scale[i];
+				var scaledWidth = width * Scale[i];
 				verts[vertIndex] = Points[i] - right * scaledWidth * .5f;
 				verts[vertIndex + 1] = Points[i] + right * scaledWidth * .5f;
 

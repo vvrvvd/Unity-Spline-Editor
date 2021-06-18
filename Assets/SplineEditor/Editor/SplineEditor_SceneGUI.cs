@@ -56,7 +56,7 @@ namespace SplineEditor.Editor
 				var curveStartIndex = i * 3;
 				if(i > 0 && i%3!=0)
 				{
-					p0 = handleTransform.TransformPoint(currentSpline.Points[i].position);
+					p0 = handleTransform.TransformPoint(currentSpline.Points[curveStartIndex].position);
 				}
 				else
 				{

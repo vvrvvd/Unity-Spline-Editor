@@ -60,6 +60,7 @@ namespace SplineEditor.MeshGenerator.Editor
 			var prevEnabled = GUI.enabled;
 			GUI.enabled = false;
 
+			//TODO: Add color to settings
 			Handles.color = Color.blue;
 			for (var i = 0; i < splineMesh.splinePath.points.Length; i++)
 			{
