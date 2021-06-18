@@ -24,10 +24,19 @@ namespace SplineEditor.MeshGenerator
 
 		#region Public Fields
 
-		public float width = 5f;
-		public float spacing = 1f;
+		[Space]
 		public bool drawPoints = true;
 		public bool drawNormals = false;
+
+		[Space]
+		public float width = 5f;
+		public float spacing = 1f;
+		public bool mirrorRightSideCurve = true;
+		public AnimationCurve rightSideCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
+		public AnimationCurve leftSideCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
+
+		[Space]
+		public bool usePointsScale = true;
 
 		#endregion
 
@@ -225,10 +234,11 @@ namespace SplineEditor.MeshGenerator
 			for (int i = 0; i < Points.Length; i++)
 			{
 				var normalVector = Normals[i];
-				var right = Vector3.Cross(normalVector, Tangents[i]);
-				var scaledWidth = width * Scale[i];
-				verts[vertIndex] = Points[i] - right * scaledWidth * .5f;
-				verts[vertIndex + 1] = Points[i] + right * scaledWidth * .5f;
+				var right = Vector3.Cross(normalVector, Tangents[i]).normalized;
+				var rightScaledWidth = width * (usePointsScale ? Scale[i] : 1f)* rightSideCurve.Evaluate(ParametersT[i]);
+				var leftScaledWidth = width * (usePointsScale ? Scale[i] : 1f)* leftSideCurve.Evaluate(ParametersT[i]);
+				verts[vertIndex] = Points[i] + right * (mirrorRightSideCurve ? rightScaledWidth : leftScaledWidth) * .5f;
+				verts[vertIndex + 1] = Points[i] + right * rightScaledWidth * .5f;
 
 				normals[vertIndex] = normalVector;
 				normals[vertIndex + 1] = normalVector;
