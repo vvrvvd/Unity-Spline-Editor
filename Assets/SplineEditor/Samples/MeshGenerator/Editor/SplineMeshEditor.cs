@@ -9,6 +9,8 @@ namespace SplineEditor.MeshGenerator.Editor
 	public class SplineMeshEditor : UnityEditor.Editor
 	{
 
+		public const string SplineMeshEditorSettingsName = "SplineMeshEditorSettings";
+
 		private SplineMesh splineMesh;
 		private static float prevPointScale = 1f;
 
