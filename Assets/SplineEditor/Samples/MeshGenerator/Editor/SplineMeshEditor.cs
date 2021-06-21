@@ -51,9 +51,16 @@ namespace SplineEditor.MeshGenerator.Editor
 				splineMesh.ToggleUV();
 			}
 
-			if (GUILayout.Button("Generate Mesh"))
+			if (GUILayout.Button("Save Mesh"))
 			{
 				splineMesh.ConstructMesh();
+				var path = EditorUtility.SaveFilePanel("Save Spline Mesh Asset", "Assets/", "savedMesh", "asset");
+				if (string.IsNullOrEmpty(path)) return;
+				
+				path = FileUtil.GetProjectRelativePath(path);
+				var mesh = splineMesh.MeshFilter.sharedMesh;
+				AssetDatabase.CreateAsset(mesh, path);
+				AssetDatabase.SaveAssets();
 			}
 
 		}

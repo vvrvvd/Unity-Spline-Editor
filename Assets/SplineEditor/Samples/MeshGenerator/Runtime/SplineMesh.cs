@@ -67,9 +67,8 @@ namespace SplineEditor.MeshGenerator
 		#region Private Fields
 
 		private bool updateMesh;
-
-		[SerializeField, HideInInspector]
 		private Mesh cachedMesh;
+
 		[SerializeField, HideInInspector]
 		private MeshFilter meshFilter;
 		[SerializeField, HideInInspector]
@@ -233,6 +232,8 @@ namespace SplineEditor.MeshGenerator
 			Undo.RecordObject(this, "Generate Bezier Spline Mesh");
 #endif
 
+			Debug.Log($"Generate Mesh: {name}");
+
 			var splineLength = bezierSpline.GetLinearLength(precision: 0.0001f, useWorldScale: false);
 			var curvesCount = bezierSpline.CurvesCount;
 			spacing = Mathf.Max(spacing, (splineLength) / (curvesCount * 1000f));
@@ -339,7 +340,6 @@ namespace SplineEditor.MeshGenerator
 			var prevMaterial = meshRenderer.sharedMaterial;
 			meshRenderer.sharedMaterial = isVisualizingUV ? settingsScriptable.uvMaterial : savedMaterial;
 			savedMaterial = isVisualizingUV ? prevMaterial : settingsScriptable.uvMaterial;
-
 		}
 
 		#endregion
