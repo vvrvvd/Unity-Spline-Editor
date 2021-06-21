@@ -28,7 +28,15 @@ namespace SplineEditor.MeshGenerator
 
 		#region Const Fields
 
+		public const string SplineMeshSettingsName = "SplineMeshSettings";
+		
 		private const float Precision = 0.0001f;
+
+		#endregion
+
+		#region Public Static Fields
+
+		public static string SettingsPath => $"Resources/{SplineMeshSettingsName}.asset";
 
 		#endregion
 
@@ -68,6 +76,10 @@ namespace SplineEditor.MeshGenerator
 		private MeshRenderer meshRenderer;
 		[SerializeField, HideInInspector]
 		private BezierSpline bezierSpline;
+		[SerializeField, HideInInspector]
+		private Material savedMaterial;
+		[SerializeField, HideInInspector]
+		private bool isVisualizingUV = false;
 
 		#endregion
 
@@ -127,6 +139,8 @@ namespace SplineEditor.MeshGenerator
 			set => splinePath.parametersT = value;
 		}
 
+		public bool IsVisualizingUV => isVisualizingUV;
+
 		public MeshFilter MeshFilter => meshFilter;
 		public MeshRenderer MeshRenderer => meshRenderer;
 		public BezierSpline BezierSpline => bezierSpline;
@@ -183,6 +197,11 @@ namespace SplineEditor.MeshGenerator
 
 			bezierSpline.OnSplineChanged -= GenerateMesh;
 			bezierSpline.OnSplineChanged += GenerateMesh;
+
+			if(isVisualizingUV)
+			{
+				ToggleUV();
+			}
 		}
 
 		private void LateUpdate()
@@ -288,6 +307,39 @@ namespace SplineEditor.MeshGenerator
 			cachedMesh.uv = uvs;
 
 			return cachedMesh;
+		}
+		/// <summary>
+		/// Toggles mesh material replacement with UV visualization material when it is not shown, and brings back previous material if UV was being shown.
+		/// </summary>
+		/// <param name="state"></param>
+		public void ToggleUV()
+		{
+			ToggleUV(!isVisualizingUV);
+		}
+
+		/// <summary>
+		/// Replace current mesh material with UV visualization material when 'state' is true and back to regular material when 'state' is false.
+		/// </summary>
+		/// <param name="state"></param>
+		public void ToggleUV(bool state)
+		{
+			if (isVisualizingUV == state)
+			{
+				return;
+			}
+
+			var settingsScriptable = Resources.Load<SplineMeshConfiguration>(SplineMeshSettingsName);
+			if (settingsScriptable==null)
+			{
+				Debug.LogError("[Spline Mesh] SplineMeshSettings.asset file cannot be found in Resources folder");
+				return;
+			}
+
+			isVisualizingUV = state;
+			var prevMaterial = meshRenderer.sharedMaterial;
+			meshRenderer.sharedMaterial = isVisualizingUV ? settingsScriptable.uvMaterial : savedMaterial;
+			savedMaterial = isVisualizingUV ? prevMaterial : settingsScriptable.uvMaterial;
+
 		}
 
 		#endregion

@@ -9,8 +9,6 @@ namespace SplineEditor.MeshGenerator.Editor
 	public class SplineMeshEditor : UnityEditor.Editor
 	{
 
-		public const string SplineMeshEditorSettingsName = "SplineMeshEditorSettings";
-
 		private SplineMesh splineMesh;
 		private static float prevPointScale = 1f;
 
@@ -46,6 +44,12 @@ namespace SplineEditor.MeshGenerator.Editor
 			prevPointScale = currentPointScale;
 
 			GUI.enabled = prevEnabled;
+
+			var uvButtonTitle = splineMesh.IsVisualizingUV ? "Hide UV" : "Show UV" ;
+			if (GUILayout.Button(uvButtonTitle))
+			{
+				splineMesh.ToggleUV();
+			}
 
 			if (GUILayout.Button("Generate Mesh"))
 			{

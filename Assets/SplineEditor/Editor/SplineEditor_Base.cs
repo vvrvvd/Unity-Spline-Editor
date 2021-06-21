@@ -281,7 +281,7 @@ namespace SplineEditor.Editor
 		{
 			TryLoadEditorSettings();
 
-			if (editorSettings!=null && editorSettings.OpenSplineEditorWithSpline)
+			if (editorSettings!=null && editorSettings.OpenSplineEditorWithSpline && !EditorWindow.HasOpenInstances<SplineEditorWindow>())
 			{
 				SplineEditorWindow.Initialize();
 			}
@@ -299,7 +299,7 @@ namespace SplineEditor.Editor
 
 		private void OnDisable()
 		{
-			if (CurrentEditor == null || CurrentEditor.target != target)
+			if (CurrentEditor == null || CurrentEditor.target != target || CurrentSpline == null)
 			{
 				return;
 			}
@@ -311,7 +311,7 @@ namespace SplineEditor.Editor
 
 		private void OnSceneGUI()
 		{
-			if (CurrentEditor == null || CurrentEditor.target != target)
+			if (CurrentEditor == null || CurrentEditor.target != target || CurrentSpline == null)
 			{
 				return;
 			}
@@ -359,6 +359,11 @@ namespace SplineEditor.Editor
 
 			CurrentEditor = this;
 			CurrentSpline = target as BezierSpline;
+
+			if(CurrentEditor==null || CurrentSpline==null)
+			{
+				return;
+			}
 
 			TryLoadEditorSettings();
 			DrawInspectorGUI();

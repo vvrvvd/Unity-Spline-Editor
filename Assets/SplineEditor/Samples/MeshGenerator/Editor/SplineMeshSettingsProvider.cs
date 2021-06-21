@@ -6,23 +6,22 @@ using UnityEngine;
 namespace SplineEditor.MeshGenerator.Editor
 {
 
-    public class SplineMeshEditorSettingsProvider : SettingsProvider
+    public class SplineMeshSettingsProvider : SettingsProvider
     {
-        private static string SettingsPath => $"Resources/{SplineMeshEditor.SplineMeshEditorSettingsName}.asset";
         private static UnityEditor.Editor cachedEditor;
 
-        public SplineMeshEditorSettingsProvider(string path, SettingsScope scope)
+        public SplineMeshSettingsProvider(string path, SettingsScope scope)
             : base(path, scope) { }
 
         public static bool IsSettingsAvailable()
         {
-            return File.Exists(SettingsPath);
+            return File.Exists(SplineMesh.SettingsPath);
         }
 
         [SettingsProvider]
         public static SettingsProvider CreateMyCustomSettingsProvider()
         {
-            var settingsScriptable = Resources.Load(SplineMeshEditor.SplineMeshEditorSettingsName);
+            var settingsScriptable = Resources.Load(SplineMesh.SplineMeshSettingsName);
 
             if(cachedEditor==null)
 			{
