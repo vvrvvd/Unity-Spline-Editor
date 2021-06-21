@@ -16,6 +16,16 @@ namespace SplineEditor.MeshGenerator
 	public class SplineMesh : MonoBehaviour
 	{
 
+		#region Enums
+
+		public enum UVMode
+		{
+			Linear,
+			PingPong,
+		}
+
+		#endregion
+
 		#region Const Fields
 
 		private const float Precision = 0.0001f;
@@ -37,6 +47,12 @@ namespace SplineEditor.MeshGenerator
 
 		[Space]
 		public bool usePointsScale = true;
+
+		[Space]
+		public UVMode uvMode = UVMode.Linear;
+
+		[Space]
+		public bool mirrorUV = false;
 
 		#endregion
 
@@ -235,8 +251,8 @@ namespace SplineEditor.MeshGenerator
 			{
 				var normalVector = Normals[i];
 				var right = Vector3.Cross(normalVector, Tangents[i]).normalized;
-				var rightScaledWidth = width * (usePointsScale ? Scale[i] : 1f)* rightSideCurve.Evaluate(ParametersT[i]);
-				var leftScaledWidth = width * (usePointsScale ? Scale[i] : 1f)* leftSideCurve.Evaluate(ParametersT[i]);
+				var rightScaledWidth = width * (usePointsScale ? Scale[i] : 1f) * rightSideCurve.Evaluate(ParametersT[i]);
+				var leftScaledWidth = width * (usePointsScale ? Scale[i] : 1f) * leftSideCurve.Evaluate(ParametersT[i]);
 
 				verts[vertIndex] = Points[i] + right * (mirrorRightSideCurve ? -rightScaledWidth : leftScaledWidth);
 				verts[vertIndex + 1] = Points[i] + right * rightScaledWidth;
@@ -244,8 +260,7 @@ namespace SplineEditor.MeshGenerator
 				normals[vertIndex] = normalVector;
 				normals[vertIndex + 1] = normalVector;
 
-				float completionPercent = i / (float)(Points.Length - 1);
-				float v = 1 - Mathf.Abs(2 * completionPercent - 1);
+				var v = GetUV(i);
 				uvs[vertIndex] = new Vector2(0, v);
 				uvs[vertIndex + 1] = new Vector2(1, v);
 
@@ -273,6 +288,26 @@ namespace SplineEditor.MeshGenerator
 			cachedMesh.uv = uvs;
 
 			return cachedMesh;
+		}
+
+		#endregion
+
+		#region Private Methods
+
+		private float GetUV(int pointIndex)
+		{
+			var uv = pointIndex / (float)(Points.Length - 1);
+			switch (uvMode)
+			{
+				case UVMode.PingPong:
+					uv = 1 - Mathf.Abs(2 * uv - 1);
+					break;
+				case UVMode.Linear:
+				default:
+					break;
+			}
+
+			return mirrorUV ? 1 - uv : uv;
 		}
 
 		#endregion
