@@ -11,6 +11,11 @@ namespace SplineEditor.Editor
 		private bool isRotating;
 		private bool isScaling;
 		private bool isDraggingPoint;
+
+		private Vector3 lastScale;
+		private Vector3 leftPointInitialLocalDistance;
+		private Vector3 rightPointInitialLocalDistance;
+
 		private Quaternion lastRotation;
 
 		#endregion
@@ -23,6 +28,8 @@ namespace SplineEditor.Editor
 			isRotating = false;
 			isDraggingPoint = false;
 			lastRotation = Quaternion.identity;
+			leftPointInitialLocalDistance = Vector3.zero;
+			rightPointInitialLocalDistance = Vector3.zero;
 		}
 
 		#endregion
@@ -213,20 +220,48 @@ namespace SplineEditor.Editor
 			var pointScaleIndex = index / 3;
 			var pointScale = currentSpline.PointsScales[pointScaleIndex];
 
+			var leftControlPointIndex = index - 1;
+			var isLeftPointIndexValid = leftControlPointIndex >= 0;
+
+			var rightControlPointIndex = index + 1;
+			var isRightPointIndexValid = rightControlPointIndex < currentSpline.PointsCount;
+
 			EditorGUI.BeginChangeCheck();
-			var newPointScale = Handles.DoScaleHandle(Vector3.one * pointScale, point, baseHandleRotation, handleSize);
+			lastScale = Handles.DoScaleHandle(isScaling ? lastScale : new Vector3(pointScale, 0f, 1f), point, baseHandleRotation, handleSize);
 			var wasChanged = EditorGUI.EndChangeCheck();
 			if (wasChanged)
 			{
+
+				if (!isScaling)
+				{
+					isScaling = true;
+					lastScale = new Vector3(lastScale.x, 0f, lastScale.z);
+					leftPointInitialLocalDistance = isLeftPointIndexValid ? currentSpline.Points[leftControlPointIndex].position - currentSpline.Points[index].position : Vector3.zero;
+					rightPointInitialLocalDistance = isRightPointIndexValid ? currentSpline.Points[rightControlPointIndex].position - currentSpline.Points[index].position : Vector3.zero;
+					return;
+				}
+
 				Undo.RecordObject(CurrentSpline, "Scale Spline Point");
 				isScaling = true;
-				CurrentSpline.UpdatePointsScale(pointScaleIndex, newPointScale.x);
+
+				lastScale.z = Mathf.Max(lastScale.z, 0.001f);
+
+				if(isLeftPointIndexValid)
+				{
+					currentSpline.UpdatePoint(leftControlPointIndex, currentSpline.Points[index].position + leftPointInitialLocalDistance * lastScale.z);
+				}
+
+				if (isRightPointIndexValid)
+				{
+					currentSpline.UpdatePoint(rightControlPointIndex, currentSpline.Points[index].position + rightPointInitialLocalDistance * lastScale.z);
+				}
+
+				CurrentSpline.UpdatePointsScale(pointScaleIndex, lastScale.x);
 				wasSplineModified = true;
 			}
 			else if ((isScaling && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
 			{
-				Undo.RecordObject(CurrentSpline, "Scale Spline Point");
-				CurrentSpline.UpdatePointsScale(pointScaleIndex, newPointScale.x);
+				CurrentSpline.UpdatePointsScale(pointScaleIndex, lastScale.x);
 				isScaling = false;
 				wasSplineModified = true;
 			}

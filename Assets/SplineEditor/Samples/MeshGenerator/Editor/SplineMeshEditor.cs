@@ -19,6 +19,7 @@ namespace SplineEditor.MeshGenerator.Editor
 
 		public override void OnInspectorGUI()
 		{
+			//Add full editor override, get rid of this invoke
 			base.OnInspectorGUI();
 
 			var prevEnabled = GUI.enabled;
@@ -31,12 +32,14 @@ namespace SplineEditor.MeshGenerator.Editor
 
 			var pointIndex = BezierSplineEditor.SelectedPointIndex / 3;
 			var currentPointScale = isScaleFieldActive ? splineMesh.BezierSpline.PointsScales[pointIndex] : prevPointScale;
+
 			//TODO: Add styles and refactor with functions
 			var nextPointScale = EditorGUILayout.FloatField("Point Scale", currentPointScale);
 			if (nextPointScale != currentPointScale)
 			{
 				splineMesh.BezierSpline.UpdatePointsScale(pointIndex, nextPointScale);
 			}
+
 
 			prevPointScale = currentPointScale;
 

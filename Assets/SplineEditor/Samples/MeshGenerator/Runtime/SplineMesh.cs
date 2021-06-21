@@ -237,8 +237,9 @@ namespace SplineEditor.MeshGenerator
 				var right = Vector3.Cross(normalVector, Tangents[i]).normalized;
 				var rightScaledWidth = width * (usePointsScale ? Scale[i] : 1f)* rightSideCurve.Evaluate(ParametersT[i]);
 				var leftScaledWidth = width * (usePointsScale ? Scale[i] : 1f)* leftSideCurve.Evaluate(ParametersT[i]);
-				verts[vertIndex] = Points[i] + right * (mirrorRightSideCurve ? rightScaledWidth : leftScaledWidth) * .5f;
-				verts[vertIndex + 1] = Points[i] + right * rightScaledWidth * .5f;
+
+				verts[vertIndex] = Points[i] + right * (mirrorRightSideCurve ? -rightScaledWidth : leftScaledWidth);
+				verts[vertIndex + 1] = Points[i] + right * rightScaledWidth;
 
 				normals[vertIndex] = normalVector;
 				normals[vertIndex + 1] = normalVector;
