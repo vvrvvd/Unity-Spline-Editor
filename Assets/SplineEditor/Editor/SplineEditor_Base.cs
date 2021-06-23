@@ -212,7 +212,7 @@ namespace SplineEditor.Editor
 		}
 
 		internal static bool DrawCurveSmoothAcuteAngles = true;
-		internal static float DrawCurveSegmentLength = 1f;
+		internal static float DrawCurveSegmentLength = 5f;
 		internal static float DrawCurveFirstPointHook = 0.33f;
 		internal static float DrawCurveSecondPointHook = 0.66f;
 

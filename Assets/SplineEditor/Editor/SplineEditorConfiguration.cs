@@ -30,6 +30,12 @@ namespace SplineEditor.Editor
 		public float SplineWidth = 2f;
 		public Color SplineColor = Color.red;
 
+
+		[Header("Normals")]
+		public float NormalVectorLength = 5f;
+		public Color NormalsColor = Color.green;
+
+
 		[Header("Drawer Tool")]
 		public bool ScaleDrawerHandleOnScreen = true;
 		public float DrawerModeHandleSize = 0.30f;

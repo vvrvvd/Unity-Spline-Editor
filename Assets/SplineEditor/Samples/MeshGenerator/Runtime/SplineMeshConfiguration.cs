@@ -10,6 +10,11 @@ namespace SplineEditor.MeshGenerator
 		[Header("General")]
 		public Material uvMaterial= default;
 
+		[Header("Scene GUI")]
+		public Color pointsColor = Color.blue;
+		public Color normalsColor = Color.green;
+		public float normalVectorLength = 2.5f;
+
 	}
 
 }

@@ -162,8 +162,8 @@ namespace SplineEditor.Editor
 				}
 				var normalVector = currentSpline.GetNormal(normalIndex);
 				var rightVector = Vector3.Cross(normalVector, currentSpline.Tangents[normalIndex]);
-				var normalLength = 5f;
-				Handles.color = Color.green;
+				var normalLength = editorSettings.NormalVectorLength;
+				Handles.color = editorSettings.NormalsColor;
 				Handles.DrawLine(point, point + currentSpline.transform.TransformDirection((normalVector) * normalLength));
 			}
 
