@@ -211,7 +211,7 @@ namespace SplineEditor.Editor
 
 			var normalAngularOffset = currentSpline.NormalsAngularOffsets[normalIndex];
 			var globalRotation = Quaternion.AngleAxis(currentSpline.GlobalNormalsRotation, currentSpline.Tangents[normalIndex]);
-			var normalRotation = globalRotation * Quaternion.AngleAxis(normalAngularOffset, currentSpline.Tangents[normalIndex]);
+			var normalRotation = globalRotation * Quaternion.AngleAxis(normalAngularOffset + MagicAngleOffset, currentSpline.Tangents[normalIndex]);
 			var normalHandleRotation = normalRotation * Quaternion.LookRotation(currentSpline.Tangents[normalIndex]);
 			var baseHandleRotation = handleTransform.rotation * normalHandleRotation;
 

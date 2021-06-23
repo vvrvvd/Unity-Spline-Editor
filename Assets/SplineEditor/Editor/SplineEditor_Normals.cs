@@ -6,7 +6,16 @@ namespace SplineEditor.Editor
 {
 	public partial class SplineEditor : UnityEditor.Editor
 	{
-		
+
+		#region Const Fields
+
+		/// <summary>
+		/// I don't know why all the handles for axis are rotated by this angle but it doesn't look neat when the handle is offseted by it so we just take it into account.
+		/// </summary>
+		private const float MagicAngleOffset = 25f; 
+
+		#endregion
+
 		#region Initialize DrawCurveMode
 
 		private void InitializeNormalsEditorMode()
@@ -47,7 +56,7 @@ namespace SplineEditor.Editor
 			EditorGUI.BeginChangeCheck();
 			var normalAngularOffset = currentSpline.NormalsAngularOffsets[normalIndex];
 			var globalRotation = Quaternion.AngleAxis(currentSpline.GlobalNormalsRotation, currentSpline.Tangents[normalIndex]);
-			var normalRotation = globalRotation * Quaternion.AngleAxis(normalAngularOffset, currentSpline.Tangents[normalIndex]);
+			var normalRotation = globalRotation * Quaternion.AngleAxis(normalAngularOffset + MagicAngleOffset, currentSpline.Tangents[normalIndex]);
 			var normalHandleRotation = normalRotation * Quaternion.LookRotation(currentSpline.Tangents[normalIndex]);
 			var baseHandleRotation = handleTransform.rotation * normalHandleRotation;
 			var rotation = Handles.DoRotationHandle(baseHandleRotation, point);
