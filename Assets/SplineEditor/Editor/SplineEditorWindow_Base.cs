@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -20,7 +21,8 @@ namespace SplineEditor.Editor
         [MenuItem("Window/Spline Editor")]
         public static void Initialize()
         {
-            SplineEditorWindow window = (SplineEditorWindow)EditorWindow.GetWindow(typeof(SplineEditorWindow), false, WindowTitle);
+            var inspectorType = Type.GetType("UnityEditor.InspectorWindow,UnityEditor.dll");
+            var window = GetWindow<SplineEditorWindow>(WindowTitle, false, inspectorType);
             window.initializeStyles = true;
             window.LoadSettings();
             window.Show();
