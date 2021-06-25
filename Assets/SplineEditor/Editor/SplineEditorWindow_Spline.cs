@@ -60,7 +60,7 @@ namespace SplineEditor.Editor
 			DrawDrawPointsToggle();
 			DrawDrawNormalsToggle();
 			DrawShowMainTransformHandleToggle();
-			DrawAlwaysOnSCeneToggle();
+			DrawAlwaysOnSceneToggle();
 		}
 
 		private void DrawDrawPointsToggle()
@@ -128,7 +128,7 @@ namespace SplineEditor.Editor
 			GUILayout.EndHorizontal();
 		}
 
-		private void DrawAlwaysOnSCeneToggle()
+		private void DrawAlwaysOnSceneToggle()
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();

@@ -49,7 +49,7 @@ namespace SplineEditor.MeshGenerator
 		[Space]
 		public float width = 5f;
 		public float spacing = 1f;
-		public bool mirrorRightSideCurve = true;
+		public bool useSymetricWidthCurve = true;
 		public AnimationCurve rightSideCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
 		public AnimationCurve leftSideCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
 
@@ -232,8 +232,6 @@ namespace SplineEditor.MeshGenerator
 			Undo.RecordObject(this, "Generate Bezier Spline Mesh");
 #endif
 
-			Debug.Log($"Generate Mesh: {name}");
-
 			var splineLength = bezierSpline.GetLinearLength(precision: 0.0001f, useWorldScale: false);
 			var curvesCount = bezierSpline.CurvesCount;
 			spacing = Mathf.Max(spacing, (splineLength) / (curvesCount * 1000f));
@@ -274,7 +272,7 @@ namespace SplineEditor.MeshGenerator
 				var rightScaledWidth = width * (usePointsScale ? Scale[i] : 1f) * rightSideCurve.Evaluate(ParametersT[i]);
 				var leftScaledWidth = width * (usePointsScale ? Scale[i] : 1f) * leftSideCurve.Evaluate(ParametersT[i]);
 
-				verts[vertIndex] = Points[i] + right * (mirrorRightSideCurve ? -rightScaledWidth : leftScaledWidth);
+				verts[vertIndex] = Points[i] + right * (useSymetricWidthCurve ? -rightScaledWidth : leftScaledWidth);
 				verts[vertIndex + 1] = Points[i] + right * rightScaledWidth;
 
 				normals[vertIndex] = normalVector;
@@ -324,6 +322,7 @@ namespace SplineEditor.MeshGenerator
 		/// <param name="state"></param>
 		public void ToggleUV(bool state)
 		{
+			//TODO: Move to editor class, it should not be contained in public API as it's using editor configuration
 			if (isVisualizingUV == state)
 			{
 				return;

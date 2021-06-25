@@ -7,8 +7,6 @@ namespace SplineEditor.MeshGenerator.Editor
 	public partial class SplineMeshEditor : UnityEditor.Editor
 	{
 
-		private SplineMeshConfiguration cachedSplineMeshConfiguration;
-
 		private void OnSceneGUI()
 		{
 
@@ -22,7 +20,7 @@ namespace SplineEditor.MeshGenerator.Editor
 				cachedSplineMeshConfiguration = Resources.Load<SplineMeshConfiguration>(SplineMesh.SplineMeshSettingsName);
 			}
 
-			if(cachedSplineMeshConfiguration==null)
+			if (cachedSplineMeshConfiguration==null)
 			{
 				Debug.LogError("[SplineMeshEditor] There is missing SplineMeshConfiguration file in Resources folder!");
 			}
