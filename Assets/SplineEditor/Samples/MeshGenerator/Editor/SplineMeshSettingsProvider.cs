@@ -15,21 +15,23 @@ namespace SplineEditor.MeshGenerator.Editor
 
         public static bool IsSettingsAvailable()
         {
-            return File.Exists(SplineMesh.SettingsPath);
-        }
+			return true;
+		}
 
         [SettingsProvider]
         public static SettingsProvider CreateMyCustomSettingsProvider()
         {
-            var settingsScriptable = Resources.Load(SplineMesh.SplineMeshSettingsName);
+			var settingsScriptable = SplineMeshEditorSettings.instance;
 
             if(cachedEditor==null)
 			{
                 UnityEditor.Editor.CreateCachedEditor(settingsScriptable, null, ref cachedEditor);
 			}
 
+			//TODO: Move to consts
             var provider = new SettingsProvider("Project/Spline Editor/Mesh Generator", SettingsScope.Project)
             {
+				//TODO: Move to consts
                 label = "Mesh Generator",
                 guiHandler = (searchContext) =>
                 {

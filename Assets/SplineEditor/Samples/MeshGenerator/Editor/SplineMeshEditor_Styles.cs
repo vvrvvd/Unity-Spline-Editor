@@ -14,6 +14,41 @@ namespace SplineEditor.MeshGenerator.Editor
 		private static GUILayoutOption ButtonMaxWidth = GUILayout.MaxWidth(200);
 		private static GUILayoutOption ButtonHeight = GUILayout.Height(30);
 
+		#region Mesh Options Styles
+
+		private const string MeshOptionsGroupTitle = "Mesh";
+		private const string MeshOptionsMeshWidthTitle = "Mesh Width";
+		private const string MeshOptionsMeshSpacingTitle = "Mesh Spacing";
+		private const string MeshOptionsUsePointsScaleTitle = "Use Points Scale";
+		private const string MeshOptionsBakeMeshButtonTitle = "Bake Mesh";
+
+		private const string MeshOptionsBakeMeshWindowTitle = "Save Spline Mesh Asset";
+		private const string MeshOptionsBakeMeshWindowFolderPath = "Assets/";
+		private const string MeshOptionsBakeMeshWindowFileName = "bakedSplineMesh";
+		private const string MeshOptionsBakeMeshWindowFileExtension = "asset";
+
+		private static GUIContent MeshOptionsMeshWidthFieldContent = new GUIContent(MeshOptionsMeshWidthTitle);
+		private static GUIContent MeshOptionsMeshSpacingFieldContent = new GUIContent(MeshOptionsMeshSpacingTitle);
+		private static GUIContent MeshOptionsUsePointsScaleToggleContent= new GUIContent(MeshOptionsUsePointsScaleTitle);
+		private static GUIContent MeshOptionsBakeMeshButtonContent = new GUIContent(MeshOptionsBakeMeshButtonTitle);
+
+		#endregion
+
+		#region Curve Options Styles
+
+		private const string CurveOptionsGroupTitle = "Width Curve";
+		private const string CurveOptionsAsymetrictWidthCurveTitle = "Asymetric Width Curve";
+		private const string CurveOptionsWidthCurveTitle = "Width Curve";
+		private const string CurveOptionsRightWidthCurveTitle = "Right Width Curve";
+		private const string CurveOptionsLeftWidthCurveTitle = "Left Width Curve";
+
+		private static GUIContent CurveOptionsAsymetricWidthCurveToggleContent = new GUIContent(CurveOptionsAsymetrictWidthCurveTitle);
+		private static GUIContent CurveOptionsWidthCurveContent = new GUIContent(CurveOptionsWidthCurveTitle);
+		private static GUIContent CurveOptionsRightWidthCurveContent = new GUIContent(CurveOptionsRightWidthCurveTitle);
+		private static GUIContent CurveOptionsLeftWidthCurveContent = new GUIContent(CurveOptionsLeftWidthCurveTitle);
+
+		#endregion
+
 		#region GUI Options Styles
 
 		private const string GuiOptionsGroupTitle = "GUI";
@@ -37,34 +72,6 @@ namespace SplineEditor.MeshGenerator.Editor
 		private static GUIContent UvOptionsMirrorUvToggleContent = new GUIContent(UvOptionsMirrorUvTitle);
 		private static GUIContent UvOptionsHideDebugUvViewButtonContent = new GUIContent(UvOptionsHideDebugUvViewButtonTitle);
 		private static GUIContent UvOptionsShowDebugUvViewButtonContent = new GUIContent(UvOptionsShowDebugUvViewButtonTitle);
-
-		#endregion
-
-		#region Mesh Options Styles
-
-		private const string MeshOptionsGroupTitle = "Mesh";
-		private const string MeshOptionsMeshWidthTitle = "Mesh Width";
-		private const string MeshOptionsMeshSpacingTitle = "Mesh Spacing";
-		private const string MeshOptionsMirrorCurveTitle = "Asymetric Width Curve";
-		private const string MeshOptionsWidthCurveTitle = "Width Curve";
-		private const string MeshOptionsRightWidthCurveTitle = "Right Width Curve";
-		private const string MeshOptionsLeftWidthCurveTitle = "Left Width Curve";
-		private const string MeshOptionsUsePointsScaleTitle = "Use Points Scale";
-		private const string MeshOptionsBakeMeshButtonTitle = "Bake Mesh";
-
-		private const string MeshOptionsBakeMeshWindowTitle = "Save Spline Mesh Asset";
-		private const string MeshOptionsBakeMeshWindowFolderPath = "Assets/";
-		private const string MeshOptionsBakeMeshWindowFileName = "bakedSplineMesh";
-		private const string MeshOptionsBakeMeshWindowFileExtension = "asset";
-
-		private static GUIContent MeshOptionsMeshWidthFieldContent = new GUIContent(MeshOptionsMeshWidthTitle);
-		private static GUIContent MeshOptionsMeshSpacingFieldContent = new GUIContent(MeshOptionsMeshSpacingTitle);
-		private static GUIContent MeshOptionsAsymetricWidthCurveToggleContent = new GUIContent(MeshOptionsMirrorCurveTitle);
-		private static GUIContent MeshOptionsWidthCurveContent = new GUIContent(MeshOptionsWidthCurveTitle);
-		private static GUIContent MeshOptionsRightWidthCurveContent = new GUIContent(MeshOptionsRightWidthCurveTitle);
-		private static GUIContent MeshOptionsLeftWidthCurveContent = new GUIContent(MeshOptionsLeftWidthCurveTitle);
-		private static GUIContent MeshOptionsUsePointsScaleToggleContent= new GUIContent(MeshOptionsUsePointsScaleTitle);
-		private static GUIContent MeshOptionsBakeMeshButtonContent = new GUIContent(MeshOptionsBakeMeshButtonTitle);
 
 		#endregion
 

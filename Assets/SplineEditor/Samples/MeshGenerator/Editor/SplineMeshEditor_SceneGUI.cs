@@ -15,16 +15,6 @@ namespace SplineEditor.MeshGenerator.Editor
 				return;
 			}
 
-			if(cachedSplineMeshConfiguration==null)
-			{
-				cachedSplineMeshConfiguration = Resources.Load<SplineMeshConfiguration>(SplineMesh.SplineMeshSettingsName);
-			}
-
-			if (cachedSplineMeshConfiguration==null)
-			{
-				Debug.LogError("[SplineMeshEditor] There is missing SplineMeshConfiguration file in Resources folder!");
-			}
-
 			var prevColor = Handles.color;
 			var prevEnabled = GUI.enabled;
 			GUI.enabled = false;
@@ -46,14 +36,14 @@ namespace SplineEditor.MeshGenerator.Editor
 			var point = splineMesh.transform.TransformPoint(splineMesh.splinePath.points[index]);
 			var size = HandleUtility.GetHandleSize(point);
 
-			if (splineMesh.drawPoints)
+			if (SplineMeshEditorState.instance.drawPoints)
 			{
 				var handleSize = 0.025f;
-				Handles.color = cachedSplineMeshConfiguration.pointsColor;
+				Handles.color = SplineMeshEditorSettings.instance.pointsColor;
 				Handles.Button(point, Quaternion.identity, size * handleSize, size * handleSize, Handles.DotHandleCap);
 			}
 
-			if (splineMesh.drawNormals)
+			if (SplineMeshEditorState.instance.drawNormals)
 			{
 				DrawNormal(point, index);
 			}
@@ -62,8 +52,8 @@ namespace SplineEditor.MeshGenerator.Editor
 		private void DrawNormal(Vector3 point, int index)
 		{
 			var normal = splineMesh.Normals[index];
-			var normalLength = cachedSplineMeshConfiguration.normalVectorLength;
-			Handles.color = cachedSplineMeshConfiguration.normalsColor;
+			var normalLength = SplineMeshEditorSettings.instance.normalVectorLength;
+			Handles.color = SplineMeshEditorSettings.instance.normalsColor;
 			Handles.DrawLine(point, point + splineMesh.transform.TransformDirection(normal * normalLength));
 		}
 	}

@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f5f225fa9e9fe4140924ba2c05daa270, type: 3}
-  m_Name: SplineMeshSettings
+  m_Name: SplineMeshEditorConfiguration
   m_EditorClassIdentifier: 
   uvMaterial: {fileID: 2100000, guid: e1783a2f079191d4f96f15b90ae0cf0e, type: 2}
   pointsColor: {r: 0, g: 0, b: 1, a: 1}

@@ -30,14 +30,19 @@ namespace SplineEditor
 		#region Public Fields
 
 		[HideInInspector]
+		//TODO: Move to editor scriptable editor state
 		public bool drawPoints = true;
 		[HideInInspector]
+		//TODO: Move to editor scriptable editor state
 		public bool drawDirections = false;
 		[HideInInspector]
+		//TODO: Move to editor scriptable editor state
 		public bool showTransformHandle = true;
 		[HideInInspector]
+		//TODO: Move to editor scriptable editor state
 		public bool alwaysDrawSplineOnScene = true;
 		[HideInInspector]
+		//TODO: Move to editor scriptable editor state
 		public bool drawNormals = false;
 
 		#endregion

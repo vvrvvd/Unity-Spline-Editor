@@ -9,7 +9,6 @@ namespace SplineEditor.MeshGenerator.Editor
 	{
 
 		private bool initializeStyles = true;
-		private static float prevPointScale = 1f;
 
 		public override void OnInspectorGUI()
 		{
@@ -20,7 +19,12 @@ namespace SplineEditor.MeshGenerator.Editor
 			}
 
 			GUILayout.BeginVertical();
+			GUI.enabled = false;
+			EditorGUILayout.ObjectField("Script:", MonoScript.FromMonoBehaviour((SplineMesh)target), typeof(SplineMesh), false);
+			GUI.enabled = true;
+
 			DrawMeshOptions();
+			DrawWidthCurveOptions();
 			DrawUvOptions();
 			DrawGUIOptions();
 			GUILayout.EndVertical();

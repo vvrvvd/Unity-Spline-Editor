@@ -16,14 +16,11 @@ namespace SplineEditor.MeshGenerator.Editor
 
 			isMeshSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(isMeshSectionFolded, MeshOptionsGroupTitle);
 			GUI.enabled = true;
-			if (isUvSectionFolded)
+			if (isMeshSectionFolded)
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
 
-				DrawWidthCurvesFields();
-
-				GUILayout.Space(10);
 				DrawUsePointsScaleToggle();
 				DrawMeshWidthField();
 				DrawMeshSpacingField();
@@ -40,133 +37,16 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUI.enabled = prevEnabled;
 		}
 
-		private void DrawWidthCurvesFields()
-		{
-			GUILayout.BeginVertical();
-			GUILayout.FlexibleSpace();
-
-
-			if(!splineMesh.useAsymetricWidthCurve)
-			{
-				DrawAsymetricCurveToggle();
-			}
-			else
-			{
-				DrawRightSideCurveField();
-				GUILayout.Space(10);
-				DrawLeftSideCurveField();
-			}
-
-			GUILayout.Space(10);
-			DrawAsymetrictWidthCurvesToggle();
-
-			GUILayout.EndVertical();
-		}
-
-		private void DrawAsymetrictWidthCurvesToggle()
-		{
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-
-			GUILayout.Label(MeshOptionsAsymetricWidthCurveToggleContent);
-			GUILayout.Space(20);
-			var toggleState = GUILayout.Toggle(splineMesh.useAsymetricWidthCurve, string.Empty);
-			if (toggleState != splineMesh.useAsymetricWidthCurve)
-			{
-				Undo.RecordObject(splineMesh, "Toggle asymetric spline width curve");
-				splineMesh.useAsymetricWidthCurve = toggleState;
-				EditorUtility.SetDirty(splineMesh);
-			}
-
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-		}
-
-		private void DrawRightSideCurveField()
-		{
-			GUILayout.BeginVertical();
-
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			GUILayout.Label(MeshOptionsRightWidthCurveContent);
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			var nextCurveState = EditorGUILayout.CurveField(string.Empty, splineMesh.rightSideCurve, WidthCurveMaxWidth);
-			if (nextCurveState != splineMesh.rightSideCurve)
-			{
-				Undo.RecordObject(splineMesh, "Change mirrored width curve");
-				splineMesh.rightSideCurve = nextCurveState;
-				EditorUtility.SetDirty(splineMesh);
-			}
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-
-			GUILayout.EndVertical();
-		}
-
-		private void DrawLeftSideCurveField()
-		{
-			GUILayout.BeginVertical();
-
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			GUILayout.Label(MeshOptionsLeftWidthCurveContent);
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			var nextCurveState = EditorGUILayout.CurveField(string.Empty, splineMesh.leftSideCurve, WidthCurveMaxWidth);
-			if (nextCurveState != splineMesh.leftSideCurve)
-			{
-				Undo.RecordObject(splineMesh, "Change mirrored width curve");
-				splineMesh.leftSideCurve = nextCurveState;
-				EditorUtility.SetDirty(splineMesh);
-			}
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-
-			GUILayout.EndVertical();
-		}
-
-		private void DrawAsymetricCurveToggle()
-		{
-			GUILayout.BeginVertical();
-
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			GUILayout.Label(MeshOptionsWidthCurveContent);
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			var nextCurveState = EditorGUILayout.CurveField(string.Empty, splineMesh.rightSideCurve, WidthCurveMaxWidth);
-			if (nextCurveState != splineMesh.rightSideCurve)
-			{
-				Undo.RecordObject(splineMesh, "Change mirrored width curve");
-				splineMesh.rightSideCurve = nextCurveState;
-				EditorUtility.SetDirty(splineMesh);
-			}
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-
-			GUILayout.EndVertical();
-		}
-
 		private void DrawUsePointsScaleToggle()
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 
-			var toggleState = EditorGUILayout.Toggle(MeshOptionsUsePointsScaleToggleContent, splineMesh.usePointsScale);
-			if (toggleState != splineMesh.usePointsScale)
+			var toggleState = EditorGUILayout.Toggle(MeshOptionsUsePointsScaleToggleContent, splineMesh.UsePointsScale);
+			if (toggleState != splineMesh.UsePointsScale)
 			{
 				Undo.RecordObject(splineMesh, "Toggle use points scale");
-				splineMesh.usePointsScale = toggleState;
+				splineMesh.UsePointsScale = toggleState;
 				EditorUtility.SetDirty(splineMesh);
 			}
 
@@ -179,11 +59,11 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 
-			var nextMeshSpacing = EditorGUILayout.FloatField(MeshOptionsMeshSpacingFieldContent, splineMesh.spacing);
-			if (nextMeshSpacing != splineMesh.spacing)
+			var nextMeshSpacing = EditorGUILayout.FloatField(MeshOptionsMeshSpacingFieldContent, splineMesh.Spacing);
+			if (nextMeshSpacing != splineMesh.Spacing)
 			{
 				Undo.RecordObject(splineMesh, "Change spline mesh spacing");
-				splineMesh.spacing = nextMeshSpacing;
+				splineMesh.Spacing = nextMeshSpacing;
 				EditorUtility.SetDirty(splineMesh);
 			}
 
@@ -196,11 +76,11 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 
-			var nextMeshWidth = EditorGUILayout.FloatField(MeshOptionsMeshWidthFieldContent, splineMesh.width);
-			if (nextMeshWidth != splineMesh.width)
+			var nextMeshWidth = EditorGUILayout.FloatField(MeshOptionsMeshWidthFieldContent, splineMesh.Width);
+			if (nextMeshWidth != splineMesh.Width)
 			{
 				Undo.RecordObject(splineMesh, "Change spline mesh width");
-				splineMesh.width = nextMeshWidth;
+				splineMesh.Width = nextMeshWidth;
 				EditorUtility.SetDirty(splineMesh);
 			}
 

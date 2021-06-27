@@ -28,43 +28,21 @@ namespace SplineEditor.MeshGenerator
 
 		#region Const Fields
 
-		public const string SplineMeshSettingsName = "SplineMeshSettings";
-		
 		private const float Precision = 0.0001f;
 
 		#endregion
 
-		#region Public Static Fields
-
-		public static string SettingsPath => $"Resources/{SplineMeshSettingsName}.asset";
-
-		#endregion
-
-		#region Public Fields
-
-		[Space]
-		public bool drawPoints = true;
-		public bool drawNormals = false;
-
-		[Space]
-		public float width = 5f;
-		public float spacing = 1f;
-		public bool useAsymetricWidthCurve = false;
-		public AnimationCurve rightSideCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
-		public AnimationCurve leftSideCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
-
-		[Space]
-		public bool usePointsScale = true;
-
-		[Space]
-		public UVMode uvMode = UVMode.Linear;
-
-		[Space]
-		public bool mirrorUV = false;
-
-		#endregion
-
 		#region Private Fields
+
+		private float width = 5f;
+		private float spacing = 1f;
+		private bool useAsymetricWidthCurve = false;
+		private AnimationCurve rightSideCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
+		private AnimationCurve leftSideCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
+
+		private bool usePointsScale = true;
+		private UVMode uvMode = UVMode.Linear;
+		private bool mirrorUV = false;
 
 		private bool updateMesh;
 		private Mesh cachedMesh;
@@ -75,10 +53,6 @@ namespace SplineEditor.MeshGenerator
 		private MeshRenderer meshRenderer;
 		[SerializeField, HideInInspector]
 		private BezierSpline bezierSpline;
-		[SerializeField, HideInInspector]
-		private Material savedMaterial;
-		[SerializeField, HideInInspector]
-		private bool isVisualizingUV = false;
 
 		#endregion
 
@@ -138,10 +112,125 @@ namespace SplineEditor.MeshGenerator
 			set => splinePath.parametersT = value;
 		}
 
-		public bool IsVisualizingUV => isVisualizingUV;
+		/// <summary>
+		/// Width of generated mesh. 
+		/// In Unity points.
+		/// </summary>
+		public float Width {
+			get => width;
+			set
+			{
+				var newValue = Mathf.Max(0.001f, value);
+				width = newValue;
+				updateMesh = true;
+			}
+		}
 
+		/// <summary>
+		/// Distance between evenly spaced points on the curve.
+		/// In Unity points.
+		/// </summary>
+		public float Spacing
+		{
+			get => spacing;
+			set
+			{
+				var newValue = Mathf.Max(0.1f, value);
+				spacing = newValue;
+				updateMesh = true;
+			}
+		}
+
+		/// <summary>
+		/// If true then RightSideCurve is used for sampling width on both sides of the mesh.
+		/// If false RightSideCurve is used for sampling width on right side of the mesh and LeftSideCurve for left side of the mesh.
+		/// </summary>
+		public bool UseAsymetricWidthCurve
+		{
+			get => useAsymetricWidthCurve;
+			set
+			{
+				useAsymetricWidthCurve = value;
+				updateMesh = true;
+			}
+		}
+
+		/// <summary>
+		/// Curve used for sampling width of the right side of the mesh.
+		/// If UseAsymetricWidthCurve is set to false then it's also used for sampling width of the left side as well.
+		/// </summary>
+		public AnimationCurve RightSideCurve {
+			get => rightSideCurve;
+			set
+			{
+				rightSideCurve = value;
+				updateMesh = true;
+			}
+		}
+
+		/// <summary>
+		/// Curve used for sampling width of the left side of the mesh.
+		/// Used only if UseAsymetricWidthCurve is set to true.
+		/// </summary>
+		public AnimationCurve LeftSideCurve
+		{
+			get => leftSideCurve;
+			set
+			{
+				leftSideCurve = value;
+				updateMesh = true;
+			}
+		}
+
+		/// <summary>
+		/// Determins if Points Scale from BezierCurve is used as multiplier for sampling width of the mesh
+		/// </summary>
+		public bool UsePointsScale
+		{
+			get => usePointsScale;
+			set
+			{
+				usePointsScale = value;
+				updateMesh = true;
+			}
+		}
+
+		/// <summary>
+		/// Mode used for generating UV on the mesh.
+		/// </summary>
+		public UVMode UvMode
+		{
+			get => uvMode; set
+			{
+				uvMode = value;
+				updateMesh = true;
+			}
+		}
+
+		/// <summary>
+		/// If set to true then UV is being mirrored on both axis.
+		/// For mirroring UV the original value is being substracted from one (1 - UV)
+		/// </summary>
+		public bool MirrorUV
+		{
+			get => mirrorUV; set
+			{
+				mirrorUV = value;
+				updateMesh = true;
+			}
+		}
+
+		/// <summary>
+		/// MeshFilter attached to the SplineMesh component.
+		/// </summary>
 		public MeshFilter MeshFilter => meshFilter;
+
+		/// <summary>
+		/// MeshRenderer attached to the SplineMesh component.
+		/// </summary>
 		public MeshRenderer MeshRenderer => meshRenderer;
+
+		/// BezierSpline attached to the SplineMesh component.
 		public BezierSpline BezierSpline => bezierSpline;
 
 		#endregion
@@ -150,7 +239,7 @@ namespace SplineEditor.MeshGenerator
 
 		private void OnValidate()
 		{
-			spacing = Mathf.Max(spacing, 0.1f);
+			Spacing = Mathf.Max(Spacing, 0.1f);
 
 			updateMesh = true;
 
@@ -197,10 +286,6 @@ namespace SplineEditor.MeshGenerator
 			bezierSpline.OnSplineChanged -= GenerateMesh;
 			bezierSpline.OnSplineChanged += GenerateMesh;
 
-			if(isVisualizingUV)
-			{
-				ToggleUV();
-			}
 		}
 
 		private void LateUpdate()
@@ -234,7 +319,7 @@ namespace SplineEditor.MeshGenerator
 
 			var splineLength = bezierSpline.GetLinearLength(precision: 0.0001f, useWorldScale: false);
 			var curvesCount = bezierSpline.CurvesCount;
-			spacing = Mathf.Max(spacing, (splineLength) / (curvesCount * 1000f));
+			Spacing = Mathf.Max(Spacing, (splineLength) / (curvesCount * 1000f));
 
 			ConstructMesh();
 			meshFilter.sharedMesh = cachedMesh;
@@ -254,7 +339,7 @@ namespace SplineEditor.MeshGenerator
 			}
 
 			BezierSpline.RecalculateNormals();
-			BezierSpline.GetEvenlySpacedPoints(spacing, splinePath, Precision, false);
+			BezierSpline.GetEvenlySpacedPoints(Spacing, splinePath, Precision, false);
 
 			var isLoop = BezierSpline.IsLoop;
 			var verts = new Vector3[Points.Length * 2];
@@ -269,10 +354,10 @@ namespace SplineEditor.MeshGenerator
 			{
 				var normalVector = Normals[i];
 				var right = Vector3.Cross(normalVector, Tangents[i]).normalized;
-				var rightScaledWidth = width * (usePointsScale ? Scale[i] : 1f) * rightSideCurve.Evaluate(ParametersT[i]);
-				var leftScaledWidth = width * (usePointsScale ? Scale[i] : 1f) * leftSideCurve.Evaluate(ParametersT[i]);
+				var rightScaledWidth = Width * (UsePointsScale ? Scale[i] : 1f) * RightSideCurve.Evaluate(ParametersT[i]);
+				var leftScaledWidth = Width * (UsePointsScale ? Scale[i] : 1f) * LeftSideCurve.Evaluate(ParametersT[i]);
 
-				verts[vertIndex] = Points[i] - right * (useAsymetricWidthCurve ? leftScaledWidth : rightScaledWidth);
+				verts[vertIndex] = Points[i] - right * (UseAsymetricWidthCurve ? leftScaledWidth : rightScaledWidth);
 				verts[vertIndex + 1] = Points[i] + right * rightScaledWidth;
 
 				normals[vertIndex] = normalVector;
@@ -307,39 +392,7 @@ namespace SplineEditor.MeshGenerator
 
 			return cachedMesh;
 		}
-		/// <summary>
-		/// Toggles mesh material replacement with UV visualization material when it is not shown, and brings back previous material if UV was being shown.
-		/// </summary>
-		/// <param name="state"></param>
-		public void ToggleUV()
-		{
-			ToggleUV(!isVisualizingUV);
-		}
 
-		/// <summary>
-		/// Replace current mesh material with UV visualization material when 'state' is true and back to regular material when 'state' is false.
-		/// </summary>
-		/// <param name="state"></param>
-		public void ToggleUV(bool state)
-		{
-			//TODO: Move to editor class, it should not be contained in public API as it's using editor configuration
-			if (isVisualizingUV == state)
-			{
-				return;
-			}
-
-			var settingsScriptable = Resources.Load<SplineMeshConfiguration>(SplineMeshSettingsName);
-			if (settingsScriptable==null)
-			{
-				Debug.LogError("[Spline Mesh] SplineMeshSettings.asset file cannot be found in Resources folder");
-				return;
-			}
-
-			isVisualizingUV = state;
-			var prevMaterial = meshRenderer.sharedMaterial;
-			meshRenderer.sharedMaterial = isVisualizingUV ? settingsScriptable.uvMaterial : savedMaterial;
-			savedMaterial = isVisualizingUV ? prevMaterial : settingsScriptable.uvMaterial;
-		}
 
 		#endregion
 
@@ -348,7 +401,7 @@ namespace SplineEditor.MeshGenerator
 		private float GetUV(int pointIndex)
 		{
 			var uv = pointIndex / (float)(Points.Length - 1);
-			switch (uvMode)
+			switch (UvMode)
 			{
 				case UVMode.PingPong:
 					uv = 1 - Mathf.Abs(2 * uv - 1);
@@ -358,7 +411,7 @@ namespace SplineEditor.MeshGenerator
 					break;
 			}
 
-			return mirrorUV ? 1 - uv : uv;
+			return MirrorUV ? 1 - uv : uv;
 		}
 
 		#endregion

@@ -41,11 +41,11 @@ namespace SplineEditor.MeshGenerator.Editor
 
 			GUILayout.Label(UvOptionsMirrorUvToggleContent);
 			GUILayout.Space(10);
-			var toggleState = GUILayout.Toggle(splineMesh.mirrorUV, string.Empty);
-			if (toggleState != splineMesh.mirrorUV)
+			var toggleState = GUILayout.Toggle(splineMesh.MirrorUV, string.Empty);
+			if (toggleState != splineMesh.MirrorUV)
 			{
 				Undo.RecordObject(splineMesh, "Toggle mirror mesh UV ");
-				splineMesh.mirrorUV = toggleState;
+				splineMesh.MirrorUV = toggleState;
 				EditorUtility.SetDirty(splineMesh);
 			}
 
@@ -59,11 +59,11 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.FlexibleSpace();
 
 			GUILayout.Label(UvOptionsUvModeDropdownContent);
-			var modeState = (SplineMesh.UVMode)EditorGUILayout.EnumPopup(string.Empty, splineMesh.uvMode, MaxDropdownWidth);
-			if (modeState != splineMesh.uvMode)
+			var modeState = (SplineMesh.UVMode)EditorGUILayout.EnumPopup(string.Empty, splineMesh.UvMode, MaxDropdownWidth);
+			if (modeState != splineMesh.UvMode)
 			{
 				Undo.RecordObject(splineMesh, "Change mesh UV Mode");
-				splineMesh.uvMode = modeState;
+				splineMesh.UvMode = modeState;
 				EditorUtility.SetDirty(splineMesh);
 			}
 
@@ -76,14 +76,29 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 
-			var uvButtonContent = splineMesh.IsVisualizingUV ? UvOptionsHideDebugUvViewButtonContent : UvOptionsShowDebugUvViewButtonContent;
+			var uvButtonContent = isVisualizingUV ? UvOptionsHideDebugUvViewButtonContent : UvOptionsShowDebugUvViewButtonContent;
 			if (GUILayout.Button(uvButtonContent, ButtonMaxWidth, ButtonHeight))
 			{
-				splineMesh.ToggleUV();
+				ToggleUV(!isVisualizingUV);
 			}
 
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
+		}
+
+		private void ToggleUV(bool state)
+		{
+			if (isVisualizingUV == state)
+			{
+				return;
+			}
+
+			var settingsScriptable = SplineMeshEditorSettings.instance;
+
+			isVisualizingUV = state;
+			var prevMaterial = splineMesh.MeshRenderer.sharedMaterial;
+			splineMesh.MeshRenderer.sharedMaterial = isVisualizingUV ? settingsScriptable.uvMaterial : savedMaterial;
+			savedMaterial = isVisualizingUV ? prevMaterial : settingsScriptable.uvMaterial;
 		}
 
 	}

@@ -9,21 +9,19 @@ namespace SplineEditor.MeshGenerator.Editor
 	{
 
 		private SplineMesh splineMesh;
-		private SplineMeshConfiguration cachedSplineMeshConfiguration;
+		private Material savedMaterial;
+		private bool isVisualizingUV = false;
 
 		private void OnEnable()
 		{
 			splineMesh = target as SplineMesh;
-			cachedSplineMeshConfiguration = Resources.Load<SplineMeshConfiguration>(SplineMesh.SplineMeshSettingsName);
-
-			if (cachedSplineMeshConfiguration == null)
-			{
-				Debug.LogError("[SplineMeshEditor] There is missing SplineMeshConfiguration file in Resources folder!");
-			}
-
 			initializeStyles = true;
 		}
 
+		private void OnDisable()
+		{
+			ToggleUV(false);
+		}
 
 	}
 
