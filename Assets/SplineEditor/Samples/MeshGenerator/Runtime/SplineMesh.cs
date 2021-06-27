@@ -49,7 +49,7 @@ namespace SplineEditor.MeshGenerator
 		[Space]
 		public float width = 5f;
 		public float spacing = 1f;
-		public bool useSymetricWidthCurve = true;
+		public bool useAsymetricWidthCurve = false;
 		public AnimationCurve rightSideCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
 		public AnimationCurve leftSideCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
 
@@ -272,7 +272,7 @@ namespace SplineEditor.MeshGenerator
 				var rightScaledWidth = width * (usePointsScale ? Scale[i] : 1f) * rightSideCurve.Evaluate(ParametersT[i]);
 				var leftScaledWidth = width * (usePointsScale ? Scale[i] : 1f) * leftSideCurve.Evaluate(ParametersT[i]);
 
-				verts[vertIndex] = Points[i] + right * (useSymetricWidthCurve ? -rightScaledWidth : leftScaledWidth);
+				verts[vertIndex] = Points[i] - right * (useAsymetricWidthCurve ? leftScaledWidth : rightScaledWidth);
 				verts[vertIndex + 1] = Points[i] + right * rightScaledWidth;
 
 				normals[vertIndex] = normalVector;

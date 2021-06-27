@@ -14,7 +14,7 @@ namespace SplineEditor.Editor
 		private static GUILayoutOption ToolsSettingsButtonHeight { get; } = GUILayout.Height(30);
 		private static GUILayoutOption ToolsHeaderToolbarWidth { get; } = GUILayout.Width(128);
 		private static GUILayoutOption ToolsHeaderToolbarHeight { get; } = GUILayout.Height(18);
-		private static GUILayoutOption ToolsButtonsWidth { get; } = GUILayout.Width(90);
+		private static GUILayoutOption ToolsButtonsWidth { get; } = GUILayout.Width(92);
 		private static GUILayoutOption ToolsButtonsHeight { get; } = GUILayout.Height(40);
 		private static GUILayoutOption ToolsPointPositionWidth { get; } = GUILayout.Width(275);
 		private static GUILayoutOption ToolsPointPopupLabelWidth { get; } = GUILayout.Width(50);
@@ -50,11 +50,13 @@ namespace SplineEditor.Editor
 
 		private const string PointGroupTitle = "Point";
 		private const string PointPositionLabel = "Position";
+		private const string PointScaleLabel = "Scale";
 		private const string PointModeLabel = "Mode";
 		private const string ApplyToAllPointsLabel = "Apply To All";
 		private const string ApplyToAllPointsTooltip = "Apply currently selected mode to all control points.";
 
 		private static GUIContent PointPositionContent = new GUIContent(PointPositionLabel);
+		private static GUIContent PointScaleContent = new GUIContent(PointScaleLabel);
 		private static GUIContent PointModeContent = new GUIContent(PointModeLabel);
 		private static GUIContent ApplyToAllPoinstButtonContent = new GUIContent(ApplyToAllPointsLabel);
 

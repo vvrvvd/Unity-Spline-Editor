@@ -8,6 +8,7 @@ namespace SplineEditor.Editor
 	public partial class SplineEditorWindow : EditorWindow
 	{
 
+		private Vector3 previousPointScale = Vector3.one;
 		private Vector3 previousPointPosition = Vector3.zero;
 		private BezierControlPointMode previousPointMode = BezierControlPointMode.Free;
 
@@ -50,10 +51,46 @@ namespace SplineEditor.Editor
 			GUI.enabled &= isPointSelected;
 
 			DrawPositionField();
+			DrawPointsScaleField();
+			GUILayout.Space(10);
 			DrawModePopupField();
 
 			GUI.enabled = prevEnabled;
 		}
+
+		private void DrawPointsScaleField()
+		{
+			var prevEnabled = GUI.enabled;
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			GUILayout.Label(PointScaleContent);
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+
+			var isScaleFieldActive = SplineEditor.IsAnyPointSelected && SplineEditor.SelectedPointIndex % 3 == 0;
+
+			GUI.enabled = isScaleFieldActive;
+
+			var pointIndex = SplineEditor.SelectedPointIndex / 3;
+			var currentPointScale = isScaleFieldActive ? SplineEditor.CurrentSpline.PointsScales[pointIndex] : previousPointScale;
+
+			var nextPointScale = EditorGUILayout.Vector3Field(string.Empty, currentPointScale, ToolsPointPositionWidth);
+			if (nextPointScale != currentPointScale)
+			{
+				SplineEditor.CurrentSpline.UpdatePointsScale(pointIndex, nextPointScale);
+			}
+			previousPointScale = currentPointScale;
+
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			GUI.enabled = prevEnabled;
+		}
+
 
 		private void DrawPositionField()
 		{
@@ -63,7 +100,7 @@ namespace SplineEditor.Editor
 
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			GUILayout.Label(PointPositionContent, ToolsPointPopupLabelWidth);
+			GUILayout.Label(PointPositionContent);
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
@@ -80,7 +117,6 @@ namespace SplineEditor.Editor
 			}
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
-			GUILayout.Space(10);
 
 			previousPointPosition = point;
 		}
@@ -119,6 +155,8 @@ namespace SplineEditor.Editor
 
 			previousPointMode = mode;
 		}
+
+
 
 	}
 }

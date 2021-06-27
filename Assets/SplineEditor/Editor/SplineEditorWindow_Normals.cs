@@ -74,6 +74,7 @@ namespace SplineEditor.Editor
 			GUILayout.FlexibleSpace();
 			previousFlipNormals = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.FlipNormals : previousFlipNormals;
 			GUILayout.Label(FlipNormalsToggleFieldContent);
+			GUILayout.Space(75);
 			var nextFlipNormals = GUILayout.Toggle(previousFlipNormals, string.Empty);
 			if (nextFlipNormals != previousFlipNormals)
 			{

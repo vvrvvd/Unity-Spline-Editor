@@ -21,16 +21,12 @@ namespace SplineEditor.MeshGenerator.Editor
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
 
-				DrawMeshWidthField();
-				DrawMeshSpacingField();
-
-				GUILayout.Space(10);
 				DrawWidthCurvesFields();
 
 				GUILayout.Space(10);
-
 				DrawUsePointsScaleToggle();
-				DrawPointsScaleField();
+				DrawMeshWidthField();
+				DrawMeshSpacingField();
 
 				GUILayout.Space(10);
 
@@ -44,17 +40,133 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUI.enabled = prevEnabled;
 		}
 
-		private void DrawMeshWidthField()
+		private void DrawWidthCurvesFields()
+		{
+			GUILayout.BeginVertical();
+			GUILayout.FlexibleSpace();
+
+
+			if(!splineMesh.useAsymetricWidthCurve)
+			{
+				DrawAsymetricCurveToggle();
+			}
+			else
+			{
+				DrawRightSideCurveField();
+				GUILayout.Space(10);
+				DrawLeftSideCurveField();
+			}
+
+			GUILayout.Space(10);
+			DrawAsymetrictWidthCurvesToggle();
+
+			GUILayout.EndVertical();
+		}
+
+		private void DrawAsymetrictWidthCurvesToggle()
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 
-			GUILayout.Label(MeshOptionsMeshWidthFieldContent);
-			var toggleState = GUILayout.Toggle(splineMesh.mirrorUV, string.Empty);
-			if (toggleState != splineMesh.mirrorUV)
+			GUILayout.Label(MeshOptionsAsymetricWidthCurveToggleContent);
+			GUILayout.Space(20);
+			var toggleState = GUILayout.Toggle(splineMesh.useAsymetricWidthCurve, string.Empty);
+			if (toggleState != splineMesh.useAsymetricWidthCurve)
 			{
-				Undo.RecordObject(splineMesh, "Toggle mirror mesh UV ");
-				splineMesh.mirrorUV = toggleState;
+				Undo.RecordObject(splineMesh, "Toggle asymetric spline width curve");
+				splineMesh.useAsymetricWidthCurve = toggleState;
+				EditorUtility.SetDirty(splineMesh);
+			}
+
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+		}
+
+		private void DrawRightSideCurveField()
+		{
+			GUILayout.BeginVertical();
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			GUILayout.Label(MeshOptionsRightWidthCurveContent);
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			var nextCurveState = EditorGUILayout.CurveField(string.Empty, splineMesh.rightSideCurve, WidthCurveMaxWidth);
+			if (nextCurveState != splineMesh.rightSideCurve)
+			{
+				Undo.RecordObject(splineMesh, "Change mirrored width curve");
+				splineMesh.rightSideCurve = nextCurveState;
+				EditorUtility.SetDirty(splineMesh);
+			}
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			GUILayout.EndVertical();
+		}
+
+		private void DrawLeftSideCurveField()
+		{
+			GUILayout.BeginVertical();
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			GUILayout.Label(MeshOptionsLeftWidthCurveContent);
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			var nextCurveState = EditorGUILayout.CurveField(string.Empty, splineMesh.leftSideCurve, WidthCurveMaxWidth);
+			if (nextCurveState != splineMesh.leftSideCurve)
+			{
+				Undo.RecordObject(splineMesh, "Change mirrored width curve");
+				splineMesh.leftSideCurve = nextCurveState;
+				EditorUtility.SetDirty(splineMesh);
+			}
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			GUILayout.EndVertical();
+		}
+
+		private void DrawAsymetricCurveToggle()
+		{
+			GUILayout.BeginVertical();
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			GUILayout.Label(MeshOptionsWidthCurveContent);
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			var nextCurveState = EditorGUILayout.CurveField(string.Empty, splineMesh.rightSideCurve, WidthCurveMaxWidth);
+			if (nextCurveState != splineMesh.rightSideCurve)
+			{
+				Undo.RecordObject(splineMesh, "Change mirrored width curve");
+				splineMesh.rightSideCurve = nextCurveState;
+				EditorUtility.SetDirty(splineMesh);
+			}
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			GUILayout.EndVertical();
+		}
+
+		private void DrawUsePointsScaleToggle()
+		{
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+
+			var toggleState = EditorGUILayout.Toggle(MeshOptionsUsePointsScaleToggleContent, splineMesh.usePointsScale);
+			if (toggleState != splineMesh.usePointsScale)
+			{
+				Undo.RecordObject(splineMesh, "Toggle use points scale");
+				splineMesh.usePointsScale = toggleState;
 				EditorUtility.SetDirty(splineMesh);
 			}
 
@@ -67,12 +179,11 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 
-			GUILayout.Label(MeshOptionsMeshSpacingFieldContent);
-			var toggleState = GUILayout.Toggle(splineMesh.mirrorUV, string.Empty);
-			if (toggleState != splineMesh.mirrorUV)
+			var nextMeshSpacing = EditorGUILayout.FloatField(MeshOptionsMeshSpacingFieldContent, splineMesh.spacing);
+			if (nextMeshSpacing != splineMesh.spacing)
 			{
-				Undo.RecordObject(splineMesh, "Toggle mirror mesh UV ");
-				splineMesh.mirrorUV = toggleState;
+				Undo.RecordObject(splineMesh, "Change spline mesh spacing");
+				splineMesh.spacing = nextMeshSpacing;
 				EditorUtility.SetDirty(splineMesh);
 			}
 
@@ -80,155 +191,31 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.EndHorizontal();
 		}
 
-		private void DrawWidthCurvesFields()
-		{
-			GUILayout.BeginVertical();
-			GUILayout.FlexibleSpace();
-
-			DrawMirrorCurvesToggle();
-
-			if(splineMesh.useSymetricWidthCurve)
-			{
-				DrawMirroredCurveField();
-			}
-			else
-			{
-				DrawRightSideCurveField();
-				DrawLeftSideCurveField();
-			}
-
-			GUILayout.EndVertical();
-		}
-
-		private void DrawMirrorCurvesToggle()
+		private void DrawMeshWidthField()
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 
-			GUILayout.Label(MeshOptionsMirrorCurveToggleContent);
-			var toggleState = GUILayout.Toggle(splineMesh.useSymetricWidthCurve, string.Empty);
-			if (toggleState != splineMesh.useSymetricWidthCurve)
+			var nextMeshWidth = EditorGUILayout.FloatField(MeshOptionsMeshWidthFieldContent, splineMesh.width);
+			if (nextMeshWidth != splineMesh.width)
 			{
-				Undo.RecordObject(splineMesh, "Toggle mirror mesh UV ");
-				splineMesh.useSymetricWidthCurve = toggleState;
+				Undo.RecordObject(splineMesh, "Change spline mesh width");
+				splineMesh.width = nextMeshWidth;
 				EditorUtility.SetDirty(splineMesh);
 			}
 
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
-		}
-
-		private void DrawMirroredCurveField()
-		{
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-
-			GUILayout.Label(MeshOptionsWidthCurveContent);
-			var toggleState = GUILayout.Toggle(splineMesh.mirrorUV, string.Empty);
-			if (toggleState != splineMesh.mirrorUV)
-			{
-				Undo.RecordObject(splineMesh, "Toggle mirror mesh UV ");
-				splineMesh.mirrorUV = toggleState;
-				EditorUtility.SetDirty(splineMesh);
-			}
-
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-		}
-
-		private void DrawRightSideCurveField()
-		{
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-
-			GUILayout.Label(MeshOptionsRightWidthCurveContent);
-			var toggleState = GUILayout.Toggle(splineMesh.mirrorUV, string.Empty);
-			if (toggleState != splineMesh.mirrorUV)
-			{
-				Undo.RecordObject(splineMesh, "Toggle mirror mesh UV ");
-				splineMesh.mirrorUV = toggleState;
-				EditorUtility.SetDirty(splineMesh);
-			}
-
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-		}
-
-		private void DrawLeftSideCurveField()
-		{
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-
-			GUILayout.Label(MeshOptionsLeftWidthCurveContent);
-			var toggleState = GUILayout.Toggle(splineMesh.mirrorUV, string.Empty);
-			if (toggleState != splineMesh.mirrorUV)
-			{
-				Undo.RecordObject(splineMesh, "Toggle mirror mesh UV ");
-				splineMesh.mirrorUV = toggleState;
-				EditorUtility.SetDirty(splineMesh);
-			}
-
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-		}
-
-
-		private void DrawUsePointsScaleToggle()
-		{
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-
-			GUILayout.Label(UvOptionsMirrorUvToggleContent);
-			var toggleState = GUILayout.Toggle(splineMesh.mirrorUV, string.Empty);
-			if (toggleState != splineMesh.mirrorUV)
-			{
-				Undo.RecordObject(splineMesh, "Toggle mirror mesh UV ");
-				splineMesh.mirrorUV = toggleState;
-				EditorUtility.SetDirty(splineMesh);
-			}
-
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-		}
-
-		private void DrawPointsScaleField()
-		{
-			var prevEnabled = GUI.enabled;
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-
-			var isTargetSplineSelected = BezierSplineEditor.CurrentSpline == splineMesh.BezierSpline;
-			var isMainPointSelected = BezierSplineEditor.IsAnyPointSelected && BezierSplineEditor.SelectedPointIndex % 3 == 0;
-			var isScaleFieldActive = isTargetSplineSelected && isMainPointSelected;
-
-			GUI.enabled = isScaleFieldActive;
-
-			var pointIndex = BezierSplineEditor.SelectedPointIndex / 3;
-			var currentPointScale = isScaleFieldActive ? splineMesh.BezierSpline.PointsScales[pointIndex] : prevPointScale;
-
-			//TODO: Add styles and refactor with functions
-			var nextPointScale = EditorGUILayout.FloatField("Point Scale", currentPointScale);
-			if (nextPointScale != currentPointScale)
-			{
-				splineMesh.BezierSpline.UpdatePointsScale(pointIndex, nextPointScale);
-			}
-			prevPointScale = currentPointScale;
-
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-
-			GUI.enabled = prevEnabled;
 		}
 
 		private void DrawBakeMeshButton()
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-
-			if (GUILayout.Button("Save Mesh"))
+			if (GUILayout.Button(MeshOptionsBakeMeshButtonContent, ButtonMaxWidth, ButtonHeight))
 			{
 				splineMesh.ConstructMesh();
-				var path = EditorUtility.SaveFilePanel("Save Spline Mesh Asset", "Assets/", "savedMesh", "asset");
+				var path = EditorUtility.SaveFilePanel(MeshOptionsBakeMeshWindowTitle, MeshOptionsBakeMeshWindowFolderPath, MeshOptionsBakeMeshWindowFileName, MeshOptionsBakeMeshWindowFileExtension);
 				if (string.IsNullOrEmpty(path)) return;
 
 				path = FileUtil.GetProjectRelativePath(path);

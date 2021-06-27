@@ -20,13 +20,10 @@ namespace SplineEditor.MeshGenerator.Editor
 			}
 
 			GUILayout.BeginVertical();
-			DrawGUIOptions();
-			DrawUvOptions();
 			DrawMeshOptions();
+			DrawUvOptions();
+			DrawGUIOptions();
 			GUILayout.EndVertical();
-
-			//Add full editor override, get rid of this invoke
-			base.OnInspectorGUI();
 
 			var prevEnabled = GUI.enabled;
 

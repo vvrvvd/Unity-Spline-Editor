@@ -66,7 +66,7 @@ namespace SplineEditor
 		private Vector3[] tangents = default;
 
 		[SerializeField, HideInInspector]
-		private List<float> pointsScales = default;
+		private List<Vector3> pointsScales = default;
 
 		//TODO: Change to list maybe
 		[SerializeField, HideInInspector]
@@ -110,7 +110,7 @@ namespace SplineEditor
 		/// <summary>
 		/// Scale at points. It doesn't affect curve itself but may be used e.g. meshes generation.
 		/// </summary>
-		public List<float> PointsScales => pointsScales;
+		public List<Vector3> PointsScales => pointsScales;
 
 		/// <summary>
 		/// Manually set angular offsets for Points.
@@ -184,7 +184,7 @@ namespace SplineEditor
 		{
 			modes = new List<BezierControlPointMode>(2);
 			points = new List<SplinePoint>(4);
-			pointsScales = new List<float>(2);
+			pointsScales = new List<Vector3>(2);
 
 			var p0 = new Vector3(1f, 0f, 0f);
 			var p1 = new Vector3(1.5f, 0f, 0f);
@@ -199,8 +199,8 @@ namespace SplineEditor
 			modes.Add(BezierControlPointMode.Free);
 			modes.Add(BezierControlPointMode.Free);
 
-			pointsScales.Add(1f);
-			pointsScales.Add(1f);
+			pointsScales.Add(Vector3.one);
+			pointsScales.Add(Vector3.one);
 
 			RecalculateNormals();
 		}
@@ -378,7 +378,7 @@ namespace SplineEditor
 			var prevPointT = curveIndex * (curveSegmentSizeT);
 			var nextPointT = (curveIndex + 1) * (curveSegmentSizeT);
 			var alpha = Mathf.InverseLerp(prevPointT, nextPointT, t);
-			var interpolatedPointScale = Mathf.Lerp(pointsScales[curveIndex], pointsScales[curveIndex + 1], alpha);
+			var interpolatedPointScale = Mathf.Lerp(pointsScales[curveIndex].x, pointsScales[curveIndex + 1].x, alpha);
 
 			return interpolatedPointScale;
 		}
@@ -735,7 +735,6 @@ namespace SplineEditor
 				OnSplineChanged?.Invoke();
 			}
 
-			//TODO: Apply in other event
 			RecalculateNormals();
 		}
 
@@ -744,7 +743,7 @@ namespace SplineEditor
 		/// </summary>
 		/// <param name="normalIndex"></param>
 		/// <param name="scale"></param>
-		public void UpdatePointsScale(int normalIndex, float scale)
+		public void UpdatePointsScale(int normalIndex, Vector3 scale)
 		{
 			var prevInvokeEvents = invokeEvents;
 			invokeEvents = false;
@@ -823,7 +822,7 @@ namespace SplineEditor
 				AddPoint(p3);
 
 				modes.Add(mode);
-				pointsScales.Add(1f);
+				pointsScales.Add(Vector3.one);
 				ApplyContraints(PointsCount - 4);
 
 				if (IsLoop)
@@ -842,7 +841,7 @@ namespace SplineEditor
 				AddPoint(p3, 0);
 
 				modes.Insert(0, mode);
-				pointsScales.Insert(0, 1f);
+				pointsScales.Insert(0, Vector3.one);
 				ApplyContraints(3);
 			}
 

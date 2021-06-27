@@ -12,7 +12,8 @@ namespace SplineEditor.Editor
 		/// <summary>
 		/// I don't know why all the handles for axis are rotated by this angle but it doesn't look neat when the handle is offseted by it so we just take it into account.
 		/// </summary>
-		private const float MagicAngleOffset = 25f; 
+		// TODO: FIX THIS
+		private const float MagicAngleOffset = 0f;
 
 		#endregion
 

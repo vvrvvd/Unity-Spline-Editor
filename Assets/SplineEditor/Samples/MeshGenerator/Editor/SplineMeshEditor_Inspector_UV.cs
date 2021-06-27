@@ -23,6 +23,7 @@ namespace SplineEditor.MeshGenerator.Editor
 
 				DrawMirrorUvToggle();
 				DrawUvModeDropdown();
+				GUILayout.Space(10);
 				DrawShowUvButton();
 
 				GUILayout.Space(10);
@@ -39,6 +40,7 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.FlexibleSpace();
 
 			GUILayout.Label(UvOptionsMirrorUvToggleContent);
+			GUILayout.Space(10);
 			var toggleState = GUILayout.Toggle(splineMesh.mirrorUV, string.Empty);
 			if (toggleState != splineMesh.mirrorUV)
 			{
@@ -74,8 +76,8 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 
-			var uvButtonTitle = splineMesh.IsVisualizingUV ? "Hide UV" : "Show UV";
-			if (GUILayout.Button(uvButtonTitle))
+			var uvButtonContent = splineMesh.IsVisualizingUV ? UvOptionsHideDebugUvViewButtonContent : UvOptionsShowDebugUvViewButtonContent;
+			if (GUILayout.Button(uvButtonContent, ButtonMaxWidth, ButtonHeight))
 			{
 				splineMesh.ToggleUV();
 			}
