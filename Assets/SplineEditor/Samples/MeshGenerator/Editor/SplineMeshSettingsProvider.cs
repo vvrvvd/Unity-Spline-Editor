@@ -21,7 +21,7 @@ namespace SplineEditor.MeshGenerator.Editor
         [SettingsProvider]
         public static SettingsProvider CreateMyCustomSettingsProvider()
         {
-			var settingsScriptable = SplineMeshEditorSettings.instance;
+			var settingsScriptable = SplineMeshEditorConfiguration.instance;
 
             if(cachedEditor==null)
 			{

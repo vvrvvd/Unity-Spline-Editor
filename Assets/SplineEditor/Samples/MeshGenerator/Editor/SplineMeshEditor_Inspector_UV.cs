@@ -93,7 +93,7 @@ namespace SplineEditor.MeshGenerator.Editor
 				return;
 			}
 
-			var settingsScriptable = SplineMeshEditorSettings.instance;
+			var settingsScriptable = SplineMeshEditorConfiguration.instance;
 
 			isVisualizingUV = state;
 			var prevMaterial = splineMesh.MeshRenderer.sharedMaterial;
