@@ -9,18 +9,17 @@ namespace SplineEditor.MeshGenerator.Editor
 	{
 
 		private SplineMesh splineMesh;
-		private Material savedMaterial;
-		private bool isVisualizingUV = false;
 
 		private void OnEnable()
 		{
 			splineMesh = target as SplineMesh;
 			initializeStyles = true;
-		}
 
-		private void OnDisable()
-		{
-			ToggleUV(false);
+			if(SplineMeshEditorState.instance.IsAnyDebugModeViewVisible() && !SplineMeshEditorState.instance.IsDebugModeView(splineMesh))
+			{
+				SplineMeshEditorState.instance.RestoreSavedDebugMaterial();
+			}
+
 		}
 
 	}

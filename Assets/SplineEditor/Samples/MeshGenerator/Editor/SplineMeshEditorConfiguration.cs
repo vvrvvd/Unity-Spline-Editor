@@ -13,7 +13,7 @@ namespace SplineEditor.MeshGenerator
 			{
 				if (_instance == null)
 				{
-					var loadedInstances = Resources.LoadAll<SplineMeshEditorConfiguration>("");
+					var loadedInstances = Resources.LoadAll<SplineMeshEditorConfiguration>(string.Empty);
 
                     if (loadedInstances.Length == 0) 
 					{

@@ -76,30 +76,18 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 
-			var uvButtonContent = isVisualizingUV ? UvOptionsHideDebugUvViewButtonContent : UvOptionsShowDebugUvViewButtonContent;
+			var isDebugModeView = SplineMeshEditorState.instance.IsDebugModeView(splineMesh);
+			var uvButtonContent = isDebugModeView ? UvOptionsHideDebugViewButtonContent : UvOptionsShowDebugViewButtonContent;
 			if (GUILayout.Button(uvButtonContent, ButtonMaxWidth, ButtonHeight))
 			{
-				ToggleUV(!isVisualizingUV);
+				SplineMeshEditorState.instance.SetDebugModeView(splineMesh, !isDebugModeView);
 			}
 
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
 
-		private void ToggleUV(bool state)
-		{
-			if (isVisualizingUV == state)
-			{
-				return;
-			}
 
-			var settingsScriptable = SplineMeshEditorConfiguration.instance;
-
-			isVisualizingUV = state;
-			var prevMaterial = splineMesh.MeshRenderer.sharedMaterial;
-			splineMesh.MeshRenderer.sharedMaterial = isVisualizingUV ? settingsScriptable.uvMaterial : savedMaterial;
-			savedMaterial = isVisualizingUV ? prevMaterial : settingsScriptable.uvMaterial;
-		}
 
 	}
 

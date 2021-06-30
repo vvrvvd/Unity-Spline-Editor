@@ -70,8 +70,8 @@ namespace SplineEditor.MeshGenerator.Editor
 
 		private static GUIContent UvOptionsUvModeDropdownContent = new GUIContent(UvOptionsUvModeTitle);
 		private static GUIContent UvOptionsMirrorUvToggleContent = new GUIContent(UvOptionsMirrorUvTitle);
-		private static GUIContent UvOptionsHideDebugUvViewButtonContent = new GUIContent(UvOptionsHideDebugUvViewButtonTitle);
-		private static GUIContent UvOptionsShowDebugUvViewButtonContent = new GUIContent(UvOptionsShowDebugUvViewButtonTitle);
+		private static GUIContent UvOptionsHideDebugViewButtonContent = new GUIContent(UvOptionsHideDebugUvViewButtonTitle);
+		private static GUIContent UvOptionsShowDebugViewButtonContent = new GUIContent(UvOptionsShowDebugUvViewButtonTitle);
 
 		#endregion
 
