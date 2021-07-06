@@ -7,18 +7,17 @@ namespace SplineEditor.Editor
 	public partial class SplineEditorWindow : EditorWindow
 	{
 
-		private bool isDrawerMode = false;
-        private bool isDrawerSectionFolded = true;
+
 
         private void DrawDrawerToolOptions()
 		{
             var prevColor = GUI.color;
             var prevEnabled = GUI.enabled;
 
-            isDrawerSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(isDrawerSectionFolded, DrawerGroupTitle);
+            editorWindowState.isDrawerSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(editorWindowState.isDrawerSectionFolded, DrawerGroupTitle);
             GUI.enabled = isSplineEditorEnabled;
 
-            if (isDrawerSectionFolded)
+            if (editorWindowState.isDrawerSectionFolded)
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
@@ -42,8 +41,8 @@ namespace SplineEditor.Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 
-			GUI.enabled = isSplineEditorEnabled && !SplineEditor.CurrentSpline.IsLoop;
-			var toggleState = isSplineEditorEnabled && isDrawerMode;
+			GUI.enabled = isSplineEditorEnabled && !editorState.CurrentSpline.IsLoop;
+			var toggleState = isSplineEditorEnabled && editorWindowState.isDrawerMode;
 			if (GUILayout.Toggle(toggleState, DrawCurveButtonContent, toggleButtonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
 			{
 				SplineEditor.ToggleDrawSplineMode();
@@ -58,7 +57,7 @@ namespace SplineEditor.Editor
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			SplineEditor.DrawCurveSmoothAcuteAngles = EditorGUILayout.Toggle(DrawCurveSmoothAnglesContent, SplineEditor.DrawCurveSmoothAcuteAngles);
+			editorState.DrawCurveSmoothAcuteAngles = EditorGUILayout.Toggle(DrawCurveSmoothAnglesContent, editorState.DrawCurveSmoothAcuteAngles);
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
@@ -68,7 +67,7 @@ namespace SplineEditor.Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 			GUILayout.Label(DrawCurveSecondHookContent);
-			SplineEditor.DrawCurveSecondPointHook = EditorGUILayout.Slider(SplineEditor.DrawCurveSecondPointHook, SplineEditor.DrawCurveFirstPointHook, 0.999f, ToolsSliderWidth);
+			editorState.DrawCurveSecondPointHook = EditorGUILayout.Slider(editorState.DrawCurveSecondPointHook, editorState.DrawCurveFirstPointHook, 0.999f, ToolsSliderWidth);
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
@@ -78,7 +77,7 @@ namespace SplineEditor.Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 			GUILayout.Label(DrawCurveFirstHookContent);
-			SplineEditor.DrawCurveFirstPointHook = EditorGUILayout.Slider(SplineEditor.DrawCurveFirstPointHook, 0.001f, SplineEditor.DrawCurveSecondPointHook, ToolsSliderWidth);
+			editorState.DrawCurveFirstPointHook = EditorGUILayout.Slider(editorState.DrawCurveFirstPointHook, 0.001f, editorState.DrawCurveSecondPointHook, ToolsSliderWidth);
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
@@ -87,7 +86,7 @@ namespace SplineEditor.Editor
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			SplineEditor.DrawCurveSegmentLength = EditorGUILayout.FloatField(DrawCurveSegmentLengthContent, SplineEditor.DrawCurveSegmentLength);
+			editorState.DrawCurveSegmentLength = EditorGUILayout.FloatField(DrawCurveSegmentLengthContent, editorState.DrawCurveSegmentLength);
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}

@@ -8,6 +8,8 @@ namespace SplineEditor.MeshGenerator.Editor
 	public partial class SplineMeshEditor : UnityEditor.Editor
 	{
 
+		private static SplineMeshEditorState meshEditorState => SplineMeshEditorState.instance;
+
 		private SplineMesh splineMesh;
 
 		private void OnEnable()
@@ -15,9 +17,9 @@ namespace SplineEditor.MeshGenerator.Editor
 			splineMesh = target as SplineMesh;
 			initializeStyles = true;
 
-			if(SplineMeshEditorState.instance.IsAnyDebugModeViewVisible() && !SplineMeshEditorState.instance.IsDebugModeView(splineMesh))
+			if(meshEditorState.IsAnyDebugModeViewVisible() && !meshEditorState.IsDebugModeView(splineMesh))
 			{
-				SplineMeshEditorState.instance.RestoreSavedDebugMaterial();
+				meshEditorState.RestoreSavedDebugMaterial();
 			}
 
 		}

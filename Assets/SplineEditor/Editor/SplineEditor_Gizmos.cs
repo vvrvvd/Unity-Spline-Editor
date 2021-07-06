@@ -10,12 +10,11 @@ namespace SplineEditor.Editor
 		[DrawGizmo(GizmoType.InSelectionHierarchy | GizmoType.NotInSelectionHierarchy)]
 		private static void RenderCustomGizmo(BezierSpline curve, GizmoType gizmoType)
 		{
-			if (CurrentSpline == curve || !curve.alwaysDrawSplineOnScene)
+			if (!editorState.alwaysDrawSplineOnScene || !editorState.drawSpline)
 			{
 				return;
 			}
 
-			TryLoadEditorSettings();
 			DrawSpline(curve);
 		}
 

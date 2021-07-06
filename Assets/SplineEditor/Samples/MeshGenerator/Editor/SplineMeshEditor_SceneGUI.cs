@@ -36,14 +36,14 @@ namespace SplineEditor.MeshGenerator.Editor
 			var point = splineMesh.transform.TransformPoint(splineMesh.splinePath.points[index]);
 			var size = HandleUtility.GetHandleSize(point);
 
-			if (SplineMeshEditorState.instance.drawPoints)
+			if (meshEditorState.drawPoints)
 			{
 				var handleSize = 0.025f;
 				Handles.color = SplineMeshEditorConfiguration.instance.pointsColor;
 				Handles.Button(point, Quaternion.identity, size * handleSize, size * handleSize, Handles.DotHandleCap);
 			}
 
-			if (SplineMeshEditorState.instance.drawNormals)
+			if (meshEditorState.drawNormals)
 			{
 				DrawNormal(point, index);
 			}

@@ -1,6 +1,5 @@
 using UnityEditor;
 using UnityEngine;
-using BezierSplineEditor = SplineEditor.Editor.SplineEditor;
 
 namespace SplineEditor.MeshGenerator.Editor
 {
@@ -8,15 +7,14 @@ namespace SplineEditor.MeshGenerator.Editor
 	public partial class SplineMeshEditor : UnityEditor.Editor
 	{
 
-		private bool isUvSectionFolded = true;
 
 		private void DrawUvOptions()
 		{
 			var prevEnabled = GUI.enabled;
 
-			isUvSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(isUvSectionFolded, UvOptionsGroupTitle);
+			meshEditorState.isUvSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(meshEditorState.isUvSectionFolded, UvOptionsGroupTitle);
 			GUI.enabled = true;
-			if (isUvSectionFolded)
+			if (meshEditorState.isUvSectionFolded)
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
@@ -76,11 +74,11 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 
-			var isDebugModeView = SplineMeshEditorState.instance.IsDebugModeView(splineMesh);
+			var isDebugModeView = meshEditorState.IsDebugModeView(splineMesh);
 			var uvButtonContent = isDebugModeView ? UvOptionsHideDebugViewButtonContent : UvOptionsShowDebugViewButtonContent;
 			if (GUILayout.Button(uvButtonContent, ButtonMaxWidth, ButtonHeight))
 			{
-				SplineMeshEditorState.instance.SetDebugModeView(splineMesh, !isDebugModeView);
+				meshEditorState.SetDebugModeView(splineMesh, !isDebugModeView);
 			}
 
 			GUILayout.FlexibleSpace();

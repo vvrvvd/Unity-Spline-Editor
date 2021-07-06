@@ -21,7 +21,7 @@ namespace SplineEditor.Editor
 
 		private void InitializeNormalsEditorMode()
 		{
-			if (!IsNormalsEditorMode)
+			if (!editorState.IsNormalsEditorMode)
 			{
 				return;
 			}
@@ -32,9 +32,9 @@ namespace SplineEditor.Editor
 		private void ToggleNormalsEditorMode(bool state)
 		{
 
-			if (IsNormalsEditorMode != state)
+			if (editorState.IsNormalsEditorMode != state)
 			{
-				Undo.RecordObject(CurrentSpline, "Toggle Normals Editor Mode");
+				Undo.RecordObject(editorState.CurrentSpline, "Toggle Normals Editor Mode");
 			}
 
 			if(state)
@@ -43,8 +43,8 @@ namespace SplineEditor.Editor
 				ToggleDrawCurveMode(false);
 			}
 
-			IsNormalsEditorMode = state;
-			wasSplineModified = true;
+			editorState.IsNormalsEditorMode = state;
+			editorState.wasSplineModified = true;
 		}
 
 		#endregion
@@ -55,32 +55,32 @@ namespace SplineEditor.Editor
 		{
 			var normalIndex = index / 3;
 			EditorGUI.BeginChangeCheck();
-			var normalAngularOffset = currentSpline.NormalsAngularOffsets[normalIndex];
-			var globalRotation = Quaternion.AngleAxis(currentSpline.GlobalNormalsRotation, currentSpline.Tangents[normalIndex]);
-			var normalRotation = globalRotation * Quaternion.AngleAxis(normalAngularOffset + MagicAngleOffset, currentSpline.Tangents[normalIndex]);
-			var normalHandleRotation = normalRotation * Quaternion.LookRotation(currentSpline.Tangents[normalIndex]);
+			var normalAngularOffset = editorState.CurrentSpline.NormalsAngularOffsets[normalIndex];
+			var globalRotation = Quaternion.AngleAxis(editorState.CurrentSpline.GlobalNormalsRotation, editorState.CurrentSpline.Tangents[normalIndex]);
+			var normalRotation = globalRotation * Quaternion.AngleAxis(normalAngularOffset + MagicAngleOffset, editorState.CurrentSpline.Tangents[normalIndex]);
+			var normalHandleRotation = normalRotation * Quaternion.LookRotation(editorState.CurrentSpline.Tangents[normalIndex]);
 			var baseHandleRotation = handleTransform.rotation * normalHandleRotation;
 			var rotation = Handles.DoRotationHandle(baseHandleRotation, point);
 			if (EditorGUI.EndChangeCheck())
 			{
-				if (!isRotating)
+				if (!editorState.isRotating)
 				{
-					lastRotation = baseHandleRotation;
-					isRotating = true;
+					editorState.lastRotation = baseHandleRotation;
+					editorState.isRotating = true;
 				}
 
-				Undo.RecordObject(CurrentSpline, "Rotate Normal Vector");
+				Undo.RecordObject(editorState.CurrentSpline, "Rotate Normal Vector");
 
-				var normalAngleDiff = Vector3.SignedAngle(rotation * currentSpline.Normals[normalIndex], lastRotation * currentSpline.Normals[normalIndex], handleTransform.rotation * (-currentSpline.Tangents[normalIndex]));
-				currentSpline.UpdateNormalAngularOffset(normalIndex, normalAngularOffset + normalAngleDiff);
-				lastRotation = rotation;
-				wasSplineModified = true;
+				var normalAngleDiff = Vector3.SignedAngle(rotation * editorState.CurrentSpline.Normals[normalIndex], editorState.lastRotation * editorState.CurrentSpline.Normals[normalIndex], handleTransform.rotation * (-editorState.CurrentSpline.Tangents[normalIndex]));
+				editorState.CurrentSpline.UpdateNormalAngularOffset(normalIndex, normalAngularOffset + normalAngleDiff);
+				editorState.lastRotation = rotation;
+				editorState.wasSplineModified = true;
 			}
-			else if ((isRotating && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
+			else if ((editorState.isRotating && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
 			{
-				lastRotation = baseHandleRotation;
-				isRotating = false;
-				wasSplineModified = true;
+				editorState.lastRotation = baseHandleRotation;
+				editorState.isRotating = false;
+				editorState.wasSplineModified = true;
 			}
 		}
 

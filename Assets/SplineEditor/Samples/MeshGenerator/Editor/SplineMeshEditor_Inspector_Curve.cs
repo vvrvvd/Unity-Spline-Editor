@@ -1,6 +1,5 @@
 using UnityEditor;
 using UnityEngine;
-using BezierSplineEditor = SplineEditor.Editor.SplineEditor;
 
 namespace SplineEditor.MeshGenerator.Editor
 {
@@ -8,15 +7,13 @@ namespace SplineEditor.MeshGenerator.Editor
 	public partial class SplineMeshEditor : UnityEditor.Editor
 	{
 
-		private bool isCurveSectionFolded = true;
-
 		private void DrawWidthCurveOptions()
 		{
 			var prevEnabled = GUI.enabled;
 
-			isCurveSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(isCurveSectionFolded, CurveOptionsGroupTitle);
+			meshEditorState.isCurveSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(meshEditorState.isCurveSectionFolded, CurveOptionsGroupTitle);
 			GUI.enabled = true;
-			if (isCurveSectionFolded)
+			if (meshEditorState.isCurveSectionFolded)
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
@@ -110,8 +107,10 @@ namespace SplineEditor.MeshGenerator.Editor
 
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
+
+			EditorGUI.BeginChangeCheck();
 			var nextCurveState = EditorGUILayout.CurveField(string.Empty, splineMesh.LeftSideCurve, WidthCurveMaxWidth);
-			if (nextCurveState != splineMesh.LeftSideCurve)
+			if (EditorGUI.EndChangeCheck())
 			{
 				Undo.RecordObject(splineMesh, "Change mirrored width curve");
 				splineMesh.LeftSideCurve = nextCurveState;

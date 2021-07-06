@@ -36,19 +36,19 @@ namespace SplineEditor.Editor
 		[ShortcutAttribute("Spline Editor/Cast Spline", KeyCode.U, ShortcutModifiers.Action)]
 		private static void CastSplineShortcut()
 		{
-			if(currentSpline==null)
+			if(editorState.CurrentSpline ==null)
 			{
 				return;
 			}
 
-			var customDirection = -currentSpline.transform.up;
+			var customDirection = -editorState.CurrentSpline.transform.up;
 			ScheduleCastSpline(customDirection);
 		}
 
 		[ShortcutAttribute("Spline Editor/Cast Spline To Camera View", KeyCode.T, ShortcutModifiers.Action)]
 		private static void CastSplineToCameraShortcut()
 		{
-			if (currentSpline == null)
+			if (editorState.CurrentSpline == null)
 			{
 				return;
 			}

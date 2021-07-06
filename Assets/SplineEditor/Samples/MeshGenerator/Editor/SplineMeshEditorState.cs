@@ -11,6 +11,10 @@ namespace SplineEditor.MeshGenerator.Editor
 		public bool drawPoints = true;
 		public bool drawNormals = false;
 
+		public bool isUvSectionFolded = true;
+		public bool isCurveSectionFolded = true;
+		public bool isMeshSectionFolded = true;
+
 		[SerializeField]
 		private Material savedDebugViewMeshMaterial;
 		[SerializeField]

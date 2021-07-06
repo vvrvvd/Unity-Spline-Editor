@@ -16,23 +16,13 @@ namespace SplineEditor.MeshGenerator
 	public class SplineMesh : MonoBehaviour
 	{
 
-		#region Enums
-
 		public enum UVMode
 		{
 			Linear,
 			PingPong,
 		}
 
-		#endregion
-
-		#region Const Fields
-
 		private const float Precision = 0.0001f;
-
-		#endregion
-
-		#region Private Fields
 
 		private float width = 5f;
 		private float spacing = 1f;
@@ -54,17 +44,9 @@ namespace SplineEditor.MeshGenerator
 		[SerializeField, HideInInspector]
 		private BezierSpline bezierSpline;
 
-		#endregion
-
-		#region Internal Fields
-
 		//TODO: Change to property
 		[SerializeField, HideInInspector]
 		public SplinePath splinePath;
-
-		#endregion
-
-		#region Properties
 
 		/// <summary>
 		/// Points on generated on the spline to create the mesh
@@ -233,10 +215,6 @@ namespace SplineEditor.MeshGenerator
 		/// BezierSpline attached to the SplineMesh component.
 		public BezierSpline BezierSpline => bezierSpline;
 
-		#endregion
-
-		#region Initialize
-
 		private void OnValidate()
 		{
 			Spacing = Mathf.Max(Spacing, 0.1f);
@@ -298,10 +276,6 @@ namespace SplineEditor.MeshGenerator
 			GenerateMesh();
 			updateMesh = false;
 		}
-
-		#endregion
-
-		#region Public Methods
 
 		/// <summary>
 		/// Constructs and assigned mesh based on the spline. 
@@ -393,11 +367,6 @@ namespace SplineEditor.MeshGenerator
 			return cachedMesh;
 		}
 
-
-		#endregion
-
-		#region Private Methods
-
 		private float GetUV(int pointIndex)
 		{
 			var uv = pointIndex / (float)(Points.Length - 1);
@@ -413,8 +382,6 @@ namespace SplineEditor.MeshGenerator
 
 			return MirrorUV ? 1 - uv : uv;
 		}
-
-		#endregion
 
 	}
 

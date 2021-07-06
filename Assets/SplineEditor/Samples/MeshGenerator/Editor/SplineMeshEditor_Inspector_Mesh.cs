@@ -1,6 +1,5 @@
 using UnityEditor;
 using UnityEngine;
-using BezierSplineEditor = SplineEditor.Editor.SplineEditor;
 
 namespace SplineEditor.MeshGenerator.Editor
 {
@@ -8,15 +7,14 @@ namespace SplineEditor.MeshGenerator.Editor
 	public partial class SplineMeshEditor : UnityEditor.Editor
 	{
 
-		private bool isMeshSectionFolded = true;
 
 		private void DrawMeshOptions()
 		{
 			var prevEnabled = GUI.enabled;
 
-			isMeshSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(isMeshSectionFolded, MeshOptionsGroupTitle);
+			meshEditorState.isMeshSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(meshEditorState.isMeshSectionFolded, MeshOptionsGroupTitle);
 			GUI.enabled = true;
-			if (isMeshSectionFolded)
+			if (meshEditorState.isMeshSectionFolded)
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);

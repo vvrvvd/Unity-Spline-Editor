@@ -1,6 +1,5 @@
 using UnityEditor;
 using UnityEngine;
-using BezierSplineEditor = SplineEditor.Editor.SplineEditor;
 
 namespace SplineEditor.MeshGenerator.Editor
 {

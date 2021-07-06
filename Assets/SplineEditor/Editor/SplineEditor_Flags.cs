@@ -4,6 +4,8 @@ using UnityEditor;
 
 namespace SplineEditor.Editor
 {
+
+	//TODO: Refactor to another class
 	public partial class SplineEditor : UnityEditor.Editor
 	{
 
@@ -111,13 +113,13 @@ namespace SplineEditor.Editor
 		{
 			if (normalsEditorModeFlag)
 			{
-				ToggleNormalsEditorMode(!IsNormalsEditorMode);
+				ToggleNormalsEditorMode(!editorState.IsNormalsEditorMode);
 				normalsEditorModeFlag = false;
 			}
 
 			if (drawSplineModeFlag)
 			{
-				ToggleDrawCurveMode(!IsDrawerMode);
+				ToggleDrawCurveMode(!editorState.IsDrawerMode);
 				drawSplineModeFlag = false;
 			}
 
@@ -163,7 +165,7 @@ namespace SplineEditor.Editor
 				castSplineToCameraFlag = false;
 			}
 
-			if (!IsDrawerMode)
+			if (!editorState.IsDrawerMode)
 			{
 				if (addCurveFlag)
 				{

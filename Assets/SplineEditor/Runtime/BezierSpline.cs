@@ -9,8 +9,6 @@ namespace SplineEditor
 	public class BezierSpline : MonoBehaviour
 	{
 
-		#region Enums
-
 		public enum BezierControlPointMode : int
 		{
 			Free = 0,
@@ -19,35 +17,7 @@ namespace SplineEditor
 			Auto = 3
 		}
 
-		#endregion
-
-		#region Events
-
 		public Action OnSplineChanged;
-
-		#endregion
-
-		#region Public Fields
-
-		[HideInInspector]
-		//TODO: Move to editor scriptable editor state
-		public bool drawPoints = true;
-		[HideInInspector]
-		//TODO: Move to editor scriptable editor state
-		public bool drawDirections = false;
-		[HideInInspector]
-		//TODO: Move to editor scriptable editor state
-		public bool showTransformHandle = true;
-		[HideInInspector]
-		//TODO: Move to editor scriptable editor state
-		public bool alwaysDrawSplineOnScene = true;
-		[HideInInspector]
-		//TODO: Move to editor scriptable editor state
-		public bool drawNormals = false;
-
-		#endregion
-
-		#region Editor Fields
 
 		[SerializeField, HideInInspector]
 		private bool isLoop = default;
@@ -77,15 +47,7 @@ namespace SplineEditor
 		[SerializeField, HideInInspector]
 		private float[] normalsAngularOffsets = default;
 
-		#endregion
-
-		#region Private Fields
-
 		private bool invokeEvents = true;
-
-		#endregion
-
-		#region Properties
 
 		/// <summary>
 		/// Number of curves in the splines.
@@ -181,10 +143,6 @@ namespace SplineEditor
 			}
 		}
 
-		#endregion
-
-		#region Initialize
-
 		private void Reset()
 		{
 			modes = new List<BezierControlPointMode>(2);
@@ -209,12 +167,6 @@ namespace SplineEditor
 
 			RecalculateNormals();
 		}
-
-		#endregion
-
-		#region Public Methods
-
-		#region Getters & Setters
 
 		/// <summary>
 		/// Returns the spline length using line iteration approximation.
@@ -668,10 +620,6 @@ namespace SplineEditor
 
 		}
 
-		#endregion
-
-		#region Tools
-
 		/// <summary>
 		/// Updates point position at given index.
 		/// </summary>
@@ -1102,12 +1050,6 @@ namespace SplineEditor
 			}
 		}
 
-		#endregion
-
-		#endregion
-
-		#region Private Methods
-
 		private void AddPoint(Vector3 point)
 		{
 			var nextIndex = PointsCount > 0 ? PointsCount : 0;
@@ -1329,8 +1271,6 @@ namespace SplineEditor
 
 			RemoveCurve(curveIndex, true);
 		}
-
-		#endregion
 
 	}
 
