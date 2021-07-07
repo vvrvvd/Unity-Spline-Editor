@@ -8,8 +8,6 @@ namespace SplineEditor.Editor
 	public partial class SplineEditorWindow : EditorWindow
 	{
 
-
-
 		private void DrawPointGroup()
 		{
 			var prevEnabled = GUI.enabled;
@@ -54,39 +52,6 @@ namespace SplineEditor.Editor
 			GUI.enabled = prevEnabled;
 		}
 
-		private void DrawPointsScaleField()
-		{
-			var prevEnabled = GUI.enabled;
-
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			GUILayout.Label(PointScaleContent);
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-
-			var isScaleFieldActive = editorState.IsAnyPointSelected && editorState.SelectedPointIndex % 3 == 0;
-
-			GUI.enabled = isScaleFieldActive;
-
-			var pointIndex = editorState.SelectedPointIndex / 3;
-			var currentPointScale = isScaleFieldActive ? editorState.CurrentSpline.PointsScales[pointIndex] : editorWindowState.previousPointScale;
-
-			var nextPointScale = EditorGUILayout.Vector3Field(string.Empty, currentPointScale, ToolsPointPositionWidth);
-			if (nextPointScale != currentPointScale)
-			{
-				editorState.CurrentSpline.UpdatePointsScale(pointIndex, nextPointScale);
-			}
-			editorWindowState.previousPointScale = currentPointScale;
-
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-
-			GUI.enabled = prevEnabled;
-		}
-
 
 		private void DrawPositionField()
 		{
@@ -115,6 +80,41 @@ namespace SplineEditor.Editor
 			GUILayout.EndHorizontal();
 
 			editorWindowState.previousPointPosition = point;
+		}
+
+		private void DrawPointsScaleField()
+		{
+			var prevEnabled = GUI.enabled;
+			var currentSpline = editorState.CurrentSpline;
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			GUILayout.Label(PointScaleContent);
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+
+			var isScaleFieldActive = editorState.IsAnyPointSelected && editorState.SelectedPointIndex % 3 == 0;
+
+			GUI.enabled = isScaleFieldActive;
+
+			var pointIndex = editorState.SelectedPointIndex / 3;
+			var currentPointScale = isScaleFieldActive ? currentSpline.PointsScales[pointIndex] : editorWindowState.previousPointScale;
+			EditorGUI.BeginChangeCheck();
+			var nextPointScale = EditorGUILayout.Vector3Field(string.Empty, currentPointScale, ToolsPointPositionWidth);
+			if (EditorGUI.EndChangeCheck())
+			{
+				Undo.RecordObject(currentSpline, "Scale Point");
+				currentSpline.UpdatePointsScale(pointIndex, nextPointScale);
+			}
+			editorWindowState.previousPointScale = currentPointScale;
+
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			GUI.enabled = prevEnabled;
 		}
 
 		private void DrawModePopupField()

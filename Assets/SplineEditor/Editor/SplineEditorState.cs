@@ -233,14 +233,6 @@ namespace SplineEditor.Editor
 			CanSplineBeSimplified = CanSplineBeLooped && (!CurrentSpline.IsLoop || CurrentSpline.CurvesCount > 2);
 			CanSelectedCurveBeRemoved = IsAnyPointSelected && CanSplineBeLooped && (!CurrentSpline.IsLoop || CurrentSpline.CurvesCount > 2);
 
-
-			//TODO: Remove
-			//if (CurrentSpline != null && CurrentSpline.GlobalNormalsRotation != previousGlobalNormalsRotation)
-			//{
-			//	previousGlobalNormalsRotation = CurrentSpline.GlobalNormalsRotation;
-			//	wasSplineModified = true;
-			//}
-
 			if (wasSplineModified)
 			{
 				OnSplineModified?.Invoke();
