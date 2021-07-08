@@ -27,7 +27,7 @@ namespace SplineEditor.Editor
 			ScheduleSplitCurve(splitCurveValue);
 		}
 
-		[ShortcutAttribute("Spline Editor/Close Loop", KeyCode.Home, ShortcutModifiers.Action)]
+		[ShortcutAttribute("Spline Editor/Close Loop", KeyCode.L, ShortcutModifiers.Action)]
 		private static void ToggleCloseLoopShortcut()
 		{
 			ScheduleToggleCloseLoop();
