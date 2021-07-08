@@ -176,6 +176,7 @@ namespace SplineEditor.Editor
 			headerLabelStyle = editorSettings.guiSkin.FindStyle("Header");
 			toggleButtonStyle = editorSettings.guiSkin.FindStyle("ToggleButton");
 			settingsButtonStyle = editorSettings.guiSkin.FindStyle("SettingsButton");
+			buttonsLayoutIndex = editorWindowState.UseText && editorWindowState.UseImages ? 2 : editorWindowState.UseImages ? 1 : 0;
 		}
 
 		private void UpdateStyles()
@@ -185,68 +186,68 @@ namespace SplineEditor.Editor
 			toggleButtonStyle = editorSettings.guiSkin.FindStyle("ToggleButton");
 			settingsButtonStyle = editorSettings.guiSkin.FindStyle("SettingsButton");
 
-			editorWindowState.useText = buttonsLayoutIndex == 0 || buttonsLayoutIndex == 2;
-			editorWindowState.useImages = buttonsLayoutIndex == 1 || buttonsLayoutIndex == 2;
+			editorWindowState.UseText = buttonsLayoutIndex == 0 || buttonsLayoutIndex == 2;
+			editorWindowState.UseImages = buttonsLayoutIndex == 1 || buttonsLayoutIndex == 2;
 
 			//header
 			layoutsButtonsContent[1].image = editorSettings.imageLayoutIcon;
 			layoutsButtonsContent[2].image = editorSettings.imageLayoutIcon;
 
 			//points
-			ApplyToAllPoinstButtonContent.text = editorWindowState.useText ? ApplyToAllPointsLabel : string.Empty;
-			ApplyToAllPoinstButtonContent.image = editorWindowState.useImages ? editorSettings.applyToAllPointsIcon : null;
-			ApplyToAllPoinstButtonContent.tooltip = editorWindowState.useText ? ApplyToAllPointsTooltip : ApplyToAllPointsLabel;
+			ApplyToAllPoinstButtonContent.text = editorWindowState.UseText ? ApplyToAllPointsLabel : string.Empty;
+			ApplyToAllPoinstButtonContent.image = editorWindowState.UseImages ? editorSettings.applyToAllPointsIcon : null;
+			ApplyToAllPoinstButtonContent.tooltip = editorWindowState.UseText ? ApplyToAllPointsTooltip : ApplyToAllPointsLabel;
 
 			//curve
-			AddCurveButtonContent.text = editorWindowState.useText ? AddCurveButtonTitle : string.Empty;
-			AddCurveButtonContent.image = editorWindowState.useImages ? editorSettings.addCurveIcon : null;
-			AddCurveButtonContent.tooltip = editorWindowState.useText ? AddCurveButtonTooltip : AddCurveButtonTitle;
+			AddCurveButtonContent.text = editorWindowState.UseText ? AddCurveButtonTitle : string.Empty;
+			AddCurveButtonContent.image = editorWindowState.UseImages ? editorSettings.addCurveIcon : null;
+			AddCurveButtonContent.tooltip = editorWindowState.UseText ? AddCurveButtonTooltip : AddCurveButtonTitle;
 
-			RemoveCurveButtonContent.text = editorWindowState.useText ? RemoveCurveButtonTitle : string.Empty;
-			RemoveCurveButtonContent.image = editorWindowState.useImages ? editorSettings.removeCurveIcon : null;
-			RemoveCurveButtonContent.tooltip = editorWindowState.useText ? RemoveCurveButtonTooltip : RemoveCurveButtonTitle;
+			RemoveCurveButtonContent.text = editorWindowState.UseText ? RemoveCurveButtonTitle : string.Empty;
+			RemoveCurveButtonContent.image = editorWindowState.UseImages ? editorSettings.removeCurveIcon : null;
+			RemoveCurveButtonContent.tooltip = editorWindowState.UseText ? RemoveCurveButtonTooltip : RemoveCurveButtonTitle;
 
-			SplitCurveButtonContent.text = editorWindowState.useText ? SplitCurveButtonTitle : string.Empty;
-			SplitCurveButtonContent.image = editorWindowState.useImages ? editorSettings.splitCurveIcon : null;
-			SplitCurveButtonContent.tooltip = editorWindowState.useText ? SplitCurveButtonTooltip : SplitCurveButtonTitle;
+			SplitCurveButtonContent.text = editorWindowState.UseText ? SplitCurveButtonTitle : string.Empty;
+			SplitCurveButtonContent.image = editorWindowState.UseImages ? editorSettings.splitCurveIcon : null;
+			SplitCurveButtonContent.tooltip = editorWindowState.UseText ? SplitCurveButtonTooltip : SplitCurveButtonTitle;
 
 			//spline
-			CloseLoopButtonContent.text = editorWindowState.useText ? CloseLoopButtonTitle : string.Empty;
-			CloseLoopButtonContent.image = editorWindowState.useImages ? editorSettings.closeLoopIcon : null;
-			CloseLoopButtonContent.tooltip = editorWindowState.useText ? CloseLoopButtonTooltip : CloseLoopButtonTitle;
+			CloseLoopButtonContent.text = editorWindowState.UseText ? CloseLoopButtonTitle : string.Empty;
+			CloseLoopButtonContent.image = editorWindowState.UseImages ? editorSettings.closeLoopIcon : null;
+			CloseLoopButtonContent.tooltip = editorWindowState.UseText ? CloseLoopButtonTooltip : CloseLoopButtonTitle;
 
 			if (editorState.CurrentSpline!=null && editorState.CurrentSpline.IsLoop)
 			{
-				CloseLoopButtonContent.text = editorWindowState.useText ? OpenLoopButtonTitle : string.Empty;
-				CloseLoopButtonContent.image = editorWindowState.useImages ? editorSettings.openLoopIcon : null;
-				CloseLoopButtonContent.tooltip = editorWindowState.useText ? OpenLoopButtonTooltip: OpenLoopButtonTitle;
+				CloseLoopButtonContent.text = editorWindowState.UseText ? OpenLoopButtonTitle : string.Empty;
+				CloseLoopButtonContent.image = editorWindowState.UseImages ? editorSettings.openLoopIcon : null;
+				CloseLoopButtonContent.tooltip = editorWindowState.UseText ? OpenLoopButtonTooltip: OpenLoopButtonTitle;
 			}
 
-			FactorSplineButtonContent.text = editorWindowState.useText ? FactorSplineButtonTitle : string.Empty;
-			FactorSplineButtonContent.image = editorWindowState.useImages ? editorSettings.factorSplineIcon : null;
-			FactorSplineButtonContent.tooltip = editorWindowState.useText ? FactorSplineButtonTooltip : FactorSplineButtonTitle;
+			FactorSplineButtonContent.text = editorWindowState.UseText ? FactorSplineButtonTitle : string.Empty;
+			FactorSplineButtonContent.image = editorWindowState.UseImages ? editorSettings.factorSplineIcon : null;
+			FactorSplineButtonContent.tooltip = editorWindowState.UseText ? FactorSplineButtonTooltip : FactorSplineButtonTitle;
 
-			SimplifyButtonContent.text = editorWindowState.useText ? SimplifySplineButtonTitle : string.Empty;
-			SimplifyButtonContent.image = editorWindowState.useImages ? editorSettings.simplifySplineIcon : null;
-			SimplifyButtonContent.tooltip = editorWindowState.useText ? SimplifySplineButtonTooltip : SimplifySplineButtonTitle;
+			SimplifyButtonContent.text = editorWindowState.UseText ? SimplifySplineButtonTitle : string.Empty;
+			SimplifyButtonContent.image = editorWindowState.UseImages ? editorSettings.simplifySplineIcon : null;
+			SimplifyButtonContent.tooltip = editorWindowState.UseText ? SimplifySplineButtonTooltip : SimplifySplineButtonTitle;
 
-			CastSplineContent.text = editorWindowState.useText ? CastSplineButtonTitle : string.Empty;
-			CastSplineContent.image = editorWindowState.useImages ? editorSettings.castSplineIcon : null;
-			CastSplineContent.tooltip = editorWindowState.useText ? CastSplineButtonTooltip : CastSplineButtonTitle;
+			CastSplineContent.text = editorWindowState.UseText ? CastSplineButtonTitle : string.Empty;
+			CastSplineContent.image = editorWindowState.UseImages ? editorSettings.castSplineIcon : null;
+			CastSplineContent.tooltip = editorWindowState.UseText ? CastSplineButtonTooltip : CastSplineButtonTitle;
 
-			CastSplineToCameraContent.text = editorWindowState.useText ? CastSplineToCameraButtonTitle : string.Empty;
-			CastSplineToCameraContent.image = editorWindowState.useImages ? editorSettings.castToCameraSplineIcon : null;
-			CastSplineToCameraContent.tooltip = editorWindowState.useText ? CastSplineToCameraButtonTooltip : CastSplineToCameraButtonTitle;
+			CastSplineToCameraContent.text = editorWindowState.UseText ? CastSplineToCameraButtonTitle : string.Empty;
+			CastSplineToCameraContent.image = editorWindowState.UseImages ? editorSettings.castToCameraSplineIcon : null;
+			CastSplineToCameraContent.tooltip = editorWindowState.UseText ? CastSplineToCameraButtonTooltip : CastSplineToCameraButtonTitle;
 
 			//normals
-			NormalsEditorButtonContent.text = editorWindowState.useText ? RotateNormalsToolLabel : string.Empty;
-			NormalsEditorButtonContent.image = editorWindowState.useImages ? editorSettings.normalsToolIcon : null;
-			NormalsEditorButtonContent.tooltip = editorWindowState.useText ? RotateNormalsToolTooltip : RotateNormalsToolLabel;
+			NormalsEditorButtonContent.text = editorWindowState.UseText ? RotateNormalsToolLabel : string.Empty;
+			NormalsEditorButtonContent.image = editorWindowState.UseImages ? editorSettings.normalsToolIcon : null;
+			NormalsEditorButtonContent.tooltip = editorWindowState.UseText ? RotateNormalsToolTooltip : RotateNormalsToolLabel;
 
 			//drawer
-			DrawCurveButtonContent.text = editorWindowState.useText ? DrawCurveButtonTitle : string.Empty;
-			DrawCurveButtonContent.image = editorWindowState.useImages ? editorSettings.drawerToolIcon : null;
-			DrawCurveButtonContent.tooltip = editorWindowState.useText ? DrawCurveButtonTooltip : DrawCurveButtonTitle;
+			DrawCurveButtonContent.text = editorWindowState.UseText ? DrawCurveButtonTitle : string.Empty;
+			DrawCurveButtonContent.image = editorWindowState.UseImages ? editorSettings.drawerToolIcon : null;
+			DrawCurveButtonContent.tooltip = editorWindowState.UseText ? DrawCurveButtonTooltip : DrawCurveButtonTitle;
 		}
 
 		#endregion

@@ -168,6 +168,7 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		[SerializeField]
 		private bool isDrawerMode;
 		public bool IsDrawerMode
 		{
@@ -181,10 +182,11 @@ namespace SplineEditor.Editor
 
 				isDrawerMode = value;
 				wasSplineModified = true;
+				Save(true);
 			}
 		}
 
-
+		[SerializeField]
 		private bool isNormalsEditorMode;
 		public bool IsNormalsEditorMode
 		{
@@ -198,30 +200,170 @@ namespace SplineEditor.Editor
 
 				isNormalsEditorMode = value;
 				wasSplineModified = true;
+				Save(true);
 			}
 		}
 
-		public bool DrawCurveSmoothAcuteAngles = true;
-		public float DrawCurveSegmentLength = 5f;
-		public float DrawCurveFirstPointHook = 0.33f;
-		public float DrawCurveSecondPointHook = 0.66f;
+		[SerializeField]
+		private bool drawCurveSmoothAcuteAngles = true;
+		public bool DrawCurveSmoothAcuteAngles { 
+			get => drawCurveSmoothAcuteAngles; 
+			set 
+			{ 
+				if(drawCurveSmoothAcuteAngles == value)
+				{
+					return;
+				}
 
+				drawCurveSmoothAcuteAngles = value; 
+				Save(true);
+			}
+		}
+
+		[SerializeField]
+		private float drawCurveSegmentLength = 5f;
+		public float DrawCurveSegmentLength { 
+			get => drawCurveSegmentLength; 
+			set 
+			{
+				if (drawCurveSegmentLength == value)
+				{
+					return;
+				}
+
+				drawCurveSegmentLength = value; 
+				Save(true);
+			}
+		}
+
+		[SerializeField]
+		private float drawCurveFirstPointHook = 0.33f;
+		public float DrawCurveFirstPointHook { 
+			get => drawCurveFirstPointHook; 
+			set 
+			{
+				if (drawCurveFirstPointHook == value)
+				{
+					return;
+				}
+
+				drawCurveFirstPointHook = value; 
+				Save(true);
+			}
+		}
+
+		[SerializeField]
+		private float drawCurveSecondPointHook = 0.66f;
+		public float DrawCurveSecondPointHook { 
+			get => drawCurveSecondPointHook; 
+			set 
+			{
+				if (drawCurveSecondPointHook == value)
+				{
+					return;
+				}
+
+				drawCurveSecondPointHook = value; 
+				Save(true);
+			}
+		}
+
+		[SerializeField]
+		private bool drawPoints = true;
+		public bool DrawPoints { 
+			get => drawPoints; 
+			set 
+			{
+				if (drawPoints == value)
+				{
+					return;
+				}
+
+				drawPoints = value; 
+				Save(true);
+			}
+		}
+
+		[SerializeField]
+		private bool drawSpline = true;
+		public bool DrawSpline { 
+			get => drawSpline; 
+			set 
+			{
+				if (drawSpline == value)
+				{
+					return;
+				}
+
+				drawSpline = value; 
+				Save(true);
+			}
+		}
+
+		[SerializeField]
+		private bool drawNormals = false;
+		public bool DrawNormals { 
+			get => drawNormals; 
+			set 
+			{
+				if (drawNormals == value)
+				{
+					return;
+				}
+
+				drawNormals = value; 
+				Save(true);
+			}
+		}
+
+		[SerializeField]
+		private bool showTransformHandle = true;
+		public bool ShowTransformHandle { 
+			get => showTransformHandle; 
+			set 
+			{
+				if (showTransformHandle == value)
+				{
+					return;
+				}
+
+				showTransformHandle = value; 
+				Save(true);
+			}
+		}
+
+		[SerializeField]
+		private bool alwaysDrawSplineOnScene = true;
+		public bool AlwaysDrawSplineOnScene { 
+			get => alwaysDrawSplineOnScene; 
+			set 
+			{
+				if (alwaysDrawSplineOnScene == value)
+				{
+					return;
+				}
+
+				alwaysDrawSplineOnScene = value;
+				Save(true);
+			} 
+		}
+
+		[NonSerialized]
 		public Tool savedTool = Tool.None;
+		[NonSerialized]
 		public bool wasSplineModified = false;
 
+		[NonSerialized]
 		public bool isRotating;
+		[NonSerialized]
 		public bool isScaling;
+		[NonSerialized]
 		public bool isDraggingPoint;
-		
-		public Vector3 lastScale;
-		public Quaternion lastRotation;
 
-		public bool drawPoints = true;
-		public bool drawSpline = true;
-		public bool drawDirections = false;
-		public bool showTransformHandle = true;
-		public bool alwaysDrawSplineOnScene = true;
-		public bool drawNormals = false;
+		[NonSerialized]
+		public Vector3 lastScale;
+		[NonSerialized]
+		public Quaternion lastRotation;
 
 		public void UpdateSplineStates()
 		{

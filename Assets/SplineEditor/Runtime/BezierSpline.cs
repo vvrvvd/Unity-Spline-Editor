@@ -19,32 +19,32 @@ namespace SplineEditor
 
 		public Action OnSplineChanged;
 
-		[SerializeField, HideInInspector]
+		[SerializeField]
 		private bool isLoop = default;
 
-		[SerializeField, HideInInspector]
+		[SerializeField]
 		private bool flipNormals = default;
 
-		[SerializeField, HideInInspector]
+		[SerializeField]
 		private float globalNormalsRotation = default;
 
-		[SerializeField, HideInInspector]
+		[SerializeField]
 		protected List<SplinePoint> points = default;
 
-		[SerializeField, HideInInspector]
+		[SerializeField]
 		private List<BezierControlPointMode> modes = default;
 
-		[SerializeField, HideInInspector]
+		[SerializeField]
 		private Vector3[] normals = default;
 
-		[SerializeField, HideInInspector]
+		[SerializeField]
 		private Vector3[] tangents = default;
 
-		[SerializeField, HideInInspector]
+		[SerializeField]
 		private List<Vector3> pointsScales = default;
 
 		//TODO: Change to list maybe
-		[SerializeField, HideInInspector]
+		[SerializeField]
 		private float[] normalsAngularOffsets = default;
 
 		private bool invokeEvents = true;
@@ -321,7 +321,7 @@ namespace SplineEditor
 		/// <param name="normalVector"></param>
 		/// <param name=""></param>
 		/// <returns></returns>
-		public float GetPointScale(float t)
+		public Vector3 GetPointScale(float t)
 		{
 			var curveSegmentSizeT = 1f / CurvesCount;
 			var curveIndex = 0;
@@ -335,7 +335,7 @@ namespace SplineEditor
 			var prevPointT = curveIndex * (curveSegmentSizeT);
 			var nextPointT = (curveIndex + 1) * (curveSegmentSizeT);
 			var alpha = Mathf.InverseLerp(prevPointT, nextPointT, t);
-			var interpolatedPointScale = Mathf.Lerp(pointsScales[curveIndex].x, pointsScales[curveIndex + 1].x, alpha);
+			var interpolatedPointScale = Vector3.Lerp(pointsScales[curveIndex], pointsScales[curveIndex + 1], alpha);
 
 			return interpolatedPointScale;
 		}
@@ -444,7 +444,7 @@ namespace SplineEditor
 		/// <param name="useWorldSpace">Transform points from local space to world space.</param>
 		public void GetEvenlySpacedPoints(float spacing, SplinePath bezierPath, float precision = 0.001f, bool useWorldSpace = true)
 		{
-			var scales = new List<float>();
+			var scales = new List<Vector3>();
 			var normals = new List<Vector3>();
 			var tangents = new List<Vector3>();
 			var parametersT = new List<float>();

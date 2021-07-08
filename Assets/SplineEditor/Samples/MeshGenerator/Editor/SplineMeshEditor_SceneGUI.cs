@@ -10,7 +10,7 @@ namespace SplineEditor.MeshGenerator.Editor
 		private void OnSceneGUI()
 		{
 
-			if (splineMesh.BezierSpline == null || splineMesh.splinePath == null)
+			if (splineMesh.BezierSpline == null)
 			{
 				return;
 			}
@@ -25,7 +25,7 @@ namespace SplineEditor.MeshGenerator.Editor
 
 		private void DrawPoints()
 		{
-			for (var i = 0; i < splineMesh.splinePath.points.Length; i++)
+			for (var i = 0; i < splineMesh.Points.Length; i++)
 			{
 				DrawPoint(i);
 			}
@@ -33,17 +33,17 @@ namespace SplineEditor.MeshGenerator.Editor
 
 		private void DrawPoint(int index)
 		{
-			var point = splineMesh.transform.TransformPoint(splineMesh.splinePath.points[index]);
+			var point = splineMesh.transform.TransformPoint(splineMesh.Points[index]);
 			var size = HandleUtility.GetHandleSize(point);
 
-			if (meshEditorState.drawPoints)
+			if (meshEditorState.DrawPoints)
 			{
 				var handleSize = 0.025f;
 				Handles.color = SplineMeshEditorConfiguration.instance.pointsColor;
 				Handles.Button(point, Quaternion.identity, size * handleSize, size * handleSize, Handles.DotHandleCap);
 			}
 
-			if (meshEditorState.drawNormals)
+			if (meshEditorState.DrawNormals)
 			{
 				DrawNormal(point, index);
 			}

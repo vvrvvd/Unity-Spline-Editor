@@ -12,9 +12,9 @@ namespace SplineEditor.MeshGenerator.Editor
 		{
 			var prevEnabled = GUI.enabled;
 
-			meshEditorState.isUvSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(meshEditorState.isUvSectionFolded, UvOptionsGroupTitle);
+			meshEditorState.IsUvSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(meshEditorState.IsUvSectionFolded, UvOptionsGroupTitle);
 			GUI.enabled = true;
-			if (meshEditorState.isUvSectionFolded)
+			if (meshEditorState.IsUvSectionFolded)
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
@@ -76,7 +76,7 @@ namespace SplineEditor.MeshGenerator.Editor
 
 			var isDebugModeView = meshEditorState.IsDebugModeView(splineMesh);
 			var uvButtonContent = isDebugModeView ? UvOptionsHideDebugViewButtonContent : UvOptionsShowDebugViewButtonContent;
-			if (GUILayout.Button(uvButtonContent, ButtonMaxWidth, ButtonHeight))
+			if (GUILayout.Button(uvButtonContent, buttonStyle, ButtonMaxWidth, ButtonHeight))
 			{
 				meshEditorState.SetDebugModeView(splineMesh, !isDebugModeView);
 			}

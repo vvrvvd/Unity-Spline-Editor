@@ -30,6 +30,7 @@ namespace SplineEditor.MeshGenerator
 
 		[Header("General")]
 		public Material uvMaterial= default;
+		public GUISkin guiSkin = default;
 
 		[Header("Scene GUI")]
 		public Color pointsColor = Color.blue;

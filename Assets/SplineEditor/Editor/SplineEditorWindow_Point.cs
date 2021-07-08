@@ -13,9 +13,9 @@ namespace SplineEditor.Editor
 			var prevEnabled = GUI.enabled;
 			var prevColor = GUI.color;
 
-			editorWindowState.isPointSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(editorWindowState.isPointSectionFolded, PointGroupTitle);
+			editorWindowState.IsPointSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(editorWindowState.IsPointSectionFolded, PointGroupTitle);
 			GUI.enabled = isCurveEditorEnabled;
-			if(editorWindowState.isPointSectionFolded)
+			if(editorWindowState.IsPointSectionFolded)
 			{
 				DrawSelectedSplineInspector();
 			}
@@ -68,7 +68,7 @@ namespace SplineEditor.Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 			EditorGUI.BeginChangeCheck();
-			var pointPosition = isPointSelected ? currentSpline.Points[selectedPointIndex].position : editorWindowState.previousPointPosition;
+			var pointPosition = isPointSelected ? currentSpline.Points[selectedPointIndex].position : editorWindowState.PreviousPointPosition;
 			var point = EditorGUILayout.Vector3Field(string.Empty, pointPosition, ToolsPointPositionWidth);
 			if (EditorGUI.EndChangeCheck())
 			{
@@ -79,7 +79,7 @@ namespace SplineEditor.Editor
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
-			editorWindowState.previousPointPosition = point;
+			editorWindowState.PreviousPointPosition = point;
 		}
 
 		private void DrawPointsScaleField()
@@ -101,7 +101,7 @@ namespace SplineEditor.Editor
 			GUI.enabled = isScaleFieldActive;
 
 			var pointIndex = editorState.SelectedPointIndex / 3;
-			var currentPointScale = isScaleFieldActive ? currentSpline.PointsScales[pointIndex] : editorWindowState.previousPointScale;
+			var currentPointScale = isScaleFieldActive ? currentSpline.PointsScales[pointIndex] : editorWindowState.PreviousPointScale;
 			EditorGUI.BeginChangeCheck();
 			var nextPointScale = EditorGUILayout.Vector3Field(string.Empty, currentPointScale, ToolsPointPositionWidth);
 			if (EditorGUI.EndChangeCheck())
@@ -109,7 +109,7 @@ namespace SplineEditor.Editor
 				Undo.RecordObject(currentSpline, "Scale Point");
 				currentSpline.UpdatePointsScale(pointIndex, nextPointScale);
 			}
-			editorWindowState.previousPointScale = currentPointScale;
+			editorWindowState.PreviousPointScale = currentPointScale;
 
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
@@ -127,7 +127,7 @@ namespace SplineEditor.Editor
 			GUILayout.FlexibleSpace();
 			EditorGUI.BeginChangeCheck();
 			GUILayout.Label(PointModeContent, ToolsPointPopupLabelWidth);
-			var currentMode = isPointSelected ? currentSpline.GetControlPointMode(selectedPointIndex) : editorWindowState.previousPointMode;
+			var currentMode = isPointSelected ? currentSpline.GetControlPointMode(selectedPointIndex) : editorWindowState.PreviousPointMode;
 			var mode = (BezierControlPointMode)EditorGUILayout.EnumPopup(currentMode, ToolsPointPopupWidth);
 			if (EditorGUI.EndChangeCheck())
 			{
@@ -149,7 +149,7 @@ namespace SplineEditor.Editor
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
-			editorWindowState.previousPointMode = mode;
+			editorWindowState.PreviousPointMode = mode;
 		}
 
 

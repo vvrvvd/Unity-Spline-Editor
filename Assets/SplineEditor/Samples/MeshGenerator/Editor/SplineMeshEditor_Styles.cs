@@ -58,10 +58,12 @@ namespace SplineEditor.MeshGenerator.Editor
 		private static GUILayoutOption ButtonHeight = GUILayout.Height(30);
 
 		private GUIStyle groupsStyle;
+		private GUIStyle buttonStyle;
 
 		private void InitializeStyles()
 		{
 			groupsStyle = new GUIStyle(EditorStyles.helpBox);
+			buttonStyle = meshEditorConfiguration.guiSkin.FindStyle("button");
 		}
 
 	}

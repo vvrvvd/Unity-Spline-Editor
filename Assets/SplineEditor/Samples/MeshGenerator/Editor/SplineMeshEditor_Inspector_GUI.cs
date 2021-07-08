@@ -38,11 +38,11 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.FlexibleSpace();
 
 			GUILayout.Label(GuiOptionsDrawPointsToggleContent);
-			var toggleState = GUILayout.Toggle(meshEditorState.drawPoints, string.Empty);
-			if (toggleState != meshEditorState.drawPoints)
+			var toggleState = GUILayout.Toggle(meshEditorState.DrawPoints, string.Empty);
+			if (toggleState != meshEditorState.DrawPoints)
 			{
-				Undo.RecordObject(splineMesh, "Toggle Draw Points");
-				meshEditorState.drawPoints = toggleState;
+				Undo.RecordObject(meshEditorState, "Toggle Draw Points");
+				meshEditorState.DrawPoints = toggleState;
 				EditorUtility.SetDirty(splineMesh);
 			}
 
@@ -56,11 +56,11 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.FlexibleSpace();
 
 			GUILayout.Label(GuiOptionsDrawNormalToggleContent);
-			var toggleState = GUILayout.Toggle(meshEditorState.drawNormals, string.Empty);
-			if (toggleState != meshEditorState.drawNormals)
+			var toggleState = GUILayout.Toggle(meshEditorState.DrawNormals, string.Empty);
+			if (toggleState != meshEditorState.DrawNormals)
 			{
-				Undo.RecordObject(splineMesh, "Toggle Draw Normals");
-				meshEditorState.drawNormals = toggleState;
+				Undo.RecordObject(meshEditorState, "Toggle Draw Normals");
+				meshEditorState.DrawNormals = toggleState;
 				EditorUtility.SetDirty(splineMesh);
 			}
 

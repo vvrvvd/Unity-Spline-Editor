@@ -14,10 +14,10 @@ namespace SplineEditor.Editor
             var prevColor = GUI.color;
             var prevEnabled = GUI.enabled;
 
-            editorWindowState.isDrawerSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(editorWindowState.isDrawerSectionFolded, DrawerGroupTitle);
+            editorWindowState.IsDrawerSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(editorWindowState.IsDrawerSectionFolded, DrawerGroupTitle);
             GUI.enabled = isSplineEditorEnabled;
 
-            if (editorWindowState.isDrawerSectionFolded)
+            if (editorWindowState.IsDrawerSectionFolded)
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
@@ -42,7 +42,7 @@ namespace SplineEditor.Editor
 			GUILayout.FlexibleSpace();
 
 			GUI.enabled = isSplineEditorEnabled && !editorState.CurrentSpline.IsLoop;
-			var toggleState = isSplineEditorEnabled && editorWindowState.isDrawerMode;
+			var toggleState = isSplineEditorEnabled && editorState.IsDrawerMode;
 			if (GUILayout.Toggle(toggleState, DrawCurveButtonContent, toggleButtonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
 			{
 				SplineEditor.ToggleDrawSplineMode();

@@ -34,7 +34,7 @@ namespace SplineEditor.Editor
 
 			if (editorState.IsNormalsEditorMode != state)
 			{
-				Undo.RecordObject(editorState.CurrentSpline, "Toggle Normals Editor Mode");
+				Undo.RecordObject(editorState, "Toggle Normals Editor Mode");
 			}
 
 			if(state)

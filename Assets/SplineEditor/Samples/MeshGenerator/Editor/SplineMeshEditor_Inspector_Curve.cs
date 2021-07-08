@@ -11,9 +11,9 @@ namespace SplineEditor.MeshGenerator.Editor
 		{
 			var prevEnabled = GUI.enabled;
 
-			meshEditorState.isCurveSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(meshEditorState.isCurveSectionFolded, CurveOptionsGroupTitle);
+			meshEditorState.IsCurveSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(meshEditorState.IsCurveSectionFolded, CurveOptionsGroupTitle);
 			GUI.enabled = true;
-			if (meshEditorState.isCurveSectionFolded)
+			if (meshEditorState.IsCurveSectionFolded)
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
@@ -82,11 +82,11 @@ namespace SplineEditor.MeshGenerator.Editor
 
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			var nextCurveState = EditorGUILayout.CurveField(string.Empty, splineMesh.RightSideCurve, WidthCurveMaxWidth);
-			if (nextCurveState != splineMesh.RightSideCurve)
+			EditorGUILayout.CurveField(string.Empty, splineMesh.RightSideCurve.animationCurve, WidthCurveMaxWidth);
+			if (splineMesh.RightSideCurve.CheckWasCurveModified())
 			{
 				Undo.RecordObject(splineMesh, "Change mirrored width curve");
-				splineMesh.RightSideCurve = nextCurveState;
+				splineMesh.RightSideCurve = splineMesh.RightSideCurve;
 				EditorUtility.SetDirty(splineMesh);
 			}
 			GUILayout.FlexibleSpace();
@@ -109,11 +109,11 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.FlexibleSpace();
 
 			EditorGUI.BeginChangeCheck();
-			var nextCurveState = EditorGUILayout.CurveField(string.Empty, splineMesh.LeftSideCurve, WidthCurveMaxWidth);
-			if (EditorGUI.EndChangeCheck())
+			EditorGUILayout.CurveField(string.Empty, splineMesh.LeftSideCurve.animationCurve, WidthCurveMaxWidth);
+			if (splineMesh.LeftSideCurve.CheckWasCurveModified())
 			{
 				Undo.RecordObject(splineMesh, "Change mirrored width curve");
-				splineMesh.LeftSideCurve = nextCurveState;
+				splineMesh.LeftSideCurve = splineMesh.LeftSideCurve;
 				EditorUtility.SetDirty(splineMesh);
 			}
 			GUILayout.FlexibleSpace();
@@ -134,11 +134,11 @@ namespace SplineEditor.MeshGenerator.Editor
 
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			var nextCurveState = EditorGUILayout.CurveField(string.Empty, splineMesh.RightSideCurve, WidthCurveMaxWidth);
-			if (nextCurveState != splineMesh.RightSideCurve)
+			EditorGUILayout.CurveField(string.Empty, splineMesh.RightSideCurve.animationCurve, WidthCurveMaxWidth);
+			if (splineMesh.RightSideCurve.CheckWasCurveModified())
 			{
 				Undo.RecordObject(splineMesh, "Change mirrored width curve");
-				splineMesh.RightSideCurve = nextCurveState;
+				splineMesh.RightSideCurve = splineMesh.RightSideCurve;
 				EditorUtility.SetDirty(splineMesh);
 			}
 			GUILayout.FlexibleSpace();

@@ -12,9 +12,9 @@ namespace SplineEditor.MeshGenerator.Editor
 		{
 			var prevEnabled = GUI.enabled;
 
-			meshEditorState.isMeshSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(meshEditorState.isMeshSectionFolded, MeshOptionsGroupTitle);
+			meshEditorState.IsMeshSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(meshEditorState.IsMeshSectionFolded, MeshOptionsGroupTitle);
 			GUI.enabled = true;
-			if (meshEditorState.isMeshSectionFolded)
+			if (meshEditorState.IsMeshSectionFolded)
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
@@ -90,7 +90,7 @@ namespace SplineEditor.MeshGenerator.Editor
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			if (GUILayout.Button(MeshOptionsBakeMeshButtonContent, ButtonMaxWidth, ButtonHeight))
+			if (GUILayout.Button(MeshOptionsBakeMeshButtonContent, buttonStyle, ButtonMaxWidth, ButtonHeight))
 			{
 				splineMesh.ConstructMesh();
 				var path = EditorUtility.SaveFilePanel(MeshOptionsBakeMeshWindowTitle, MeshOptionsBakeMeshWindowFolderPath, MeshOptionsBakeMeshWindowFileName, MeshOptionsBakeMeshWindowFileExtension);

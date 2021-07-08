@@ -9,6 +9,7 @@ namespace SplineEditor.MeshGenerator.Editor
 	{
 
 		private static SplineMeshEditorState meshEditorState => SplineMeshEditorState.instance;
+		private static SplineMeshEditorConfiguration meshEditorConfiguration => SplineMeshEditorConfiguration.instance;
 
 		private SplineMesh splineMesh;
 

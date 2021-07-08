@@ -22,31 +22,45 @@ namespace SplineEditor.MeshGenerator
 			PingPong,
 		}
 
+#if UNITY_EDITOR
+		private const int EditorLateUpdateFramesDelay = 5;
+#endif
+
 		private const float Precision = 0.0001f;
 
+		[SerializeField]
 		private float width = 5f;
+		[SerializeField]
 		private float spacing = 1f;
+		[SerializeField]
 		private bool useAsymetricWidthCurve = false;
-		private AnimationCurve rightSideCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
-		private AnimationCurve leftSideCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
-
+		[SerializeField]
 		private bool usePointsScale = true;
+		[SerializeField]
 		private UVMode uvMode = UVMode.Linear;
+		[SerializeField]
 		private bool mirrorUV = false;
-
-		private bool updateMesh;
+		[SerializeReference]
+		private CustomAnimationCurve rightSideCurve = CustomAnimationCurve.Constant(0f, 1f, 1f);
+		[SerializeReference]
+		private CustomAnimationCurve leftSideCurve = CustomAnimationCurve.Constant(0f, 1f, 1f);
+		[SerializeField]
+		private MeshFilter meshFilter;
+		[SerializeField]
+		private MeshRenderer meshRenderer;
+		[SerializeField]
+		private BezierSpline bezierSpline;
+		[SerializeReference]
+		private SplinePath splinePath;
+		[SerializeField]
 		private Mesh cachedMesh;
 
-		[SerializeField, HideInInspector]
-		private MeshFilter meshFilter;
-		[SerializeField, HideInInspector]
-		private MeshRenderer meshRenderer;
-		[SerializeField, HideInInspector]
-		private BezierSpline bezierSpline;
+#if UNITY_EDITOR
+		private int editorLateUpdateCounter = 0;
+		private bool useEditorDelay = false;
+#endif
 
-		//TODO: Change to property
-		[SerializeField, HideInInspector]
-		public SplinePath splinePath;
+		private bool updateMesh = false;
 
 		/// <summary>
 		/// Points on generated on the spline to create the mesh
@@ -79,7 +93,7 @@ namespace SplineEditor.MeshGenerator
 		/// <summary>
 		/// Scale of the points on the mesh.
 		/// </summary>
-		public float[] Scale
+		public Vector3[] Scale
 		{
 			get => splinePath.scales;
 			set => splinePath.scales = value;
@@ -98,7 +112,8 @@ namespace SplineEditor.MeshGenerator
 		/// Width of generated mesh. 
 		/// In Unity points.
 		/// </summary>
-		public float Width {
+		public float Width
+		{
 			get => width;
 			set
 			{
@@ -141,12 +156,18 @@ namespace SplineEditor.MeshGenerator
 		/// Curve used for sampling width of the right side of the mesh.
 		/// If UseAsymetricWidthCurve is set to false then it's also used for sampling width of the left side as well.
 		/// </summary>
-		public AnimationCurve RightSideCurve {
+		public CustomAnimationCurve RightSideCurve
+		{
 			get => rightSideCurve;
 			set
 			{
 				rightSideCurve = value;
 				updateMesh = true;
+
+#if UNITY_EDITOR
+				useEditorDelay = true;
+#endif
+
 			}
 		}
 
@@ -154,13 +175,17 @@ namespace SplineEditor.MeshGenerator
 		/// Curve used for sampling width of the left side of the mesh.
 		/// Used only if UseAsymetricWidthCurve is set to true.
 		/// </summary>
-		public AnimationCurve LeftSideCurve
+		public CustomAnimationCurve LeftSideCurve
 		{
 			get => leftSideCurve;
 			set
 			{
 				leftSideCurve = value;
 				updateMesh = true;
+
+#if UNITY_EDITOR
+				useEditorDelay = true;
+#endif
 			}
 		}
 
@@ -273,6 +298,20 @@ namespace SplineEditor.MeshGenerator
 				return;
 			}
 
+#if UNITY_EDITOR
+
+			if(useEditorDelay && editorLateUpdateCounter < EditorLateUpdateFramesDelay)
+			{
+				editorLateUpdateCounter++;
+				return;
+			}
+			else
+			{
+				editorLateUpdateCounter = 0;
+				useEditorDelay = false;
+			}
+#endif
+
 			GenerateMesh();
 			updateMesh = false;
 		}
@@ -286,10 +325,6 @@ namespace SplineEditor.MeshGenerator
 			{
 				return;
 			}
-
-#if UNITY_EDITOR
-			Undo.RecordObject(this, "Generate Bezier Spline Mesh");
-#endif
 
 			var splineLength = bezierSpline.GetLinearLength(precision: 0.0001f, useWorldScale: false);
 			var curvesCount = bezierSpline.CurvesCount;
@@ -328,8 +363,8 @@ namespace SplineEditor.MeshGenerator
 			{
 				var normalVector = Normals[i];
 				var right = Vector3.Cross(normalVector, Tangents[i]).normalized;
-				var rightScaledWidth = Width * (UsePointsScale ? Scale[i] : 1f) * RightSideCurve.Evaluate(ParametersT[i]);
-				var leftScaledWidth = Width * (UsePointsScale ? Scale[i] : 1f) * LeftSideCurve.Evaluate(ParametersT[i]);
+				var rightScaledWidth = Width * (UsePointsScale ? Scale[i].y : 1f) * RightSideCurve.Evaluate(ParametersT[i]);
+				var leftScaledWidth = Width * (UsePointsScale ? Scale[i].y : 1f) * LeftSideCurve.Evaluate(ParametersT[i]);
 
 				verts[vertIndex] = Points[i] - right * (UseAsymetricWidthCurve ? leftScaledWidth : rightScaledWidth);
 				verts[vertIndex + 1] = Points[i] + right * rightScaledWidth;
@@ -367,6 +402,7 @@ namespace SplineEditor.MeshGenerator
 			return cachedMesh;
 		}
 
+		//TODO: Move to tools with additional parameter for UVMode
 		private float GetUV(int pointIndex)
 		{
 			var uv = pointIndex / (float)(Points.Length - 1);

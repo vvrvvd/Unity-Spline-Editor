@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: SplineMeshEditorConfiguration
   m_EditorClassIdentifier: 
   uvMaterial: {fileID: 2100000, guid: e1783a2f079191d4f96f15b90ae0cf0e, type: 2}
+  guiSkin: {fileID: 11400000, guid: f8399d3ad1b6b9146a7395a5c9cfb8fc, type: 2}
   pointsColor: {r: 0, g: 0, b: 1, a: 1}
   normalsColor: {r: 0, g: 1, b: 0, a: 1}
   normalVectorLength: 2.5

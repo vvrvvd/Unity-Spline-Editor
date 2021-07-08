@@ -14,10 +14,10 @@ namespace SplineEditor.Editor
             var prevColor = GUI.color;
             var prevEnabled = GUI.enabled;
 
-			editorWindowState.isNormalsSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(editorWindowState.isNormalsSectionFolded, NormalsEditorGroupTitle);
+			editorWindowState.IsNormalsSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(editorWindowState.IsNormalsSectionFolded, NormalsEditorGroupTitle);
             GUI.enabled = isSplineEditorEnabled;
 
-            if (editorWindowState.isNormalsSectionFolded)
+            if (editorWindowState.IsNormalsSectionFolded)
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
@@ -42,7 +42,7 @@ namespace SplineEditor.Editor
 			GUILayout.FlexibleSpace();
 
 			GUI.enabled = isSplineEditorEnabled;
-			var toggleState = isSplineEditorEnabled && editorWindowState.isNormalsEditorMode;
+			var toggleState = isSplineEditorEnabled && editorState.IsNormalsEditorMode;
 			if (GUILayout.Toggle(toggleState, NormalsEditorButtonContent, toggleButtonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
 			{
 				SplineEditor.ToggleNormalsEditorMode();
@@ -57,18 +57,18 @@ namespace SplineEditor.Editor
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			editorWindowState.previousFlipNormals = editorState.CurrentSpline != null ? editorState.CurrentSpline.FlipNormals : editorWindowState.previousFlipNormals;
+			editorWindowState.PreviousFlipNormals = editorState.CurrentSpline != null ? editorState.CurrentSpline.FlipNormals : editorWindowState.PreviousFlipNormals;
 			GUILayout.Label(FlipNormalsToggleFieldContent);
 			GUILayout.Space(75);
-			var nextFlipNormals = GUILayout.Toggle(editorWindowState.previousFlipNormals, string.Empty);
-			if (nextFlipNormals != editorWindowState.previousFlipNormals)
+			var nextFlipNormals = GUILayout.Toggle(editorWindowState.PreviousFlipNormals, string.Empty);
+			if (nextFlipNormals != editorWindowState.PreviousFlipNormals)
 			{
 				Undo.RecordObject(editorState.CurrentSpline, "Toggle Flip Normals");
 				editorState.CurrentSpline.FlipNormals = nextFlipNormals;
 				EditorUtility.SetDirty(editorState.CurrentSpline);
 				repaintScene = true;
 			}
-			editorWindowState.previousFlipNormals = nextFlipNormals;
+			editorWindowState.PreviousFlipNormals = nextFlipNormals;
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
@@ -83,9 +83,9 @@ namespace SplineEditor.Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 			GUI.enabled = isNormalsEditorEnabled;
-			editorWindowState.previousNormalLocalRotation = isNormalsEditorEnabled ? currentSpline.NormalsAngularOffsets[normalIndex] : editorWindowState.previousNormalLocalRotation;
-			var nextNormalsRotation = EditorGUILayout.FloatField(NormalsEditorLocalRotationContent, editorWindowState.previousNormalLocalRotation);
-			if (nextNormalsRotation != editorWindowState.previousNormalLocalRotation)
+			editorWindowState.PreviousNormalLocalRotation = isNormalsEditorEnabled ? currentSpline.NormalsAngularOffsets[normalIndex] : editorWindowState.PreviousNormalLocalRotation;
+			var nextNormalsRotation = EditorGUILayout.FloatField(NormalsEditorLocalRotationContent, editorWindowState.PreviousNormalLocalRotation);
+			if (nextNormalsRotation != editorWindowState.PreviousNormalLocalRotation)
 			{
 				Undo.RecordObject(editorState.CurrentSpline, "Change Normal Local Rotation");
 				currentSpline.UpdateNormalAngularOffset(normalIndex, nextNormalsRotation);
@@ -93,7 +93,7 @@ namespace SplineEditor.Editor
 				repaintScene = true;
 			}
 
-			editorWindowState.previousNormalLocalRotation = nextNormalsRotation;
+			editorWindowState.PreviousNormalLocalRotation = nextNormalsRotation;
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
@@ -104,9 +104,9 @@ namespace SplineEditor.Editor
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			editorWindowState.previousNormalsGlobalRotation = editorState.CurrentSpline != null ? editorState.CurrentSpline.GlobalNormalsRotation : editorWindowState.previousNormalsGlobalRotation;
-			var nextNormalsRotation = EditorGUILayout.FloatField(NormalsEditorGlobalRotationContent, editorWindowState.previousNormalsGlobalRotation);
-			if (nextNormalsRotation != editorWindowState.previousNormalsGlobalRotation)
+			editorWindowState.PreviousNormalsGlobalRotation = editorState.CurrentSpline != null ? editorState.CurrentSpline.GlobalNormalsRotation : editorWindowState.PreviousNormalsGlobalRotation;
+			var nextNormalsRotation = EditorGUILayout.FloatField(NormalsEditorGlobalRotationContent, editorWindowState.PreviousNormalsGlobalRotation);
+			if (nextNormalsRotation != editorWindowState.PreviousNormalsGlobalRotation)
 			{
 				Undo.RecordObject(editorState.CurrentSpline, "Change Normals Global Rotation");
 				editorState.CurrentSpline.GlobalNormalsRotation = nextNormalsRotation;
@@ -115,7 +115,7 @@ namespace SplineEditor.Editor
 				repaintScene = true;
 			}
 
-			editorWindowState.previousNormalsGlobalRotation = nextNormalsRotation;
+			editorWindowState.PreviousNormalsGlobalRotation = nextNormalsRotation;
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}

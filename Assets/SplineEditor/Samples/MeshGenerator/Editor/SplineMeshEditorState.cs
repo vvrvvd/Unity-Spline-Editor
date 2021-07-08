@@ -8,17 +8,93 @@ namespace SplineEditor.MeshGenerator.Editor
 	public class SplineMeshEditorState : ScriptableSingleton<SplineMeshEditorState>
 	{
 
-		public bool drawPoints = true;
-		public bool drawNormals = false;
-
-		public bool isUvSectionFolded = true;
-		public bool isCurveSectionFolded = true;
-		public bool isMeshSectionFolded = true;
-
-		[SerializeField]
 		private Material savedDebugViewMeshMaterial;
-		[SerializeField]
 		private SplineMesh savedDebugViewSplineMesh;
+
+		[SerializeField]
+		private bool drawPoints = true;
+		public bool DrawPoints
+		{
+			get => drawPoints; 
+			set
+			{
+				if (drawPoints == value)
+				{
+					return;
+				}
+
+				drawPoints = value;
+				Save(true);
+			}
+		}
+
+		[SerializeField]
+		private bool drawNormals = false;
+		public bool DrawNormals
+		{
+			get => drawNormals; 
+			set
+			{
+				if (drawNormals == value)
+				{
+					return;
+				}
+
+				drawNormals = value;
+				Save(true);
+			}
+		}
+
+		[SerializeField]
+		private bool isUvSectionFolded = true;
+		public bool IsUvSectionFolded
+		{
+			get => isUvSectionFolded; 
+			set
+			{
+				if (isUvSectionFolded == value)
+				{
+					return;
+				}
+
+				isUvSectionFolded = value;
+				Save(true);
+			}
+		}
+
+		[SerializeField]
+		private bool isCurveSectionFolded = true;
+		public bool IsCurveSectionFolded
+		{
+			get => isCurveSectionFolded; 
+			set
+			{
+				if (IsCurveSectionFolded == value)
+				{
+					return;
+				}
+
+				isCurveSectionFolded = value;
+				Save(true);
+			}
+		}
+
+		[SerializeField]
+		private bool isMeshSectionFolded = true;
+		public bool IsMeshSectionFolded
+		{
+			get => isMeshSectionFolded; 
+			set
+			{
+				if(IsMeshSectionFolded == value)
+				{
+					return;
+				}
+
+				isMeshSectionFolded = value;
+				Save(true);
+			}
+		}
 
 		public bool IsDebugModeView(SplineMesh splineMesh)
 		{
@@ -32,14 +108,14 @@ namespace SplineEditor.MeshGenerator.Editor
 
 		public void SetDebugModeView(SplineMesh splineMesh, bool state)
 		{
-			if((state && splineMesh == savedDebugViewSplineMesh) || (!state && splineMesh != savedDebugViewSplineMesh))
+			if ((state && splineMesh == savedDebugViewSplineMesh) || (!state && splineMesh != savedDebugViewSplineMesh))
 			{
 				return;
 			}
 
 			RestoreSavedDebugMaterial();
 
-			if(state)
+			if (state)
 			{
 				SetDebugModeMaterial(splineMesh);
 			}

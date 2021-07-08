@@ -46,7 +46,7 @@ namespace SplineEditor.Editor
 
 			if (editorState.IsDrawerMode != state)
 			{
-				Undo.RecordObject(editorState.CurrentSpline, "Toggle Draw Curve Mode");
+				Undo.RecordObject(editorState, "Toggle Draw Curve Mode");
 			}
 
 			editorState.IsDrawerMode = state;
@@ -149,7 +149,7 @@ namespace SplineEditor.Editor
 
 			Handles.DrawBezier(p0, p3, p1, p2, editorSettings.DrawerModeCurveColor, null, editorSettings.SplineWidth * 1.5f);
 
-			if (editorState.drawPoints)
+			if (editorState.DrawPoints)
 			{
 				if (firstControlPointSet)
 				{
