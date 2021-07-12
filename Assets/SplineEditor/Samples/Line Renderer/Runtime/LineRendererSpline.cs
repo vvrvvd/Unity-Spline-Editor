@@ -3,12 +3,15 @@ using UnityEngine;
 namespace SplineEditor
 {
 
-	[ExecuteInEditMode]
+	[ExecuteAlways]
 	[RequireComponent(typeof(BezierSpline))]
 	[RequireComponent(typeof(LineRenderer))]
 	public class LineRendererSpline : MonoBehaviour
 	{
-		public int segmentsCount = 10;
+		[SerializeField]
+		private int segmentsCount = 10;
+		[SerializeField]
+		private bool useEvenlySpacedPoints = false;
 
 		private int _prevSegmentsCount = 0;
 		private BezierSpline spline;
@@ -16,6 +19,18 @@ namespace SplineEditor
 
 		public BezierSpline BezierSpline => spline;
 		public LineRenderer LineRenderer => lineRenderer;
+
+		public int SegmentsCount {
+			get => segmentsCount;
+            set {
+				if(segmentsCount == value) {
+					return;
+                }
+
+				segmentsCount = value;
+				UpdateLinePoints();
+            }
+        }
 
 		private void OnValidate()
 		{
@@ -53,11 +68,6 @@ namespace SplineEditor
 		private void OnDisable()
 		{
 			spline.OnSplineChanged -= UpdateLinePoints;
-		}
-
-		private void Update()
-		{
-			UpdateLinePoints();
 		}
 
 		private void UpdateLinePoints() {

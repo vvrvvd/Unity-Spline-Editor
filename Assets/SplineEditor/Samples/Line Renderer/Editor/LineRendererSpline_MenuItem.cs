@@ -1,10 +1,10 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace SplineEditor
+namespace SplineEditor.Editor
 {
 
-	public class LineRendererSpline_MenuItem : MonoBehaviour
+	public partial class LineRendererSplineEditor : Editor
 	{
 		[MenuItem("GameObject/Spline Editor/Line Renderer Spline", false, 1)]
 		static void CreateCustomSplineMesh(MenuCommand menuCommand) {
