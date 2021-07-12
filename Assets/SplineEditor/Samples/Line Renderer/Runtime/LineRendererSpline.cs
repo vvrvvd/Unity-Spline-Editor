@@ -9,10 +9,13 @@ namespace SplineEditor
 	public class LineRendererSpline : MonoBehaviour
 	{
 		public int segmentsCount = 10;
-		private int _prevSegmentsCount = 0;
 
+		private int _prevSegmentsCount = 0;
 		private BezierSpline spline;
 		private LineRenderer lineRenderer;
+
+		public BezierSpline BezierSpline => spline;
+		public LineRenderer LineRenderer => lineRenderer;
 
 		private void OnValidate()
 		{
