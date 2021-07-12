@@ -25,6 +25,7 @@ namespace SplineEditor.Editor
 
 		private void OnEnable()
 		{
+
 			if (SplineEditorConfiguration.instance.OpenSplineEditorWithSpline && !EditorWindow.HasOpenInstances<SplineEditorWindow>())
 			{
 				SplineEditorWindow.Initialize();
@@ -70,6 +71,7 @@ namespace SplineEditor.Editor
 				curveDrawerPosition = lastPoint.position;
 				editorState.CurrentSpline?.OnSplineChanged();
 			}
+
 
 			if (editorState.SelectedPointIndex >= editorState.CurrentSpline.PointsCount)
 			{

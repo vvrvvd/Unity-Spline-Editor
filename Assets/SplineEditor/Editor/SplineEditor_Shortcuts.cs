@@ -68,6 +68,11 @@ namespace SplineEditor.Editor
 			ScheduleSimplifySpline();
 		}
 
+		[ShortcutAttribute("Spline Editor/Toggle Normals Rotation", KeyCode.K, ShortcutModifiers.Action)]
+		private static void ToggleNormalsEditorModeShortcuts () {
+			ToggleNormalsEditorMode();
+		}
+
 		[ShortcutAttribute("Spline Editor/Toggle Drawer Tool", KeyCode.Slash, ShortcutModifiers.Action)]
 		private static void ToggleDrawSplineModeShortcut()
 		{

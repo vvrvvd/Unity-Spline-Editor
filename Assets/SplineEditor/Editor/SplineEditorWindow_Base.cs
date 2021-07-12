@@ -11,6 +11,7 @@ namespace SplineEditor.Editor
         private static SplineEditorState editorState => SplineEditorState.instance;
         private static SplineEditorWindowState editorWindowState => SplineEditorWindowState.instance;
         private static SplineEditorConfiguration editorSettings => SplineEditorConfiguration.instance;
+        private static SplineEditorWindow cachedWindow;
 
         private bool repaintScene = false;
         private bool isSplineEditorEnabled = false;
@@ -20,14 +21,15 @@ namespace SplineEditor.Editor
         private Vector2 scrollPos = Vector2.zero;
 
         private bool initializeStyles = false;
+        private static bool wasCachedWindow = false;
 
         [MenuItem("Window/Spline Editor")]
         public static void Initialize()
         {
             var inspectorType = Type.GetType("UnityEditor.InspectorWindow,UnityEditor.dll");
-            var window = GetWindow<SplineEditorWindow>(WindowTitle, false, inspectorType);
-            window.initializeStyles = true;
-            window.Show();
+            cachedWindow = GetWindow<SplineEditorWindow>(WindowTitle, false, inspectorType);
+            cachedWindow.initializeStyles = true;
+            cachedWindow.Show();
         }
 
         private void OnEnable()

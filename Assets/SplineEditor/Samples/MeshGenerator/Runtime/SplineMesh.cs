@@ -120,6 +120,10 @@ namespace SplineEditor.MeshGenerator
 				var newValue = Mathf.Max(0.001f, value);
 				width = newValue;
 				updateMesh = true;
+
+#if UNITY_EDITOR
+				useEditorDelay = false;
+#endif
 			}
 		}
 
@@ -135,6 +139,10 @@ namespace SplineEditor.MeshGenerator
 				var newValue = Mathf.Max(0.1f, value);
 				spacing = newValue;
 				updateMesh = true;
+
+#if UNITY_EDITOR
+				useEditorDelay = false;
+#endif
 			}
 		}
 
@@ -149,6 +157,11 @@ namespace SplineEditor.MeshGenerator
 			{
 				useAsymetricWidthCurve = value;
 				updateMesh = true;
+
+#if UNITY_EDITOR
+				useEditorDelay = false;
+#endif
+
 			}
 		}
 
@@ -199,6 +212,10 @@ namespace SplineEditor.MeshGenerator
 			{
 				usePointsScale = value;
 				updateMesh = true;
+
+#if UNITY_EDITOR
+				useEditorDelay = false;
+#endif
 			}
 		}
 
@@ -211,6 +228,10 @@ namespace SplineEditor.MeshGenerator
 			{
 				uvMode = value;
 				updateMesh = true;
+
+#if UNITY_EDITOR
+				useEditorDelay = false;
+#endif
 			}
 		}
 
@@ -224,6 +245,10 @@ namespace SplineEditor.MeshGenerator
 			{
 				mirrorUV = value;
 				updateMesh = true;
+
+#if UNITY_EDITOR
+				useEditorDelay = false;
+#endif
 			}
 		}
 
@@ -291,7 +316,12 @@ namespace SplineEditor.MeshGenerator
 
 		}
 
-		private void LateUpdate()
+        private void OnDisable() {
+			bezierSpline.OnSplineChanged -= GenerateMesh;
+		}
+
+
+        private void LateUpdate()
 		{
 			if (!updateMesh)
 			{

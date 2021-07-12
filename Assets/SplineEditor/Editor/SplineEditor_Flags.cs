@@ -5,7 +5,6 @@ using UnityEditor;
 namespace SplineEditor.Editor
 {
 
-	//TODO: Refactor to another class
 	public partial class SplineEditor : UnityEditor.Editor
 	{
 

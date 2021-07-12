@@ -18,7 +18,7 @@ namespace SplineEditor.Editor
 			get => currentSpline;
 			set
 			{
-				if (value == currentSpline)
+				if (currentSpline != null && value == currentSpline)
 				{
 					return;
 				}
@@ -34,7 +34,7 @@ namespace SplineEditor.Editor
 			get => currentEditor;
 			set
 			{
-				if (value == currentEditor)
+				if (currentEditor!=null && value == currentEditor)
 				{
 					return;
 				}

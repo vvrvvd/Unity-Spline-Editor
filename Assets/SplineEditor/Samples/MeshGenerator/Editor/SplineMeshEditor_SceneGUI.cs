@@ -10,7 +10,7 @@ namespace SplineEditor.MeshGenerator.Editor
 		private void OnSceneGUI()
 		{
 
-			if (splineMesh.BezierSpline == null)
+			if (splineMesh == null || splineMesh.BezierSpline == null)
 			{
 				return;
 			}
