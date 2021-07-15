@@ -7,8 +7,6 @@ namespace SplineEditor.Editor
 	public partial class SplineEditorWindow : EditorWindow
 	{
 
-		#region Draw Scene GUI
-
 		private void DrawNormalsEditorOptions()
 		{
             var prevColor = GUI.color;
@@ -121,7 +119,5 @@ namespace SplineEditor.Editor
 		}
 
 	}
-
-	#endregion
 
 }

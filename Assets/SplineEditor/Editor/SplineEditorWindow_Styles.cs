@@ -7,8 +7,6 @@ namespace SplineEditor.Editor
 	public partial class SplineEditorWindow : EditorWindow
 	{
 
-		#region Static Fields
-
 		private static string WindowTitle { get; } = "Spline Editor";
 		private static GUILayoutOption ToolsSettingsButtonWidth { get; } = GUILayout.Width(30);
 		private static GUILayoutOption ToolsSettingsButtonHeight { get; } = GUILayout.Height(30);
@@ -21,8 +19,6 @@ namespace SplineEditor.Editor
 		private static GUILayoutOption ToolsPointPopupWidth { get; } = GUILayout.Width(80);
 		private static GUILayoutOption ToolsSliderWidth { get; } = GUILayout.Width(175);
 		private static GUILayoutOption ToolsCustomTransformFieldWidth { get; } = GUILayout.Width(175);
-
-		#region Header Styles
 
 
 		private const string HeaderTitle = "Spline Editor";
@@ -44,9 +40,7 @@ namespace SplineEditor.Editor
 				new GUIContent(LayoutTextAndImageTitle, LayoutTextAndImageTooltip),
 		};
 
-		#endregion
-
-		#region Point Styles
+		
 
 		private const string PointGroupTitle = "Point";
 		private const string PointPositionLabel = "Position";
@@ -59,10 +53,6 @@ namespace SplineEditor.Editor
 		private static GUIContent PointScaleContent = new GUIContent(PointScaleLabel);
 		private static GUIContent PointModeContent = new GUIContent(PointModeLabel);
 		private static GUIContent ApplyToAllPoinstButtonContent = new GUIContent(ApplyToAllPointsLabel);
-
-		#endregion
-
-		#region Curve Styles
 
 		private const string BezierGroupTitle = "Curve";
 		private const string AddCurveButtonTitle = "Add Curve";
@@ -79,11 +69,7 @@ namespace SplineEditor.Editor
 		private static GUIContent RemoveCurveButtonContent = new GUIContent();
 		private static GUIContent SplitCurveButtonContent = new GUIContent();
 		private static GUIContent SplitPointSliderContent = new GUIContent(SplitPointSliderLabel);
-
-		#endregion
-
-		#region Spline Styles
-
+		
 		private const string SplineOptionsTitle = "Spline";
 		private const string CloseLoopButtonTitle = "Close Loop";
 		private const string CloseLoopButtonTooltip = "Loop spline by adding closing curve.";
@@ -119,10 +105,7 @@ namespace SplineEditor.Editor
 		private static GUIContent ShowTransformHandleFieldContent = new GUIContent(ShowTransformHandleFieldLabel);
 		private static GUIContent AlwaysDrawOnSceneFieldContent = new GUIContent(AlwaysDrawOnSceneFieldLabel);
 
-		#endregion
-
-		#region Drawer Styles
-
+		
 		private const string DrawerGroupTitle = "Drawer Tool";
 		private const string DrawCurveButtonTitle = "Drawer Tool";
 		private const string DrawCurveButtonTooltip = "Draw spline using mouse.";
@@ -137,10 +120,6 @@ namespace SplineEditor.Editor
 		private static GUIContent DrawCurveFirstHookContent = new GUIContent(DrawCurveFirstHookLabel);
 		private static GUIContent DrawCurveSecondHookContent = new GUIContent(DrawCurveSecondHookLabel);
 
-		#endregion
-
-		#region Normals Editor Styles
-
 		private const string NormalsEditorGroupTitle = "Normals";
 		private const string RotateNormalsToolLabel = "Rotate Tool";
 		private const string RotateNormalsToolTooltip = "Rotate normal vectors using Unity handle.";
@@ -153,22 +132,13 @@ namespace SplineEditor.Editor
 		private static GUIContent NormalsEditorLocalRotationContent = new GUIContent(NormalsEditorLocalRotationLabel);
 		private static GUIContent FlipNormalsToggleFieldContent = new GUIContent(FlipNormalsToggleFieldLabel);
 
-		#endregion
-
-		#endregion
-
-		#region Private Fields
-
 		private GUIStyle buttonStyle;
 		private GUIStyle groupsStyle;
 		private GUIStyle headerLabelStyle;
 		private GUIStyle toggleButtonStyle;
 		private GUIStyle settingsButtonStyle;
 
-		#endregion
-
-		#region Private Methods
-
+		
 		private void InitializeStyles()
 		{
 			buttonStyle = editorSettings.guiSkin.FindStyle("button");
@@ -250,7 +220,7 @@ namespace SplineEditor.Editor
 			DrawCurveButtonContent.tooltip = editorWindowState.UseText ? DrawCurveButtonTooltip : DrawCurveButtonTitle;
 		}
 
-		#endregion
+		
 
 	}
 }

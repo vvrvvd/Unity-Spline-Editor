@@ -17,6 +17,8 @@ namespace SplineEditor
 			Auto = 3
 		}
 
+		private const float MinNormalsAnglesDifference = 0.1f;
+
 		public Action OnSplineChanged;
 
 		[SerializeField]
@@ -29,7 +31,10 @@ namespace SplineEditor
 		private float globalNormalsRotation = default;
 
 		[SerializeField]
-		protected List<SplinePoint> points = default;
+		private List<SplinePoint> points = default;
+
+		[SerializeField]
+		private List<Vector3> pointsScales = default;
 
 		[SerializeField]
 		private List<BezierControlPointMode> modes = default;
@@ -41,13 +46,10 @@ namespace SplineEditor
 		private Vector3[] tangents = default;
 
 		[SerializeField]
-		private List<Vector3> pointsScales = default;
-
-		//TODO: Change to list maybe
-		[SerializeField]
 		private float[] normalsAngularOffsets = default;
 
 		private bool invokeEvents = true;
+		private List<float> normalsOffsetCopyList = new List<float>();
 
 		/// <summary>
 		/// Number of curves in the splines.
@@ -96,9 +98,8 @@ namespace SplineEditor
 			}
 			set
 			{
-				//TODO: Add points count check
 				isLoop = value;
-				if (value == true)
+				if (value && modes.Count > 0 && pointsScales.Count > 0 && normalsAngularOffsets.Length > 0)
 				{
 					modes[modes.Count - 1] = modes[0];
 					pointsScales[pointsScales.Count - 1] = pointsScales[0];
@@ -485,7 +486,6 @@ namespace SplineEditor
 				t += (alpha - 1f) * precision;
 				t = Mathf.Clamp01(t);
 
-				//TODO: Probably refactor into one function to spare while loops
 				scales.Add(GetPointScale(t));
 				tangents.Add(GetDirection(t));
 				parametersT.Add(t);
@@ -510,7 +510,7 @@ namespace SplineEditor
 				// Get angle between first and last normal (if zero, they're already lined up, otherwise we need to correct)
 				float normalsAngleErrorAcrossJoin = Vector3.SignedAngle(normals[normals.Count - 1], normals[0], tangents[0]);
 				// Gradually rotate the normals along the path to ensure start and end normals line up correctly
-				if (Mathf.Abs(normalsAngleErrorAcrossJoin) > 0.1f) // don't bother correcting if very nearly correct
+				if (Mathf.Abs(normalsAngleErrorAcrossJoin) > MinNormalsAnglesDifference) // don't bother correcting if very nearly correct
 				{
 					for (int i = 1; i < normals.Count; i++)
 					{
@@ -566,10 +566,10 @@ namespace SplineEditor
 			var globalAngleCopy = globalNormalsRotation;
 			globalNormalsRotation = 0f;
 
-			//TODO: Add caching
-			var normalsOffsetCopy = new List<float>(normalsAngularOffsets);
-			for(var i=0; i<normalsAngularOffsets.Length; i++)
+			normalsOffsetCopyList.Clear();
+			for (var i=0; i<normalsAngularOffsets.Length; i++)
 			{
+				normalsOffsetCopyList.Add(normalsAngularOffsets[i]);
 				normalsAngularOffsets[i] = 0f;
 			}
 
@@ -615,7 +615,7 @@ namespace SplineEditor
 			globalNormalsRotation = globalAngleCopy;
 			for (var i = 0; i < normalsAngularOffsets.Length; i++)
 			{
-				normalsAngularOffsets[i] = normalsOffsetCopy[i];
+				normalsAngularOffsets[i] = normalsOffsetCopyList[i];
 			}
 
 		}

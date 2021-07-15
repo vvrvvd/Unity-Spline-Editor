@@ -13,19 +13,12 @@ namespace SplineEditor.Editor
 		private static SplineEditorState editorState => SplineEditorState.instance;
 		private static SplineEditorConfiguration editorSettings => SplineEditorConfiguration.instance;
 
-		#region Private Fields
-
 		private Event currentEvent;
 		private Transform handleTransform;
 		private Quaternion handleRotation;
-
-		#endregion
-
-		#region Unity Callbacks
-
+		
 		private void OnEnable()
 		{
-
 			if (SplineEditorConfiguration.instance.OpenSplineEditorWithSpline && !EditorWindow.HasOpenInstances<SplineEditorWindow>())
 			{
 				SplineEditorWindow.Initialize();
@@ -111,10 +104,6 @@ namespace SplineEditor.Editor
 			editorState.CurrentEditor = prevEditor;
 			editorState.CurrentSpline = prevSpline;
 		}
-
-		#endregion
-
-		#region Tools Methods
 
 		private void SelectIndex(int pointIndex)
 		{
@@ -323,7 +312,7 @@ namespace SplineEditor.Editor
 			return isCorrectPosition;
 		}
 
-        #endregion
+        
 
     }
 

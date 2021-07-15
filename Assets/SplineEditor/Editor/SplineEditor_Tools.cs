@@ -5,8 +5,6 @@ namespace SplineEditor.Editor
 	public partial class SplineEditor : UnityEditor.Editor
 	{
 
-		#region Private Methods
-
 		private void InitializeTools()
 		{
 			if (editorState.CurrentSpline == null || editorState.ShowTransformHandle)
@@ -53,10 +51,6 @@ namespace SplineEditor.Editor
 
 		}
 
-		#endregion
-
-		#region Static Methods
-
 		public static void ShowTools()
 		{
 			if (editorState.savedTool == Tool.None)
@@ -72,9 +66,6 @@ namespace SplineEditor.Editor
 			editorState.savedTool = Tools.current;
 			Tools.current = Tool.None;
 		}
-
-		#endregion
-
 
 	}
 

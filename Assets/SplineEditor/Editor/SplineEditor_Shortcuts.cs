@@ -7,8 +7,6 @@ namespace SplineEditor.Editor
 	public partial class SplineEditor : UnityEditor.Editor
 	{
 
-		#region ShortcutManager Callbacks
-
 		[ShortcutAttribute("Spline Editor/Add Curve", KeyCode.Home, ShortcutModifiers.Action)]
 		private static void AddCurveShortcut()
 		{
@@ -84,8 +82,6 @@ namespace SplineEditor.Editor
 		{
 			ScheduleCastSelectedPoint();
 		}
-
-		#endregion
 
 	}
 

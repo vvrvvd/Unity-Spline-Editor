@@ -7,8 +7,6 @@ namespace SplineEditor.Editor
 	public partial class SplineEditor : UnityEditor.Editor
 	{
 
-		#region Inspector GUI
-
 		private void DrawInspectorGUI()
 		{
 			DrawStandardScriptReferenceField();
@@ -32,7 +30,7 @@ namespace SplineEditor.Editor
 			GUI.enabled = prevEnabled;
 		}
 
-		#endregion
+		
 
 	}
 

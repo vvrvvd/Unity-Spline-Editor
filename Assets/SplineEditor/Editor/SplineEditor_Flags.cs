@@ -8,8 +8,6 @@ namespace SplineEditor.Editor
 	public partial class SplineEditor : UnityEditor.Editor
 	{
 
-		#region Static Fields
-
 		private static bool addCurveFlag;
 		private static bool splitCurveFlag;
 		private static bool removeSelectedCurveFlag;
@@ -26,10 +24,6 @@ namespace SplineEditor.Editor
 		private static float addCurveLength = 1f;
 		private static float splitCurveValue = 0.5f;
 		private static Vector3 castSplineDirection;
-
-		#endregion
-
-		#region Flags Logic
 
 		internal static void ScheduleAddCurve(float curveLength)
 		{
@@ -89,10 +83,6 @@ namespace SplineEditor.Editor
 		{
 			normalsEditorModeFlag = !normalsEditorModeFlag;
 		}
-
-		#endregion
-
-		#region Shortcuts Logic
 
 		private void InitializeFlags()
 		{
@@ -180,7 +170,7 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		#endregion
+		
 
 	}
 

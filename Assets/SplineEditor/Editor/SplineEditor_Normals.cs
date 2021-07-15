@@ -7,17 +7,11 @@ namespace SplineEditor.Editor
 	public partial class SplineEditor : UnityEditor.Editor
 	{
 
-		#region Const Fields
-
 		/// <summary>
 		/// I don't know why all the handles for axis are rotated by this angle but it doesn't look neat when the handle is offseted by it so we just take it into account.
 		/// </summary>
 		// TODO: FIX THIS
 		private const float MagicAngleOffset = 0f;
-
-		#endregion
-
-		#region Initialize DrawCurveMode
 
 		private void InitializeNormalsEditorMode()
 		{
@@ -46,10 +40,6 @@ namespace SplineEditor.Editor
 			editorState.IsNormalsEditorMode = state;
 			editorState.wasSplineModified = true;
 		}
-
-		#endregion
-
-		#region Draw Scene GUI
 
 		private void RotateNormals(int index, Vector3 point)
 		{
@@ -84,7 +74,7 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		#endregion
+		
 
 	}
 

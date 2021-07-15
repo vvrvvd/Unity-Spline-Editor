@@ -6,8 +6,6 @@ namespace SplineEditor.Editor
 	public partial class SplineEditor : UnityEditor.Editor
 	{
 
-		#region Initialize Scene GUI
-
 		private void InitializeSceneGUI()
 		{
 			editorState.isScaling = false;
@@ -15,10 +13,6 @@ namespace SplineEditor.Editor
 			editorState.isDraggingPoint = false;
 			editorState.lastRotation = Quaternion.identity;
 		}
-
-		#endregion
-
-		#region Draw Scene GUI
 
 		private void DrawSceneGUI()
 		{
@@ -214,12 +208,6 @@ namespace SplineEditor.Editor
 			var pointScaleIndex = index / 3;
 			var pointScale = editorState.CurrentSpline.PointsScales[pointScaleIndex];
 
-			var leftControlPointIndex = index - 1;
-			var isLeftPointIndexValid = leftControlPointIndex >= 0;
-
-			var rightControlPointIndex = index + 1;
-			var isRightPointIndexValid = rightControlPointIndex < editorState.CurrentSpline.PointsCount;
-
 			EditorGUI.BeginChangeCheck();
 			editorState.lastScale = Handles.DoScaleHandle(editorState.isScaling ? editorState.lastScale : pointScale, point, baseHandleRotation, handleSize);
 			var wasChanged = EditorGUI.EndChangeCheck();
@@ -290,10 +278,6 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		#endregion
-
-		#region Static Methods
-
 		private static void DrawSpline(BezierSpline spline, int selectedSplineIndex = -1)
 		{
 			var transformHandle = spline.transform;
@@ -309,8 +293,6 @@ namespace SplineEditor.Editor
 				Handles.DrawBezier(p0, p3, p1, p2, splineColor, null, editorSettings.SplineWidth * 1.5f);
 			}
 		}
-
-		#endregion
 
 	}
 

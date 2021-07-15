@@ -4,7 +4,7 @@ using UnityEngine;
 namespace SplineEditor.Editor
 {
 
-	public partial class LineRendererSplineEditor : Editor
+	public partial class LineRendererSplineEditor : UnityEditor.Editor
 	{
 		[MenuItem("GameObject/Spline Editor/Line Renderer Spline", false, 1)]
 		static void CreateCustomSplineMesh(MenuCommand menuCommand) {

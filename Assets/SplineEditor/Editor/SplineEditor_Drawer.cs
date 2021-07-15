@@ -7,13 +7,7 @@ namespace SplineEditor.Editor
 	public partial class SplineEditor : UnityEditor.Editor
 	{
 
-		#region Const Fields
-
 		private const float DrawCurveMinLengthToVisualize = 0.1f;
-
-		#endregion
-
-		#region Private Fields
 
 		private bool isDraggingNewCurve;
 		private bool firstControlPointSet;
@@ -21,10 +15,6 @@ namespace SplineEditor.Editor
 
 		private Vector3 curveDrawerPosition = Vector3.zero;
 		private Vector3[] newCurvePoints = new Vector3[4];
-
-		#endregion
-
-		#region Initialize DrawCurveMode
 
 		private void InitializeDrawCurveMode()
 		{
@@ -73,11 +63,6 @@ namespace SplineEditor.Editor
 			firstControlPointSet = false;
 			secondControlPointSet = false;
 		}
-
-
-		#endregion
-
-		#region Draw Scene GUI
 
 		private void DrawCurveModeSceneGUI()
 		{
@@ -266,7 +251,7 @@ namespace SplineEditor.Editor
 			editorState.CurrentSpline.AppendCurve(p1, p2, p3, BezierControlPointMode.Free, false);
 		}
 
-		#endregion
+		
 
 	}
 

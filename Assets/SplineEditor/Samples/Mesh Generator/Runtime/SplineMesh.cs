@@ -22,11 +22,15 @@ namespace SplineEditor.MeshGenerator
 			PingPong,
 		}
 
+		private const float Precision = 0.0001f;
+		private const float MinSpacingValue = 0.1f;
+		private const float MinWidthValue = 0.001f;
+		private const float LengthCalculationPrecision = 0.0001f;
+		private const float MaxSpacingFactor = 1000f;
+
 #if UNITY_EDITOR
 		private const int EditorLateUpdateFramesDelay = 5;
 #endif
-
-		private const float Precision = 0.0001f;
 
 		[SerializeField]
 		private float width = 5f;
@@ -52,7 +56,7 @@ namespace SplineEditor.MeshGenerator
 		private BezierSpline bezierSpline;
 		[SerializeReference]
 		private SplinePath splinePath;
-		[SerializeField]
+
 		private Mesh cachedMesh;
 
 #if UNITY_EDITOR
@@ -117,7 +121,7 @@ namespace SplineEditor.MeshGenerator
 			get => width;
 			set
 			{
-				var newValue = Mathf.Max(0.001f, value);
+				var newValue = Mathf.Max(MinWidthValue, value);
 				width = newValue;
 				updateMesh = true;
 
@@ -136,7 +140,7 @@ namespace SplineEditor.MeshGenerator
 			get => spacing;
 			set
 			{
-				var newValue = Mathf.Max(0.1f, value);
+				var newValue = Mathf.Max(MinSpacingValue, value);
 				spacing = newValue;
 				updateMesh = true;
 
@@ -267,8 +271,6 @@ namespace SplineEditor.MeshGenerator
 
 		private void OnValidate()
 		{
-			Spacing = Mathf.Max(Spacing, 0.1f);
-
 			updateMesh = true;
 
 			if (meshFilter == null)
@@ -356,9 +358,9 @@ namespace SplineEditor.MeshGenerator
 				return;
 			}
 
-			var splineLength = bezierSpline.GetLinearLength(precision: 0.0001f, useWorldScale: false);
+			var splineLength = bezierSpline.GetLinearLength(precision: LengthCalculationPrecision, useWorldScale: false);
 			var curvesCount = bezierSpline.CurvesCount;
-			Spacing = Mathf.Max(Spacing, (splineLength) / (curvesCount * 1000f));
+			Spacing = Mathf.Max(Spacing, (splineLength) / (curvesCount * MaxSpacingFactor));
 
 			ConstructMesh();
 			meshFilter.sharedMesh = cachedMesh;
@@ -432,7 +434,6 @@ namespace SplineEditor.MeshGenerator
 			return cachedMesh;
 		}
 
-		//TODO: Move to tools with additional parameter for UVMode
 		private float GetUV(int pointIndex)
 		{
 			var uv = pointIndex / (float)(Points.Length - 1);
