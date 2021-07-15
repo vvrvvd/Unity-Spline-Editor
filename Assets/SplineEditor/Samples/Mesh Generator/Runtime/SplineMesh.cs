@@ -26,7 +26,7 @@ namespace SplineEditor.MeshGenerator
 		private const float MinSpacingValue = 0.1f;
 		private const float MinWidthValue = 0.001f;
 		private const float LengthCalculationPrecision = 0.0001f;
-		private const float MaxSpacingFactor = 1000f;
+		private const float MaxAutoSpacingCurvesCountFactor = 1000f;
 
 #if UNITY_EDITOR
 		private const int EditorLateUpdateFramesDelay = 5;
@@ -288,8 +288,6 @@ namespace SplineEditor.MeshGenerator
 				bezierSpline = GetComponent<BezierSpline>();
 			}
 
-			bezierSpline.OnSplineChanged -= GenerateMesh;
-			bezierSpline.OnSplineChanged += GenerateMesh;
 		}
 
 		private void Awake()
@@ -312,13 +310,15 @@ namespace SplineEditor.MeshGenerator
 			Assert.IsNotNull(meshFilter);
 			Assert.IsNotNull(meshRenderer);
 			Assert.IsNotNull(bezierSpline);
-
-			bezierSpline.OnSplineChanged -= GenerateMesh;
-			bezierSpline.OnSplineChanged += GenerateMesh;
-
 		}
 
-        private void OnDisable() {
+
+		private void OnEnable()
+		{
+			bezierSpline.OnSplineChanged += GenerateMesh;
+		}
+
+		private void OnDisable() {
 			bezierSpline.OnSplineChanged -= GenerateMesh;
 		}
 
@@ -361,7 +361,7 @@ namespace SplineEditor.MeshGenerator
 
 			var splineLength = bezierSpline.GetLinearLength(precision: LengthCalculationPrecision, useWorldScale: false);
 			var curvesCount = bezierSpline.CurvesCount;
-			Spacing = Mathf.Max(Spacing, (splineLength) / (curvesCount * MaxSpacingFactor));
+			Spacing = Mathf.Max(Spacing, (splineLength) / (curvesCount * MaxAutoSpacingCurvesCountFactor));
 
 			ConstructMesh();
 			meshFilter.sharedMesh = cachedMesh;
