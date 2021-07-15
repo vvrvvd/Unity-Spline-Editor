@@ -351,6 +351,7 @@ namespace SplineEditor.MeshGenerator
 		/// <summary>
 		/// Constructs and assigned mesh based on the spline. 
 		/// </summary>
+		[ContextMenu("Generate Mesh")]
 		public void GenerateMesh()
 		{
 			if (BezierSpline == null || MeshFilter == null)

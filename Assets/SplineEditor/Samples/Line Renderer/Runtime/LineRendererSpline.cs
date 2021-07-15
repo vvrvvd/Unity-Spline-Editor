@@ -117,6 +117,7 @@ namespace SplineEditor
 			bezierSpline.OnSplineChanged -= UpdateLinePoints;
 		}
 
+		[ContextMenu("Update Line Points")]
 		public void UpdateLinePoints()
 		{
 			if (bezierSpline == null || lineRenderer == null)
