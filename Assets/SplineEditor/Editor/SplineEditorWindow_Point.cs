@@ -86,7 +86,9 @@ namespace SplineEditor.Editor
 		{
 			var prevEnabled = GUI.enabled;
 			var currentSpline = editorState.CurrentSpline;
-
+			var isScaleFieldActive = GUI.enabled & editorState.SelectedPointIndex % 3 == 0;
+			GUI.enabled = isScaleFieldActive;
+			
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 			GUILayout.Label(PointScaleContent);
@@ -95,10 +97,6 @@ namespace SplineEditor.Editor
 
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-
-			var isScaleFieldActive = editorState.IsAnyPointSelected && editorState.SelectedPointIndex % 3 == 0;
-
-			GUI.enabled = isScaleFieldActive;
 
 			var pointIndex = editorState.SelectedPointIndex / 3;
 			var currentPointScale = isScaleFieldActive ? currentSpline.PointsScales[pointIndex] : editorWindowState.PreviousPointScale;
