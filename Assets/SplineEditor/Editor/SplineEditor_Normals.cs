@@ -7,12 +7,6 @@ namespace SplineEditor.Editor
 	public partial class SplineEditor : UnityEditor.Editor
 	{
 
-		/// <summary>
-		/// I don't know why all the handles for axis are rotated by this angle but it doesn't look neat when the handle is offseted by it so we just take it into account.
-		/// </summary>
-		// TODO: FIX THIS
-		private const float MagicAngleOffset = 0f;
-
 		private void InitializeNormalsEditorMode()
 		{
 			if (!editorState.IsNormalsEditorMode)
@@ -41,16 +35,16 @@ namespace SplineEditor.Editor
 			editorState.wasSplineModified = true;
 		}
 
-		private void RotateNormals(int index, Vector3 point)
+		private void RotateNormals(int index, Vector3 worldPoint)
 		{
 			var normalIndex = index / 3;
 			EditorGUI.BeginChangeCheck();
 			var normalAngularOffset = editorState.CurrentSpline.NormalsAngularOffsets[normalIndex];
 			var globalRotation = Quaternion.AngleAxis(editorState.CurrentSpline.GlobalNormalsRotation, editorState.CurrentSpline.Tangents[normalIndex]);
-			var normalRotation = globalRotation * Quaternion.AngleAxis(normalAngularOffset + MagicAngleOffset, editorState.CurrentSpline.Tangents[normalIndex]);
+			var normalRotation = globalRotation * Quaternion.AngleAxis(normalAngularOffset, editorState.CurrentSpline.Tangents[normalIndex]);
 			var normalHandleRotation = normalRotation * Quaternion.LookRotation(editorState.CurrentSpline.Tangents[normalIndex]);
 			var baseHandleRotation = handleTransform.rotation * normalHandleRotation;
-			var rotation = Handles.DoRotationHandle(baseHandleRotation, point);
+			var rotation = Handles.DoRotationHandle(baseHandleRotation, worldPoint);
 			if (EditorGUI.EndChangeCheck())
 			{
 				if (!editorState.isRotating)

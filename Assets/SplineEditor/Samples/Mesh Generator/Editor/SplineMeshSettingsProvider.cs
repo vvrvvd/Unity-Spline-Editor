@@ -8,7 +8,10 @@ namespace SplineEditor.MeshGenerator.Editor
 
     public class SplineMeshSettingsProvider : SettingsProvider
     {
-        private static UnityEditor.Editor cachedEditor;
+		private const string SettingsPath = "Project/Spline Editor/Mesh Generator";
+		private const string SettingsLabel = "Mesh Generator";
+
+		private static UnityEditor.Editor cachedEditor;
 
         public SplineMeshSettingsProvider(string path, SettingsScope scope)
             : base(path, scope) { }
@@ -28,11 +31,9 @@ namespace SplineEditor.MeshGenerator.Editor
                 UnityEditor.Editor.CreateCachedEditor(settingsScriptable, null, ref cachedEditor);
 			}
 
-			//TODO: Move to consts
-            var provider = new SettingsProvider("Project/Spline Editor/Mesh Generator", SettingsScope.Project)
+            var provider = new SettingsProvider(SettingsPath, SettingsScope.Project)
             {
-				//TODO: Move to consts
-                label = "Mesh Generator",
+                label = SettingsLabel,
                 guiHandler = (searchContext) =>
                 {
                     var prevLabelWidth = EditorGUIUtility.labelWidth;

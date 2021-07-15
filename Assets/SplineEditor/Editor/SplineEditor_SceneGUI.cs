@@ -72,12 +72,11 @@ namespace SplineEditor.Editor
 			{
 				var point = handleTransform.TransformPoint(editorState.CurrentSpline.Points[i].position);
 				var normalIndex = i / 3;
-					if (editorState.CurrentSpline.Normals.Length <= normalIndex)
+				if (editorState.CurrentSpline.Normals.Length <= normalIndex)
 				{
 					editorState.CurrentSpline.RecalculateNormals();
 				}
 				var normalVector = editorState.CurrentSpline.GetNormal(normalIndex);
-				var rightVector = Vector3.Cross(normalVector, editorState.CurrentSpline.Tangents[normalIndex]);
 				var normalLength = editorSettings.NormalVectorLength;
 				Handles.color = editorSettings.NormalsColor;
 				Handles.DrawLine(point, point + editorState.CurrentSpline.transform.TransformDirection((normalVector) * normalLength));
@@ -119,13 +118,13 @@ namespace SplineEditor.Editor
 
 		private Vector3 DrawPoint(int index, Color pointColor)
 		{
-			var point = handleTransform.TransformPoint(editorState.CurrentSpline.Points[index].position);
-			var size = editorSettings.ScalePointOnScreen ? HandleUtility.GetHandleSize(point) : 1f;
+			var worldPoint = handleTransform.TransformPoint(editorState.CurrentSpline.Points[index].position);
+			var size = editorSettings.ScalePointOnScreen ? HandleUtility.GetHandleSize(worldPoint) : 1f;
 
 			Handles.color = pointColor;
 			var handleSize = index % 3 == 0 ? editorSettings.MainPointSize : editorSettings.TangentPointSize;
 
-			if (Handles.Button(point, handleRotation, size * handleSize, size * handleSize, Handles.DotHandleCap))
+			if (Handles.Button(worldPoint, handleRotation, size * handleSize, size * handleSize, Handles.DotHandleCap))
 			{
 				SelectIndex(index);
 				Repaint();
@@ -138,54 +137,54 @@ namespace SplineEditor.Editor
 				{
 					if (editorState.IsNormalsEditorMode)
 					{
-						RotateNormals(index, point);
+						RotateNormals(index, worldPoint);
 					}
 					else
 					{
-						RotatePoints(index, point);
+						RotatePoints(index, worldPoint);
 					}
 				}
 				else if(editorState.savedTool == Tool.Scale && index % 3 == 0)
 				{
-					ScalePoint(index, point);
+					ScalePoint(index, worldPoint);
 				}
 				else
 				{
-					MovePoint(index, point);
+					MovePoint(index, worldPoint);
 				}
 			}
 
-			return point;
+			return worldPoint;
 		}
 
-		private void MovePoint(int index, Vector3 point)
+		private void MovePoint(int index, Vector3 worldPoint)
 		{
 			if (castSelectedPointFlag)
 			{
 				if (TryCastMousePoint(out var castedPosition))
 				{
 					Undo.RecordObject(editorState.CurrentSpline, "Cast Spline Point To Mouse");
-					point = castedPosition;
-					editorState.CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
+					worldPoint = castedPosition;
+					editorState.CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(worldPoint));
 					editorState.wasSplineModified = true;
 				}
 			}
 			else
 			{
 				EditorGUI.BeginChangeCheck();
-				point = Handles.DoPositionHandle(point, handleRotation);
+				worldPoint = Handles.DoPositionHandle(worldPoint, handleRotation);
 				var wasChanged = EditorGUI.EndChangeCheck();
 				if (wasChanged)
 				{
 					Undo.RecordObject(editorState.CurrentSpline, "Move Spline Point");
 					editorState.isDraggingPoint = true;
-					editorState.CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
+					editorState.CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(worldPoint));
 					editorState.wasSplineModified = true;
 				}
 				else if ((editorState.isDraggingPoint && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
 				{
 					Undo.RecordObject(editorState.CurrentSpline, "Move Spline Point");
-					editorState.CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(point));
+					editorState.CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(worldPoint));
 					editorState.isDraggingPoint = false;
 					castSelectedPointFlag = false;
 					editorState.wasSplineModified = true;
@@ -193,23 +192,28 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private void ScalePoint(int index, Vector3 point)
+		private void ScalePoint(int index, Vector3 worldPoint)
 		{
 			var normalIndex = index / 3;
+			var normalVector = editorState.CurrentSpline.GetNormal(normalIndex);
+			var normalLength = editorSettings.NormalVectorLength;
+			Handles.color = editorSettings.NormalsColor;
+			var normalNormalizedWorldVector = (worldPoint + editorState.CurrentSpline.transform.TransformDirection((normalVector) * normalLength) - worldPoint).normalized;
+			//-------------------------------------------------------------------------------------
 
 			var normalAngularOffset = editorState.CurrentSpline.NormalsAngularOffsets[normalIndex];
 			var globalRotation = Quaternion.AngleAxis(editorState.CurrentSpline.GlobalNormalsRotation, editorState.CurrentSpline.Tangents[normalIndex]);
-			var normalRotation = globalRotation * Quaternion.AngleAxis(normalAngularOffset + MagicAngleOffset, editorState.CurrentSpline.Tangents[normalIndex]);
+			var normalRotation = globalRotation * Quaternion.AngleAxis(normalAngularOffset, editorState.CurrentSpline.Tangents[normalIndex]);
 			var normalHandleRotation = normalRotation * Quaternion.LookRotation(editorState.CurrentSpline.Tangents[normalIndex]);
 			var baseHandleRotation = handleTransform.rotation * normalHandleRotation;
 
-			var handleSize = HandleUtility.GetHandleSize(point);
+			var handleSize = HandleUtility.GetHandleSize(worldPoint);
 
 			var pointScaleIndex = index / 3;
 			var pointScale = editorState.CurrentSpline.PointsScales[pointScaleIndex];
 
 			EditorGUI.BeginChangeCheck();
-			editorState.lastScale = Handles.DoScaleHandle(editorState.isScaling ? editorState.lastScale : pointScale, point, baseHandleRotation, handleSize);
+			editorState.lastScale = Handles.DoScaleHandle(editorState.isScaling ? editorState.lastScale : pointScale, worldPoint, baseHandleRotation, handleSize);
 			var wasChanged = EditorGUI.EndChangeCheck();
 			if (wasChanged)
 			{
@@ -235,10 +239,10 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private void RotatePoints(int index, Vector3 point)
+		private void RotatePoints(int index, Vector3 worldPoint)
 		{
 			EditorGUI.BeginChangeCheck();
-			var rotation = Handles.DoRotationHandle(handleRotation, point);
+			var rotation = Handles.DoRotationHandle(handleRotation, worldPoint);
 			if (EditorGUI.EndChangeCheck())
 			{
 				if (!editorState.isRotating)
@@ -256,14 +260,14 @@ namespace SplineEditor.Editor
 				if (point1Index >= 0 && point1Index < editorState.CurrentSpline.PointsCount)
 				{
 					var point1 = handleTransform.TransformPoint(editorState.CurrentSpline.Points[point1Index].position);
-					var rotatedPoint1 = Vector3Utils.RotateAround(point1, point, rotationDiff);
+					var rotatedPoint1 = Vector3Utils.RotateAround(point1, worldPoint, rotationDiff);
 					editorState.CurrentSpline.UpdatePoint(point1Index, handleTransform.InverseTransformPoint(rotatedPoint1));
 				}
 
 				if (point2Index >= 0 && point2Index < editorState.CurrentSpline.PointsCount)
 				{
 					var point2 = handleTransform.TransformPoint(editorState.CurrentSpline.Points[point2Index].position);
-					var rotatedPoint2 = Vector3Utils.RotateAround(point2, point, rotationDiff);
+					var rotatedPoint2 = Vector3Utils.RotateAround(point2, worldPoint, rotationDiff);
 					editorState.CurrentSpline.UpdatePoint(point2Index, handleTransform.InverseTransformPoint(rotatedPoint2));
 				}
 

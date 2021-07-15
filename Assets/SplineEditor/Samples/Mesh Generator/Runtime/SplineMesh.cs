@@ -26,7 +26,6 @@ namespace SplineEditor.MeshGenerator
 		private const float MinSpacingValue = 0.1f;
 		private const float MinWidthValue = 0.001f;
 		private const float LengthCalculationPrecision = 0.0001f;
-		private const float MaxAutoSpacingCurvesCountFactor = 1000f;
 
 #if UNITY_EDITOR
 		private const int EditorLateUpdateFramesDelay = 5;
@@ -361,7 +360,6 @@ namespace SplineEditor.MeshGenerator
 
 			var splineLength = bezierSpline.GetLinearLength(precision: LengthCalculationPrecision, useWorldScale: false);
 			var curvesCount = bezierSpline.CurvesCount;
-			Spacing = Mathf.Max(Spacing, (splineLength) / (curvesCount * MaxAutoSpacingCurvesCountFactor));
 
 			ConstructMesh();
 			meshFilter.sharedMesh = cachedMesh;
@@ -396,8 +394,8 @@ namespace SplineEditor.MeshGenerator
 			{
 				var normalVector = Normals[i];
 				var right = Vector3.Cross(normalVector, Tangents[i]).normalized;
-				var rightScaledWidth = Width * (UsePointsScale ? Scale[i].y : 1f) * RightSideCurve.Evaluate(ParametersT[i]);
-				var leftScaledWidth = Width * (UsePointsScale ? Scale[i].y : 1f) * LeftSideCurve.Evaluate(ParametersT[i]);
+				var rightScaledWidth = Width * (UsePointsScale ? Scale[i].x : 1f) * RightSideCurve.Evaluate(ParametersT[i]);
+				var leftScaledWidth = Width * (UsePointsScale ? Scale[i].x : 1f) * LeftSideCurve.Evaluate(ParametersT[i]);
 
 				verts[vertIndex] = Points[i] - right * (UseAsymetricWidthCurve ? leftScaledWidth : rightScaledWidth);
 				verts[vertIndex + 1] = Points[i] + right * rightScaledWidth;
