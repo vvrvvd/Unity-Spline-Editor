@@ -195,22 +195,16 @@ namespace SplineEditor.Editor
 		private void ScalePoint(int index, Vector3 worldPoint)
 		{
 			var normalIndex = index / 3;
-			var normalVector = editorState.CurrentSpline.GetNormal(normalIndex);
-			var normalLength = editorSettings.NormalVectorLength;
-			Handles.color = editorSettings.NormalsColor;
-			var normalNormalizedWorldVector = (worldPoint + editorState.CurrentSpline.transform.TransformDirection((normalVector) * normalLength) - worldPoint).normalized;
-			//-------------------------------------------------------------------------------------
-
-			var normalAngularOffset = editorState.CurrentSpline.NormalsAngularOffsets[normalIndex];
-			var globalRotation = Quaternion.AngleAxis(editorState.CurrentSpline.GlobalNormalsRotation, editorState.CurrentSpline.Tangents[normalIndex]);
-			var normalRotation = globalRotation * Quaternion.AngleAxis(normalAngularOffset, editorState.CurrentSpline.Tangents[normalIndex]);
-			var normalHandleRotation = normalRotation * Quaternion.LookRotation(editorState.CurrentSpline.Tangents[normalIndex]);
-			var baseHandleRotation = handleTransform.rotation * normalHandleRotation;
-
-			var handleSize = HandleUtility.GetHandleSize(worldPoint);
-
 			var pointScaleIndex = index / 3;
+			
+			var handleSize = HandleUtility.GetHandleSize(worldPoint);
 			var pointScale = editorState.CurrentSpline.PointsScales[pointScaleIndex];
+			var normalVector = editorState.CurrentSpline.GetNormal(normalIndex);
+			var tangentVector = editorState.CurrentSpline.Tangents[normalIndex];
+
+			var normalWorldVector = editorState.CurrentSpline.transform.TransformDirection(normalVector).normalized;
+			var tangentWorldVector = editorState.CurrentSpline.transform.TransformDirection(tangentVector).normalized;
+			var baseHandleRotation = Quaternion.LookRotation(normalWorldVector, tangentWorldVector);
 
 			EditorGUI.BeginChangeCheck();
 			editorState.lastScale = Handles.DoScaleHandle(editorState.isScaling ? editorState.lastScale : pointScale, worldPoint, baseHandleRotation, handleSize);

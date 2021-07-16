@@ -38,12 +38,15 @@ namespace SplineEditor.Editor
 		private void RotateNormals(int index, Vector3 worldPoint)
 		{
 			var normalIndex = index / 3;
-			EditorGUI.BeginChangeCheck();
+			var normalVector = editorState.CurrentSpline.GetNormal(normalIndex);
+			var tangentVector = editorState.CurrentSpline.Tangents[normalIndex];
 			var normalAngularOffset = editorState.CurrentSpline.NormalsAngularOffsets[normalIndex];
-			var globalRotation = Quaternion.AngleAxis(editorState.CurrentSpline.GlobalNormalsRotation, editorState.CurrentSpline.Tangents[normalIndex]);
-			var normalRotation = globalRotation * Quaternion.AngleAxis(normalAngularOffset, editorState.CurrentSpline.Tangents[normalIndex]);
-			var normalHandleRotation = normalRotation * Quaternion.LookRotation(editorState.CurrentSpline.Tangents[normalIndex]);
-			var baseHandleRotation = handleTransform.rotation * normalHandleRotation;
+
+			var normalWorldVector = editorState.CurrentSpline.transform.TransformDirection(normalVector).normalized;
+			var tangentWorldVector = editorState.CurrentSpline.transform.TransformDirection(tangentVector).normalized;
+			var baseHandleRotation = Quaternion.LookRotation(normalWorldVector, tangentWorldVector);
+
+			EditorGUI.BeginChangeCheck();
 			var rotation = Handles.DoRotationHandle(baseHandleRotation, worldPoint);
 			if (EditorGUI.EndChangeCheck())
 			{
