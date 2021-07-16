@@ -27,6 +27,8 @@ MonoBehaviour:
   TangentLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   SplineWidth: 2
   SplineColor: {r: 1, g: 0, b: 0, a: 1}
+  NormalVectorLength: 5
+  NormalsColor: {r: 0, g: 1, b: 0, a: 1}
   ScaleDrawerHandleOnScreen: 1
   DrawerModeHandleSize: 0.2
   DrawerModeHandleColor: {r: 0, g: 1, b: 0, a: 1}
@@ -44,4 +46,5 @@ MonoBehaviour:
   simplifySplineIcon: {fileID: 2800000, guid: 132b1a15d2101ef46a0ed0d05edac179, type: 3}
   castSplineIcon: {fileID: 2800000, guid: 4b03b212f73224240bcc58600352b89c, type: 3}
   castToCameraSplineIcon: {fileID: 2800000, guid: 80c20be2f943fdb4aa52b2c90c605ab2, type: 3}
+  normalsToolIcon: {fileID: 2800000, guid: dbdd0644dcaa75c499b1614dd9447e8a, type: 3}
   drawerToolIcon: {fileID: 2800000, guid: 852c57626ee14504c8177efd140dac25, type: 3}

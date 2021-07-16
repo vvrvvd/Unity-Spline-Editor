@@ -1420,7 +1420,7 @@ MonoBehaviour:
     m_FixedHeight: 0
     m_StretchWidth: 1
     m_StretchHeight: 0
-  - m_Name: DrawerButton
+  - m_Name: ToggleButton
     m_Normal:
       m_Background: {fileID: 11006, guid: 0000000000000000e000000000000000, type: 0}
       m_ScaledBackgrounds: []
