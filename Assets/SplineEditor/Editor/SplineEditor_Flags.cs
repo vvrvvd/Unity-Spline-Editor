@@ -4,10 +4,9 @@ using UnityEditor;
 
 namespace SplineEditor.Editor
 {
+
 	public partial class SplineEditor : UnityEditor.Editor
 	{
-
-		#region Static Fields
 
 		private static bool addCurveFlag;
 		private static bool splitCurveFlag;
@@ -17,6 +16,7 @@ namespace SplineEditor.Editor
 		private static bool closeLoopFlag;
 		private static bool factorSplineFlag;
 		private static bool simplifySplineFlag;
+		private static bool normalsEditorModeFlag;
 		private static bool drawSplineModeFlag;
 		private static bool castSelectedPointFlag;
 		private static bool castSelectedPointShortcutFlag;
@@ -24,10 +24,6 @@ namespace SplineEditor.Editor
 		private static float addCurveLength = 1f;
 		private static float splitCurveValue = 0.5f;
 		private static Vector3 castSplineDirection;
-
-		#endregion
-
-		#region Flags Logic
 
 		internal static void ScheduleAddCurve(float curveLength)
 		{
@@ -82,10 +78,11 @@ namespace SplineEditor.Editor
 		{
 			drawSplineModeFlag = !drawSplineModeFlag;
 		}
-
-		#endregion
-
-		#region Shortcuts Logic
+		
+		internal static void ToggleNormalsEditorMode()
+		{
+			normalsEditorModeFlag = !normalsEditorModeFlag;
+		}
 
 		private void InitializeFlags()
 		{
@@ -94,6 +91,7 @@ namespace SplineEditor.Editor
 			simplifySplineFlag = false;
 			addCurveFlag = false;
 			removeSelectedCurveFlag = false;
+			normalsEditorModeFlag = false;
 			drawSplineModeFlag = false;
 			castSplineFlag = false;
 			castSplineToCameraFlag = false;
@@ -102,9 +100,15 @@ namespace SplineEditor.Editor
 
 		private void InvokeScheduledActions()
 		{
+			if (normalsEditorModeFlag)
+			{
+				ToggleNormalsEditorMode(!editorState.IsNormalsEditorMode);
+				normalsEditorModeFlag = false;
+			}
+
 			if (drawSplineModeFlag)
 			{
-				ToggleDrawCurveMode(!IsDrawerMode);
+				ToggleDrawCurveMode(!editorState.IsDrawerMode);
 				drawSplineModeFlag = false;
 			}
 
@@ -150,7 +154,7 @@ namespace SplineEditor.Editor
 				castSplineToCameraFlag = false;
 			}
 
-			if (!IsDrawerMode)
+			if (!editorState.IsDrawerMode)
 			{
 				if (addCurveFlag)
 				{
@@ -166,7 +170,7 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		#endregion
+		
 
 	}
 
