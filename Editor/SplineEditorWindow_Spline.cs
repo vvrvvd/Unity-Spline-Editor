@@ -7,19 +7,14 @@ namespace SplineEditor.Editor
 	public partial class SplineEditorWindow : EditorWindow
 	{
 
-		private float previousSplineLength = 0f;
-		private Transform customTransform = null;
-
-		private bool isSplineSectionFolded = true;
-
 		private void DrawSplineGroup()
 		{
 			var prevEnabled = GUI.enabled;
 			var prevColor = GUI.color;
 
-			isSplineSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(isSplineSectionFolded, SplineOptionsTitle);
-			GUI.enabled = isSplineEditorEnabled;
-			if (isSplineSectionFolded)
+			editorWindowState.IsSplineSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(editorWindowState.IsSplineSectionFolded, SplineOptionsTitle);
+			GUI.enabled = IsSplineEditorEnabled;
+			if (editorWindowState.IsSplineSectionFolded)
 			{
 				DrawSplineStatsSection();
 				DrawSplineButtons();
@@ -51,37 +46,79 @@ namespace SplineEditor.Editor
 		}
 
 
-		private bool previousDrawPointsState = true;
-		private bool previousShowTransformHandleState = true;
-		private bool previousAlwaysDrawOnSceneState = false;
-
 		private void DrawSplineTogglesInspector()
+		{
+			DrawDrawPointsToggle();
+			DrawDrawNormalsToggle();
+			DrawDrawSplineToggle();
+			DrawAlwaysOnSceneToggle();
+			DrawShowMainTransformHandleToggle();
+		}
+
+
+		private void DrawDrawPointsToggle()
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			var previousDrawPoints = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.drawPoints : previousDrawPointsState;
+			var previousDrawPoints = editorState.DrawPoints;
 			GUILayout.Label(DrawPointsFieldContent);
 			var nextLoopState = GUILayout.Toggle(previousDrawPoints, string.Empty);
 			if (nextLoopState != previousDrawPoints)
 			{
-				Undo.RecordObject(SplineEditor.CurrentSpline, "Toggle Draw Points");
-				SplineEditor.CurrentSpline.drawPoints = nextLoopState;
-				EditorUtility.SetDirty(SplineEditor.CurrentSpline);
+				Undo.RecordObject(editorState, "Toggle Draw Points");
+				editorState.DrawPoints = nextLoopState;
 				repaintScene = true;
 			}
-			previousDrawPointsState = nextLoopState;
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
+		}
 
+		private void DrawDrawSplineToggle()
+		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			var previousShowTransformHandle = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.showTransformHandle : previousShowTransformHandleState;
+			var previousDrawSpline = editorState.DrawSpline;
+			GUILayout.Label(DrawSplineFieldContent);
+			var nextLoopState = GUILayout.Toggle(previousDrawSpline, string.Empty);
+			if (nextLoopState != previousDrawSpline)
+			{
+				Undo.RecordObject(editorState, "Toggle Draw Spline");
+				editorState.DrawSpline = nextLoopState;
+				repaintScene = true;
+			}
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+		}
+
+
+		private void DrawDrawNormalsToggle()
+		{
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			var previousDrawNormals = editorState.DrawNormals;
+			GUILayout.Label(DrawNormalsToggleFieldContent);
+			var nextDrawNormals = GUILayout.Toggle(previousDrawNormals, string.Empty);
+			if (nextDrawNormals != previousDrawNormals)
+			{
+				Undo.RecordObject(editorState, "Toggle Draw Normals");
+				editorState.DrawNormals = nextDrawNormals;
+				repaintScene = true;
+			}
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+		}
+
+		private void DrawShowMainTransformHandleToggle()
+		{
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			var previousShowTransformHandle = editorState.ShowTransformHandle;
 			GUILayout.Label(ShowTransformHandleFieldContent);
-			nextLoopState = GUILayout.Toggle(previousShowTransformHandle, string.Empty);
+			var nextLoopState = GUILayout.Toggle(previousShowTransformHandle, string.Empty);
 			if (nextLoopState != previousShowTransformHandle)
 			{
-				Undo.RecordObject(SplineEditor.CurrentSpline, "Toggle Show Transform Handle");
-				SplineEditor.CurrentSpline.showTransformHandle = nextLoopState;
+				Undo.RecordObject(editorState, "Toggle Show Transform Handle");
+				editorState.ShowTransformHandle = nextLoopState;
 				if (!nextLoopState)
 				{
 					SplineEditor.HideTools();
@@ -90,29 +127,33 @@ namespace SplineEditor.Editor
 				{
 					SplineEditor.ShowTools();
 				}
-				EditorUtility.SetDirty(SplineEditor.CurrentSpline);
 				repaintScene = true;
 			}
-			previousShowTransformHandleState = nextLoopState;
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
+		}
+
+		private void DrawAlwaysOnSceneToggle()
+		{
+			var prevEnabled = GUI.enabled;
+			GUI.enabled &= editorState.DrawSpline;
 
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			var previousAlwaysDrawOnScene = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.alwaysDrawSplineOnScene : previousAlwaysDrawOnSceneState;
+			var previousAlwaysDrawOnScene = editorState.AlwaysDrawSplineOnScene;
 			GUILayout.Label(AlwaysDrawOnSceneFieldContent);
-			nextLoopState = GUILayout.Toggle(previousAlwaysDrawOnScene, string.Empty);
+			var nextLoopState = GUILayout.Toggle(previousAlwaysDrawOnScene, string.Empty);
 			if (nextLoopState != previousAlwaysDrawOnScene)
 			{
-				Undo.RecordObject(SplineEditor.CurrentSpline, "Toggle Always Draw On Scene");
-				SplineEditor.CurrentSpline.alwaysDrawSplineOnScene = nextLoopState;
-				EditorUtility.SetDirty(SplineEditor.CurrentSpline);
+				Undo.RecordObject(editorState, "Toggle Always Draw On Scene");
+				editorState.AlwaysDrawSplineOnScene = nextLoopState;
 				repaintScene = true;
 			}
 
-			previousAlwaysDrawOnSceneState = nextLoopState;
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
+
+			GUI.enabled = prevEnabled;
 		}
 
 		private void DrawLengthField()
@@ -122,11 +163,11 @@ namespace SplineEditor.Editor
 
 			var prevEnabled = GUI.enabled;
 			GUI.enabled = false;
-			var currentLength = SplineEditor.CurrentSpline != null ? SplineEditor.CurrentSpline.Length : previousSplineLength;
+			var currentLength = editorState.CurrentSpline != null ? editorState.CurrentSpline.GetLinearLength(useWorldScale: true) : editorWindowState.PreviousSplineLength;
 			GUILayout.Label(LengthSplineFieldContent);
 			GUILayout.Label(currentLength.ToString());
 
-			previousSplineLength = currentLength;
+			editorWindowState.PreviousSplineLength = currentLength;
 			GUI.enabled = prevEnabled;
 
 			GUILayout.FlexibleSpace();
@@ -154,7 +195,7 @@ namespace SplineEditor.Editor
 				repaintScene = true;
 			}
 
-			GUI.enabled = isGroupEnabled && SplineEditor.CanSplineBeSimplified;
+			GUI.enabled = isGroupEnabled && editorState.CanSplineBeSimplified;
 			if (GUILayout.Button(SimplifyButtonContent, buttonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
 			{
 				SplineEditor.ScheduleSimplifySpline();
@@ -175,7 +216,7 @@ namespace SplineEditor.Editor
 			GUILayout.FlexibleSpace();
 			if (GUILayout.Button(CastSplineContent, buttonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
 			{
-				var referenceTransform = customTransform == null ? SplineEditor.CurrentSpline.transform : customTransform;
+				var referenceTransform = editorWindowState.CustomTransform == null ? editorState.CurrentSpline.transform : editorWindowState.CustomTransform;
 				var castDirection = -referenceTransform.up;
 				SplineEditor.ScheduleCastSpline(castDirection);
 				repaintScene = true;
@@ -190,15 +231,31 @@ namespace SplineEditor.Editor
 			GUILayout.EndHorizontal();
 
 			GUILayout.Space(10);
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			GUILayout.Label(CastTransformFieldContent);
-			customTransform = EditorGUILayout.ObjectField(customTransform, typeof(Transform), true, ToolsCustomTransformFieldWidth) as Transform;
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
+
+			DrawCustomTransformField();
 
 			GUILayout.Space(10);
 			GUILayout.EndVertical();
+		}
+
+		private void DrawCustomTransformField()
+		{
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			GUILayout.Label(CastTransformFieldContent);
+
+			var prevState = editorWindowState.CustomTransform;
+			var nextState = EditorGUILayout.ObjectField(editorWindowState.CustomTransform, typeof(Transform), true, ToolsCustomTransformFieldWidth) as Transform;
+			if (nextState != prevState)
+			{
+				Undo.RecordObject(editorWindowState, "Change Custom Cast Transform");
+				editorWindowState.CustomTransform = nextState;
+			}
+
+
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
 		}
 
 

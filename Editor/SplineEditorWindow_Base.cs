@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -6,92 +7,80 @@ namespace SplineEditor.Editor
 
 	public partial class SplineEditorWindow : EditorWindow
 	{
-        private static SplineEditorConfiguration editorSettings = default;
+        private static SplineEditorState editorState => SplineEditorState.instance;
+        private static SplineEditorWindowState editorWindowState => SplineEditorWindowState.instance;
+        private static SplineEditorConfiguration editorSettings => SplineEditorConfiguration.instance;
 
-        private bool repaintScene = false;
-        private bool isSplineEditorEnabled = false;
-        private bool isCurveEditorEnabled = false;
 
         private int buttonsLayoutIndex = 2;
+
+        private bool repaintScene = false;
+        private bool initializeStyles = false;
+
         private Vector2 scrollPos = Vector2.zero;
 
-        private bool initializeStyles = false;
+        private bool IsSplineEditorEnabled => editorState.CurrentSpline != null;
+        private bool IsCurveEditorEnabled => IsSplineEditorEnabled && editorState.IsAnyPointSelected;
+
 
         [MenuItem("Window/Spline Editor")]
         public static void Initialize()
         {
-            SplineEditorWindow window = (SplineEditorWindow)EditorWindow.GetWindow(typeof(SplineEditorWindow), false, WindowTitle);
+            var inspectorType = Type.GetType("UnityEditor.InspectorWindow,UnityEditor.dll");
+            var window = GetWindow<SplineEditorWindow>(WindowTitle, false, inspectorType);
             window.initializeStyles = true;
-            window.LoadSettings();
+            window.autoRepaintOnSceneChange = true;
             window.Show();
         }
 
         private void OnEnable()
 		{
-            SplineEditor.OnSplineModified += OnSplineModified;
-            SplineEditor.OnSelectedSplineChanged += OnSelectedSplineChanged;
-            SplineEditor.OnSelectedPointChanged += OnSelectedCurveChanged;
+            editorState.OnSplineModified += OnSplineModified;
+            editorState.OnSelectedSplineChanged += OnSelectedSplineChanged;
+            editorState.OnSelectedPointChanged += OnSelectedCurveChanged;
         }
 
         private void OnDisable()
 		{
-            SplineEditor.OnSplineModified -= OnSplineModified;
-            SplineEditor.OnSelectedSplineChanged -= OnSelectedSplineChanged;
-            SplineEditor.OnSelectedPointChanged -= OnSelectedCurveChanged;
+            editorState.OnSplineModified -= OnSplineModified;
+            editorState.OnSelectedSplineChanged -= OnSelectedSplineChanged;
+            editorState.OnSelectedPointChanged -= OnSelectedCurveChanged;
         }
 
         private void OnSplineModified()
 		{
-            isDrawerMode = SplineEditor.CurrentEditor != null && SplineEditor.IsDrawerMode;
+            editorState.IsDrawerMode = editorState.CurrentEditor != null && editorState.IsDrawerMode;
+            editorState.IsNormalsEditorMode = editorState.CurrentEditor != null && editorState.IsNormalsEditorMode;
             Repaint();
 		}
 
         private void OnSelectedSplineChanged()
 		{
-            isSplineEditorEnabled = SplineEditor.CurrentSpline != null;
-            isDrawerMode = SplineEditor.CurrentEditor != null && SplineEditor.IsDrawerMode;
+            editorState.IsDrawerMode = editorState.CurrentEditor != null && editorState.IsDrawerMode;
+            editorState.IsNormalsEditorMode = editorState.CurrentEditor != null && editorState.IsNormalsEditorMode;
             OnSelectedCurveChanged();
         }
 
         private void OnSelectedCurveChanged()
         {
-            isCurveEditorEnabled = isSplineEditorEnabled && SplineEditor.IsAnyPointSelected;
             Repaint();
-        }
-
-        private void LoadSettings()
-        {
-            editorSettings = Resources.Load<SplineEditorConfiguration>(SplineEditor.SplineEditorSettingsName);
-
-            if (editorSettings == null)
-            {
-                Debug.LogError("[Spline Editor] Spline Editor settings couldn't be loaded!");
-                return;
-            }
         }
 
 
         private void OnGUI()
         {
             repaintScene = false;
+
             //Hack for getting hover mouse visuals before showing tooltip when using custom GUI.skin pt.1
             wantsMouseMove = true;
 
-            if(editorSettings==null)
-			{
-                LoadSettings();
-            }
-
             if(initializeStyles)
 			{
-                InitializeStyles(editorSettings);
+                InitializeStyles();
                 initializeStyles = false;
             }
 
-            SplineEditor.UpdateSplineStates();
-
-            isCurveEditorEnabled &= SplineEditor.CurrentSpline != null;
-            isSplineEditorEnabled &= SplineEditor.CurrentSpline != null;
+            editorState.UpdateSplineStates();
 
             scrollPos = GUILayout.BeginScrollView(scrollPos, GUILayout.ExpandHeight(true));
             EditorGUILayout.BeginVertical();
@@ -101,7 +90,7 @@ namespace SplineEditor.Editor
             DrawSettingsButton();
 			DrawLayoutsToolbar();
 
-            UpdateStyles(editorSettings);
+            UpdateStyles();
 
             DrawPointGroup();
             GUILayout.Space(3);
@@ -109,8 +98,10 @@ namespace SplineEditor.Editor
             GUILayout.Space(3);
             DrawSplineGroup();
             GUILayout.Space(3);
+            DrawNormalsEditorOptions();
+            GUILayout.Space(3);
             DrawDrawerToolOptions();
-			EditorGUILayout.EndVertical();
+            EditorGUILayout.EndVertical();
             EditorGUILayout.EndScrollView();
 
             //Hack for getting hover mouse visuals before showing tooltip when using custom GUI.skin pt.2

@@ -6,8 +6,6 @@ namespace SplineEditor
     public static class BezierUtils
     {
 
-		#region Public Static Methods
-
 		/// <summary>
 		/// Returns coordinates for point on cubic bezier curve with given control points and t
 		/// </summary>
@@ -204,10 +202,6 @@ namespace SplineEditor
 			p2.z = solution[1, 2];
 		}
 
-		#endregion
-
-		#region Private Static Methods
-
 		private static float[,] MultiplyMatrices(float[,] a, float[,] b)
 		{
 			int m = a.GetLength(0);
@@ -236,8 +230,6 @@ namespace SplineEditor
 
 			return c;
 		}
-
-		#endregion
 
 	}
 

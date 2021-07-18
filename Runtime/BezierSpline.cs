@@ -9,8 +9,6 @@ namespace SplineEditor
 	public class BezierSpline : MonoBehaviour
 	{
 
-		#region Enums
-
 		public enum BezierControlPointMode : int
 		{
 			Free = 0,
@@ -19,52 +17,44 @@ namespace SplineEditor
 			Auto = 3
 		}
 
-		#endregion
+		private const float MinNormalsAnglesDifference = 0.1f;
 
-		#region Events
-
-		public event Action OnSplineChanged;
-
-		#endregion
-
-		#region Public Fields
-
-		[HideInInspector]
-		public bool drawPoints = true;
-		[HideInInspector]
-		public bool drawDirections = false;
-		[HideInInspector]
-		public bool showTransformHandle = true;
-		[HideInInspector]
-		public bool alwaysDrawSplineOnScene = true;
-
-		#endregion
-
-		#region Editor Fields
+		public Action OnSplineChanged;
 
 		[SerializeField]
 		private bool isLoop = default;
 
 		[SerializeField]
-		protected List<SplinePoint> points = default;
+		private bool flipNormals = default;
+
+		[SerializeField]
+		private float globalNormalsRotation = default;
+
+		[SerializeField]
+		private List<SplinePoint> points = default;
+
+		[SerializeField]
+		private List<Vector3> pointsScales = default;
 
 		[SerializeField]
 		private List<BezierControlPointMode> modes = default;
 
-		#endregion
+		[SerializeField]
+		private Vector3[] normals = default;
 
-		#region Private Fields
+		[SerializeField]
+		private Vector3[] tangents = default;
+
+		[SerializeField]
+		private float[] normalsAngularOffsets = default;
 
 		private bool invokeEvents = true;
-
-		#endregion
-
-		#region Properties
+		private List<float> normalsOffsetCopyList = new List<float>();
 
 		/// <summary>
 		/// Number of curves in the splines.
 		/// </summary>
-		public int CurvesCount => Mathf.Max(0 ,(PointsCount - 1) / 3);
+		public int CurvesCount => Mathf.Max(0, (PointsCount - 1) / 3);
 
 		/// <summary>
 		/// Number of points in the spline.
@@ -75,6 +65,26 @@ namespace SplineEditor
 		/// List of all the spline points.
 		/// </summary>
 		public List<SplinePoint> Points => points;
+
+		/// <summary>
+		/// Calculated normals for Points.
+		/// </summary>
+		public Vector3[] Normals => normals;
+
+		/// <summary>
+		/// Calculated tangents for Points.
+		/// </summary>
+		public Vector3[] Tangents => tangents;
+
+		/// <summary>
+		/// Scale at points. It doesn't affect curve itself but may be used e.g. meshes generation.
+		/// </summary>
+		public List<Vector3> PointsScales => pointsScales;
+
+		/// <summary>
+		/// Manually set angular offsets for Points.
+		/// </summary>
+		public float[] NormalsAngularOffsets => normalsAngularOffsets;
 
 		/// <summary>
 		/// Returns if the spline is looped.
@@ -89,40 +99,56 @@ namespace SplineEditor
 			set
 			{
 				isLoop = value;
-				if (value == true)
+				if (value && modes.Count > 0 && pointsScales.Count > 0 && normalsAngularOffsets.Length > 0)
 				{
 					modes[modes.Count - 1] = modes[0];
+					pointsScales[pointsScales.Count - 1] = pointsScales[0];
+					normalsAngularOffsets[normalsAngularOffsets.Length - 1] = normalsAngularOffsets[0];
 					UpdatePoint(0, points[0].position);
 				}
 			}
 		}
 
+
 		/// <summary>
-		/// Returns the entire spline length using quadratic curve approximation for every cubic spline.
+		/// Should normals be flipped to face opposite direction.
 		/// </summary>
-		public float Length
+		public bool FlipNormals
 		{
 			get
 			{
-				var lengthSum = 0f;
-				var curveCount = CurvesCount;
-				for (var i = 0; i < curveCount; i++)
-				{
-					lengthSum += BezierUtils.GetCubicLength(points[i * 3].position, points[i * 3 + 1].position, points[i * 3 + 2].position, points[i * 3 + 3].position);
-				}
-
-				return lengthSum;
+				return flipNormals;
+			}
+			set
+			{
+				flipNormals = value;
+				RecalculateNormals();
+				OnSplineChanged?.Invoke();
 			}
 		}
 
-		#endregion
-
-		#region Initialize
+		/// <summary>
+		/// Offset rotation of every normal along the spline direction axis at given point.
+		/// </summary>
+		public float GlobalNormalsRotation
+		{
+			get
+			{
+				return globalNormalsRotation;
+			}
+			set
+			{
+				globalNormalsRotation = value;
+				RecalculateNormals();
+				OnSplineChanged?.Invoke();
+			}
+		}
 
 		private void Reset()
 		{
-			modes = new List<BezierControlPointMode>();
-			points = new List<SplinePoint>(1000);
+			modes = new List<BezierControlPointMode>(2);
+			points = new List<SplinePoint>(4);
+			pointsScales = new List<Vector3>(2);
 
 			var p0 = new Vector3(1f, 0f, 0f);
 			var p1 = new Vector3(1.5f, 0f, 0f);
@@ -136,13 +162,72 @@ namespace SplineEditor
 
 			modes.Add(BezierControlPointMode.Free);
 			modes.Add(BezierControlPointMode.Free);
+
+			pointsScales.Add(Vector3.one);
+			pointsScales.Add(Vector3.one);
+
+			RecalculateNormals();
 		}
 
-		#endregion
+		/// <summary>
+		/// Returns the spline length using line iteration approximation.
+		/// </summary>
+		/// <param name="useWorldScale"></param>
+		/// <param name="targetT">Up to which t should length be calculated</param>
+		/// <returns></returns>
+		public float GetLinearLength(float targetT = 1f, float precision = 0.001f, bool useWorldScale = true)
+		{
+			var lengthSum = 0f;
+			var iterationsCount = (int)(1f / precision);
+			var t = 0f;
+			var prevPoint = GetPoint(t, useWorldScale);
+			for (var i = 1; i < iterationsCount; i++)
+			{
+				t += (float)i / iterationsCount;
+				var nextPoint = GetPoint(t, useWorldScale);
+				lengthSum += Vector3.Distance(prevPoint, nextPoint);
+				prevPoint = nextPoint;
 
-		#region Public Methods
+				if (t >= targetT)
+				{
+					i = iterationsCount;
+				}
+			}
 
-		#region Getters & Setters
+			return lengthSum;
+		}
+
+		/// <summary>
+		/// Returns the spline length using quadratic curve approximation for every cubic spline.
+		/// </summary>
+		/// <param name="useWorldScale"></param>
+		/// <returns></returns>
+		public float GetQuadraticLength(bool useWorldScale = true)
+		{
+
+			var lengthSum = 0f;
+			var curveCount = CurvesCount;
+
+			for (var i = 0; i < curveCount; i++)
+			{
+				var p0 = points[i * 3].position;
+				var p1 = points[i * 3 + 1].position;
+				var p2 = points[i * 3 + 2].position;
+				var p3 = points[i * 3 + 3].position;
+
+				if (useWorldScale)
+				{
+					p0 = transform.TransformPoint(p0);
+					p1 = transform.TransformPoint(p1);
+					p2 = transform.TransformPoint(p2);
+					p3 = transform.TransformPoint(p3);
+				}
+
+				lengthSum += BezierUtils.GetCubicLength(p0, p1, p2, p3);
+			}
+
+			return lengthSum;
+		}
 
 		/// <summary>
 		/// If spline is looping then returns next index taking into account the loop 
@@ -153,9 +238,9 @@ namespace SplineEditor
 		public int GetLoopingIndex(int pointIndex)
 		{
 
-			if((pointIndex < 0 || pointIndex >= points.Count))
+			if ((pointIndex < 0 || pointIndex >= points.Count))
 			{
-				if(isLoop)
+				if (isLoop)
 				{
 					return pointIndex < 0 ? points.Count - 1 + pointIndex : pointIndex - points.Count - 1;
 				}
@@ -232,6 +317,80 @@ namespace SplineEditor
 		}
 
 		/// <summary>
+		/// Returns interpolated points scale at point t of the spline.
+		/// </summary>
+		/// <param name="normalVector"></param>
+		/// <param name=""></param>
+		/// <returns></returns>
+		public Vector3 GetPointScale(float t)
+		{
+			var curveSegmentSizeT = 1f / CurvesCount;
+			var curveIndex = 0;
+			while (t > curveIndex * curveSegmentSizeT)
+			{
+				curveIndex++;
+			}
+
+			curveIndex = Mathf.Clamp(curveIndex - 1, 0, normalsAngularOffsets.Length - 2);
+
+			var prevPointT = curveIndex * (curveSegmentSizeT);
+			var nextPointT = (curveIndex + 1) * (curveSegmentSizeT);
+			var alpha = Mathf.InverseLerp(prevPointT, nextPointT, t);
+			var interpolatedPointScale = Vector3.Lerp(pointsScales[curveIndex], pointsScales[curveIndex + 1], alpha);
+
+			return interpolatedPointScale;
+		}
+
+		/// <summary>
+		/// Returns normals vector for curveIndex point based on Normals and their angular offsets
+		/// </summary>
+		/// <param name="t"></param>
+		/// <returns></returns>
+		/// </summary>
+		/// <param name="curveIndex"></param>
+		/// <returns></returns>
+		public Vector3 GetNormal(int controlPointIndex)
+		{
+			var globalAngleOffset = GlobalNormalsRotation;
+			var normalAngularOffset = normalsAngularOffsets[controlPointIndex];
+			var globalRotation = Quaternion.AngleAxis(globalAngleOffset, Tangents[controlPointIndex]);
+			var normalRotation = Quaternion.AngleAxis(normalAngularOffset, Tangents[controlPointIndex]);
+			var normalVector = globalRotation * normalRotation * normals[controlPointIndex];
+
+			return normalVector;
+		}
+
+		/// <summary>
+		/// Rotates normal vector based on interpolated angular offset at point t of the spline.
+		/// </summary>
+		/// <param name="normalVector"></param>
+		/// <param name=""></param>
+		/// <returns></returns>
+		public Vector3 GetRotatedNormal(Vector3 normalVector, float t)
+		{
+			var curveSegmentSizeT = 1f / CurvesCount;
+			var curveIndex = 0;
+			while (t > curveIndex * curveSegmentSizeT)
+			{
+				curveIndex++;
+			}
+
+			curveIndex = Mathf.Clamp(curveIndex - 1, 0, normalsAngularOffsets.Length-2);
+
+			var tangent = GetDirection(t);
+			var prevPointT = curveIndex * (curveSegmentSizeT);
+			var nextPointT = (curveIndex + 1) * (curveSegmentSizeT);
+			var alpha = Mathf.InverseLerp(prevPointT, nextPointT, t);
+			var globalAngleOffset = GlobalNormalsRotation;
+			var normalAngularOffset = Mathf.Lerp(normalsAngularOffsets[curveIndex], normalsAngularOffsets[curveIndex + 1], alpha);
+			var globalRotation = Quaternion.AngleAxis(globalAngleOffset, tangent);
+			var normalRotation = Quaternion.AngleAxis(normalAngularOffset, tangent);
+			var rotatedNormalVector = globalRotation * normalRotation * normalVector;
+
+			return rotatedNormalVector;
+		}
+
+		/// <summary>
 		/// Returns control point mode for given point index.
 		/// </summary>
 		/// <param name="pointIndex"></param>
@@ -269,18 +428,200 @@ namespace SplineEditor
 			ApplyContraints(pointIndex);
 
 			invokeEvents = prevInvokeEvents;
-			if(invokeEvents)
+			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
 
-		#endregion
+		/// <summary>
+		/// Calculates evenly spaced points and their respective directions (tangents) across the spline with given parameters.
+		/// Points are being saved in SplinePath object.
+		/// </summary>
+		/// <param name="spacing">Distance between points.</param>
+		/// <param name="bezierPath">Object for keeping generated points parameters.</param>
+		/// <param name="precision">Precision of spline approximation used for calculating points (the lower value, the higher precision).</param>
+		/// <param name="useWorldSpace">Transform points from local space to world space.</param>
+		public void GetEvenlySpacedPoints(float spacing, SplinePath bezierPath, float precision = 0.001f, bool useWorldSpace = true)
+		{
+			var scales = new List<Vector3>();
+			var normals = new List<Vector3>();
+			var tangents = new List<Vector3>();
+			var parametersT = new List<float>();
+			var spacedPoints = new List<Vector3>();
 
-		#region Tools
+			var splineLength = GetLinearLength(precision: 0.0001f, useWorldScale: false);
+			var segmentsCount = Mathf.RoundToInt(splineLength / spacing) + 1;
+
+			var t = precision;
+			var prevPoint = points[0].position;
+			spacedPoints.Add(prevPoint);
+			tangents.Add(GetDirection(0f));
+			scales.Add(GetPointScale(0f));
+			parametersT.Add(0f);
+
+			var lastRotationAxis = ((FlipNormals ? -1 : 1) * Vector3.forward);
+			var normalVector = Vector3.Cross(lastRotationAxis, tangents[0]).normalized;
+			var rotatedNormalVector = GetRotatedNormal(normalVector, 0f);
+			normals.Add(rotatedNormalVector);
+			for (var i = 1; i < segmentsCount || t < 1; i++)
+			{
+				var currentPoint = GetPoint(t, false);
+				var distance = Vector3.Distance(prevPoint, currentPoint);
+				t += precision;
+				while (distance < spacing && t < 1f)
+				{
+					t += precision;
+					prevPoint = currentPoint;
+					currentPoint = GetPoint(t, false);
+					distance += Vector3.Distance(prevPoint, currentPoint);
+				}
+
+				var alpha = spacing / distance;
+				currentPoint = Vector3.Lerp(prevPoint, currentPoint, alpha);
+				spacedPoints.Add(currentPoint);
+
+				t = Mathf.Clamp01(t);
+				t += (alpha - 1f) * precision;
+				t = Mathf.Clamp01(t);
+
+				scales.Add(GetPointScale(t));
+				tangents.Add(GetDirection(t));
+				parametersT.Add(t);
+
+				var prevTan = tangents[tangents.Count - 2];
+				var currentTan = tangents[tangents.Count - 1];
+				normalVector = NormalsUtils.CalculateNormal(ref lastRotationAxis, prevPoint, currentPoint, prevTan, currentTan);
+				rotatedNormalVector = GetRotatedNormal(normalVector, t);
+				normals.Add(rotatedNormalVector);
+
+				prevPoint = currentPoint;
+
+				if (t >= 1f)
+				{
+					break;
+				}
+
+			}
+
+			if (isLoop && normals.Count > 1)
+			{
+				// Get angle between first and last normal (if zero, they're already lined up, otherwise we need to correct)
+				float normalsAngleErrorAcrossJoin = Vector3.SignedAngle(normals[normals.Count - 1], normals[0], tangents[0]);
+				// Gradually rotate the normals along the path to ensure start and end normals line up correctly
+				if (Mathf.Abs(normalsAngleErrorAcrossJoin) > MinNormalsAnglesDifference) // don't bother correcting if very nearly correct
+				{
+					for (int i = 1; i < normals.Count; i++)
+					{
+						float targetT = (i / (normals.Count - 1f));
+						float angle = normalsAngleErrorAcrossJoin * targetT;
+						Quaternion rot = Quaternion.AngleAxis(angle, tangents[i]);
+
+						normals[i] = rot * normals[i];
+					}
+				}
+			}
+
+			bezierPath.scales = scales.ToArray();
+			bezierPath.points = spacedPoints.ToArray();
+			bezierPath.normals = normals.ToArray();
+			bezierPath.tangents = tangents.ToArray();
+			bezierPath.parametersT = parametersT.ToArray();
+
+			if (useWorldSpace)
+			{
+
+				for (var i = 0; i < bezierPath.points.Length; i++)
+				{
+					bezierPath.points[i] = transform.TransformPoint(bezierPath.points[i]);
+				}
+			}
+		}
 
 		/// <summary>
-		/// Update point position at given index.
+		/// Recalculate normals for control points.
+		/// </summary>
+		public void RecalculateNormals()
+		{
+			var curvesCount = CurvesCount;
+			if (normals == null)
+			{
+				normals = new Vector3[curvesCount + 1];
+				tangents = new Vector3[normals.Length];
+				normalsAngularOffsets = new float[normals.Length];
+			}
+			else if (normals.Length != curvesCount + 1)
+			{
+				Array.Resize(ref normals, curvesCount + 1);
+				Array.Resize(ref tangents, normals.Length);
+				Array.Resize(ref normalsAngularOffsets, normals.Length);
+			}
+
+			var precision = 0.0001f;
+			var splineLength = GetLinearLength(precision: 0.0001f, useWorldScale: false);
+			var spacing = Mathf.Max((splineLength) / (curvesCount * 1000f), 0.1f);
+
+			var normalsPath = new SplinePath();
+			var globalAngleCopy = globalNormalsRotation;
+			globalNormalsRotation = 0f;
+
+			normalsOffsetCopyList.Clear();
+			for (var i=0; i<normalsAngularOffsets.Length; i++)
+			{
+				normalsOffsetCopyList.Add(normalsAngularOffsets[i]);
+				normalsAngularOffsets[i] = 0f;
+			}
+
+			GetEvenlySpacedPoints(spacing, normalsPath, precision, false);
+
+			var pointIndex = 1;
+			var currentTargetT = pointIndex * (1f / CurvesCount);
+			var distance = 0f;
+			var targetDistance = GetLinearLength(targetT: currentTargetT, precision: 0.00001f, useWorldScale: false);
+			normals[0] = normalsPath.normals[0];
+			Tangents[0] = normalsPath.tangents[0];
+			for (var i = 1; i < normalsPath.points.Length; i++)
+			{
+				distance += Vector3.Distance(normalsPath.points[i - 1], normalsPath.points[i]);
+				if (distance >= targetDistance)
+				{
+					var alpha = (targetDistance / distance);
+					normals[pointIndex] = Vector3.Lerp(normalsPath.normals[i-1], normalsPath.normals[i], alpha);
+					Tangents[pointIndex] = Vector3.Lerp(normalsPath.tangents[i - 1], normalsPath.tangents[i], alpha);
+
+					pointIndex += 1;
+					currentTargetT = pointIndex * (1f / CurvesCount);
+					targetDistance = GetLinearLength(targetT: currentTargetT, precision: 0.0001f, useWorldScale: false);
+				}
+
+				if (currentTargetT == 1)
+				{
+					break;
+				}
+			}
+
+			if (isLoop)
+			{
+				normals[normals.Length - 1] = normalsPath.normals[0];
+				Tangents[Tangents.Length - 1] = normalsPath.tangents[0];
+			}
+			else
+			{
+				normals[normals.Length - 1] = normalsPath.normals[normalsPath.normals.Length - 1];
+				Tangents[Tangents.Length - 1] = normalsPath.tangents[normalsPath.tangents.Length - 1];
+			}
+
+			globalNormalsRotation = globalAngleCopy;
+			for (var i = 0; i < normalsAngularOffsets.Length; i++)
+			{
+				normalsAngularOffsets[i] = normalsOffsetCopyList[i];
+			}
+
+		}
+
+		/// <summary>
+		/// Updates point position at given index.
 		/// </summary>
 		/// <param name="pointIndex">Point index.</param>
 		/// <param name="position">New local point position.</param>
@@ -343,6 +684,72 @@ namespace SplineEditor
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
+				OnSplineChanged?.Invoke();
+			}
+
+			RecalculateNormals();
+		}
+
+		/// <summary>
+		/// Updates point scale for the point at given index.
+		/// </summary>
+		/// <param name="normalIndex"></param>
+		/// <param name="scale"></param>
+		public void UpdatePointsScale(int normalIndex, Vector3 scale)
+		{
+			var prevInvokeEvents = invokeEvents;
+			invokeEvents = false;
+
+			pointsScales[normalIndex] = scale;
+
+			if (IsLoop)
+			{
+				if (normalIndex == 0)
+				{
+					pointsScales[Normals.Length - 1] = scale;
+				}
+				else if (normalIndex == Normals.Length - 1)
+				{
+					pointsScales[0] = scale;
+				}
+			}
+
+			invokeEvents = prevInvokeEvents;
+			if (invokeEvents)
+			{
+				OnSplineChanged?.Invoke();
+			}
+		}
+
+		/// <summary>
+		/// Updates normal angular offset for a point at given index.
+		/// </summary>
+		/// <param name="normalIndex"></param>
+		/// <param name="angle"></param>
+		public void UpdateNormalAngularOffset(int normalIndex, float angle)
+		{
+			var prevInvokeEvents = invokeEvents;
+			invokeEvents = false;
+
+			normalsAngularOffsets[normalIndex] = angle;
+
+			if (IsLoop)
+			{
+				if (normalIndex == 0)
+				{
+					normalsAngularOffsets[Normals.Length - 1] = angle;
+				}
+				else if (normalIndex == Normals.Length - 1)
+				{
+					normalsAngularOffsets[0] = angle;
+				}
+			}
+
+			invokeEvents = prevInvokeEvents;
+			if (invokeEvents)
+			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
@@ -368,12 +775,14 @@ namespace SplineEditor
 				AddPoint(p3);
 
 				modes.Add(mode);
+				pointsScales.Add(Vector3.one);
 				ApplyContraints(PointsCount - 4);
 
 				if (IsLoop)
 				{
-					Points[PointsCount - 1].position = Points[0].position;
 					modes[modes.Count - 1] = modes[0];
+					points[PointsCount - 1].position = points[0].position;
+					pointsScales[pointsScales.Count - 1] = pointsScales[0];
 					ApplyContraints(0);
 				}
 			}
@@ -385,12 +794,14 @@ namespace SplineEditor
 				AddPoint(p3, 0);
 
 				modes.Insert(0, mode);
+				pointsScales.Insert(0, Vector3.one);
 				ApplyContraints(3);
 			}
 
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
@@ -420,7 +831,8 @@ namespace SplineEditor
 			else if (isMidCurve)
 			{
 				startCurveIndex += 2;
-			} else if(!removeFirstPoints)
+			}
+			else if (!removeFirstPoints)
 			{
 				startCurveIndex += 3;
 			}
@@ -433,6 +845,7 @@ namespace SplineEditor
 				RemovePoint(startCurveIndex - 1);
 				var modeIndex = (beginCurveIndex + 2) / 3;
 				modes.RemoveAt(modeIndex);
+				pointsScales.RemoveAt(modeIndex);
 			}
 
 			var nextPointIndex = (isLastCurve || startCurveIndex >= PointsCount) ? PointsCount - 1 : startCurveIndex;
@@ -452,6 +865,7 @@ namespace SplineEditor
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
@@ -469,9 +883,10 @@ namespace SplineEditor
 				IsLoop = false;
 				RemoveCurve(CurvesCount - 1, false);
 			}
-			else { 
+			else
+			{
 
-				if (points[0].position != points[PointsCount-1].position)
+				if (points[0].position != points[PointsCount - 1].position)
 				{
 					var p0 = points[PointsCount - 1].position;
 					var p1 = p0 - (points[PointsCount - 2].position - p0);
@@ -488,6 +903,7 @@ namespace SplineEditor
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
@@ -508,6 +924,7 @@ namespace SplineEditor
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
@@ -534,6 +951,7 @@ namespace SplineEditor
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
@@ -545,7 +963,7 @@ namespace SplineEditor
 		public void InsertCurve(int curveIndex, float t)
 		{
 			t = Mathf.Clamp01(t);
-			if(t == 0f || t == 1f)
+			if (t == 0f || t == 1f)
 			{
 				return;
 			}
@@ -573,7 +991,7 @@ namespace SplineEditor
 
 			var p3 = points[startPointIndex + 3].position;
 
-			newT = (curveIndex + t + (1f - t)*0.4f) / CurvesCount;
+			newT = (curveIndex + t + (1f - t) * 0.4f) / CurvesCount;
 			pointOnCurve1 = GetPoint(newT, false);
 
 			newT = (curveIndex + t + (1f - t) * 0.8f) / CurvesCount;
@@ -593,14 +1011,19 @@ namespace SplineEditor
 			AddPoint(rightControlPoint, startPointIndex + 4);
 
 			var modeIndex = (startPointIndex + 3) / 3;
-			var prevMode = modes[modeIndex-1];
+			var prevMode = modes[modeIndex - 1];
 			modes.Insert(modeIndex, prevMode);
+
+			var pointScaleIndex = (startPointIndex + 3) / 3;
+			var prevScale = pointsScales[pointScaleIndex - 1];
+			pointsScales.Insert(pointScaleIndex, prevScale);
 
 			ApplyAutoSetToAllControlPoints();
 
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
@@ -614,7 +1037,7 @@ namespace SplineEditor
 			var prevInvokeEvents = invokeEvents;
 			invokeEvents = false;
 
-			for (var i = 0; i < PointsCount; i+=3)
+			for (var i = 0; i < PointsCount; i += 3)
 			{
 				SetControlPointMode(i, mode);
 			}
@@ -622,15 +1045,10 @@ namespace SplineEditor
 			invokeEvents = prevInvokeEvents;
 			if (invokeEvents)
 			{
+				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
 		}
-
-		#endregion
-
-		#endregion
-
-		#region Private Methods
 
 		private void AddPoint(Vector3 point)
 		{
@@ -715,7 +1133,7 @@ namespace SplineEditor
 
 		private void ApplyAutoSetToAllControlPoints()
 		{
-			for(var i=0; i < PointsCount; i+=3)
+			for (var i = 0; i < PointsCount; i += 3)
 			{
 				ApplyAffectedAutoSetControlPoints(i);
 			}
@@ -750,7 +1168,7 @@ namespace SplineEditor
 
 		private void ApplyAutoSetControlPoints(int curveIndex)
 		{
-			if(modes[curveIndex]!=BezierControlPointMode.Auto)
+			if (modes[curveIndex] != BezierControlPointMode.Auto)
 			{
 				return;
 			}
@@ -760,16 +1178,21 @@ namespace SplineEditor
 			var previousPointPosition = startPointPosition;
 			var nextPointPosition = startPointPosition;
 
-			if(curveIndex > 0 || isLoop)
+			if (curveIndex > 0 || isLoop)
 			{
 				var loopedIndex = GetLoopingIndex(startPointIndex - 3);
 				previousPointPosition = Points[loopedIndex].position;
-			} 
+			}
 
-			if(curveIndex < CurvesCount || isLoop)
+			if (curveIndex < CurvesCount || isLoop)
 			{
 				var loopedIndex = GetLoopingIndex(startPointIndex + 3);
 				nextPointPosition = Points[loopedIndex].position;
+			}
+
+			if (previousPointPosition == nextPointPosition)
+			{
+				return;
 			}
 
 			var prevDistance = (previousPointPosition - startPointPosition);
@@ -779,13 +1202,13 @@ namespace SplineEditor
 			var prevControlPointIndex = GetLoopingIndex(startPointIndex - 1);
 			var nextControlPointIndex = GetLoopingIndex(startPointIndex + 1);
 
-			if(prevControlPointIndex != -1)
+			if (prevControlPointIndex != -1)
 			{
 				var updatedPosition = Points[startPointIndex].position + dir * prevDistance.magnitude * 0.5f;
 				Points[prevControlPointIndex].position = updatedPosition;
 			}
 
-			if(nextControlPointIndex != -1)
+			if (nextControlPointIndex != -1)
 			{
 				var updatedPosition = Points[startPointIndex].position - dir * nextDistance.magnitude * 0.5f;
 				Points[nextControlPointIndex].position = updatedPosition;
@@ -810,17 +1233,17 @@ namespace SplineEditor
 				else
 				{
 					ApplyAutoSetControlPoints(0);
-					ApplyAutoSetControlPoints(CurvesCount-1);
+					ApplyAutoSetControlPoints(CurvesCount - 1);
 				}
 			}
 			else
 			{
-				if(modes[0] == BezierControlPointMode.Auto)
+				if (modes[0] == BezierControlPointMode.Auto)
 				{
 					points[1].position = (points[0].position + points[2].position) * 0.5f;
 				}
 
-				if(modes[modes.Count-1] == BezierControlPointMode.Auto)
+				if (modes[modes.Count - 1] == BezierControlPointMode.Auto)
 				{
 					points[points.Count - 2].position = (points[points.Count - 1].position + points[points.Count - 3].position) * 0.5f;
 				}
@@ -848,8 +1271,6 @@ namespace SplineEditor
 
 			RemoveCurve(curveIndex, true);
 		}
-
-		#endregion
 
 	}
 

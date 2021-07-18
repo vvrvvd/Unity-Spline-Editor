@@ -5,17 +5,9 @@ namespace SplineEditor.Editor
 	public partial class SplineEditor : UnityEditor.Editor
 	{
 
-		#region Static Fields
-
-		private static Tool savedTool = Tool.None;
-
-		#endregion
-
-		#region Private Methods
-
 		private void InitializeTools()
 		{
-			if (CurrentSpline == null || CurrentSpline.showTransformHandle)
+			if (editorState.CurrentSpline == null || editorState.ShowTransformHandle)
 			{
 				ShowTools();
 			}
@@ -28,7 +20,7 @@ namespace SplineEditor.Editor
 
 		private void ReleaseTools()
 		{
-			if(CurrentSpline==null || CurrentSpline.showTransformHandle)
+			if(editorState.CurrentSpline ==null || editorState.ShowTransformHandle)
 			{
 				ShowTools();
 			}
@@ -40,47 +32,40 @@ namespace SplineEditor.Editor
 
 		private void UpdateTools()
 		{
-			if (CurrentEditor == null || CurrentSpline == null)
+			if (editorState.CurrentEditor == null || editorState.CurrentSpline == null)
 			{
 				return;
 			}
 
-			if(CurrentSpline.showTransformHandle && Tools.current == Tool.None && savedTool != Tool.None)
+			if(editorState.ShowTransformHandle && Tools.current == Tool.None && editorState.savedTool != Tool.None)
 			{
 				ShowTools();
 			}
-			else if (!CurrentSpline.showTransformHandle && Tools.current != Tool.None)
+			else if (!editorState.ShowTransformHandle && Tools.current != Tool.None)
 			{
 				HideTools();
-			} else if(CurrentSpline.showTransformHandle && Tools.current != savedTool)
+			} else if(editorState.ShowTransformHandle && Tools.current != editorState.savedTool)
 			{
-				savedTool = Tools.current;
+				editorState.savedTool = Tools.current;
 			}
 
 		}
 
-		#endregion
-
-		#region Static Methods
-
 		public static void ShowTools()
 		{
-			if (savedTool == Tool.None)
+			if (editorState.savedTool == Tool.None)
 			{
-				savedTool = Tool.Move;
+				editorState.savedTool = Tool.Move;
 			}
 
-			Tools.current = savedTool;
+			Tools.current = editorState.savedTool;
 		}
 
 		public static void HideTools()
 		{
-			savedTool = Tools.current;
+			editorState.savedTool = Tools.current;
 			Tools.current = Tool.None;
 		}
-
-		#endregion
-
 
 	}
 

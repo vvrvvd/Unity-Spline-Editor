@@ -7,8 +7,6 @@ namespace SplineEditor.Editor
 	public partial class SplineEditor : UnityEditor.Editor
 	{
 
-		#region Inspector GUI
-
 		private void DrawInspectorGUI()
 		{
 			DrawStandardScriptReferenceField();
@@ -27,12 +25,12 @@ namespace SplineEditor.Editor
 			var prevEnabled = GUI.enabled;
 			GUI.enabled = false;
 
-			EditorGUILayout.FloatField("Length", CurrentSpline.Length);
+			EditorGUILayout.FloatField("Length", editorState.CurrentSpline.GetLinearLength(precision: 0.001f, useWorldScale: true));
 
 			GUI.enabled = prevEnabled;
 		}
 
-		#endregion
+		
 
 	}
 

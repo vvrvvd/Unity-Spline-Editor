@@ -7,8 +7,6 @@ namespace SplineEditor.Editor
 	public partial class SplineEditor : UnityEditor.Editor
 	{
 
-		#region ShortcutManager Callbacks
-
 		[ShortcutAttribute("Spline Editor/Add Curve", KeyCode.Home, ShortcutModifiers.Action)]
 		private static void AddCurveShortcut()
 		{
@@ -27,7 +25,7 @@ namespace SplineEditor.Editor
 			ScheduleSplitCurve(splitCurveValue);
 		}
 
-		[ShortcutAttribute("Spline Editor/Close Loop", KeyCode.Home, ShortcutModifiers.Action)]
+		[ShortcutAttribute("Spline Editor/Close Loop", KeyCode.L, ShortcutModifiers.Action)]
 		private static void ToggleCloseLoopShortcut()
 		{
 			ScheduleToggleCloseLoop();
@@ -36,19 +34,19 @@ namespace SplineEditor.Editor
 		[ShortcutAttribute("Spline Editor/Cast Spline", KeyCode.U, ShortcutModifiers.Action)]
 		private static void CastSplineShortcut()
 		{
-			if(currentSpline==null)
+			if(editorState.CurrentSpline ==null)
 			{
 				return;
 			}
 
-			var customDirection = -currentSpline.transform.up;
+			var customDirection = -editorState.CurrentSpline.transform.up;
 			ScheduleCastSpline(customDirection);
 		}
 
 		[ShortcutAttribute("Spline Editor/Cast Spline To Camera View", KeyCode.T, ShortcutModifiers.Action)]
 		private static void CastSplineToCameraShortcut()
 		{
-			if (currentSpline == null)
+			if (editorState.CurrentSpline == null)
 			{
 				return;
 			}
@@ -68,6 +66,11 @@ namespace SplineEditor.Editor
 			ScheduleSimplifySpline();
 		}
 
+		[ShortcutAttribute("Spline Editor/Toggle Normals Rotation", KeyCode.K, ShortcutModifiers.Action)]
+		private static void ToggleNormalsEditorModeShortcuts () {
+			ToggleNormalsEditorMode();
+		}
+
 		[ShortcutAttribute("Spline Editor/Toggle Drawer Tool", KeyCode.Slash, ShortcutModifiers.Action)]
 		private static void ToggleDrawSplineModeShortcut()
 		{
@@ -79,8 +82,6 @@ namespace SplineEditor.Editor
 		{
 			ScheduleCastSelectedPoint();
 		}
-
-		#endregion
 
 	}
 

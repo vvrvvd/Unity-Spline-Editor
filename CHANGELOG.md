@@ -1,3 +1,11 @@
+## v1.0.0 [18.07.2021]
+- Adding Normals editor
+- Adding Mesh Generator tool for generating meshes from splines
+- Decreasing GUI calls overhead
+- Major bugfixes
+- Code clean-up
+
+
 ## v0.2.0 [17.05.2021]
 - b3f967d - Adding onSplineChanged event to Spline API.
 - 3c403b5 - Fix for NRE when initializing helpBox editor style.
