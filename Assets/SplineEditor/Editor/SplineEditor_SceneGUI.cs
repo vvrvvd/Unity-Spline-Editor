@@ -254,14 +254,14 @@ namespace SplineEditor.Editor
 				if (point1Index >= 0 && point1Index < editorState.CurrentSpline.PointsCount)
 				{
 					var point1 = handleTransform.TransformPoint(editorState.CurrentSpline.Points[point1Index].position);
-					var rotatedPoint1 = Vector3Utils.RotateAround(point1, worldPoint, rotationDiff);
+					var rotatedPoint1 = VectorUtils.RotateAround(point1, worldPoint, rotationDiff);
 					editorState.CurrentSpline.UpdatePoint(point1Index, handleTransform.InverseTransformPoint(rotatedPoint1));
 				}
 
 				if (point2Index >= 0 && point2Index < editorState.CurrentSpline.PointsCount)
 				{
 					var point2 = handleTransform.TransformPoint(editorState.CurrentSpline.Points[point2Index].position);
-					var rotatedPoint2 = Vector3Utils.RotateAround(point2, worldPoint, rotationDiff);
+					var rotatedPoint2 = VectorUtils.RotateAround(point2, worldPoint, rotationDiff);
 					editorState.CurrentSpline.UpdatePoint(point2Index, handleTransform.InverseTransformPoint(rotatedPoint2));
 				}
 

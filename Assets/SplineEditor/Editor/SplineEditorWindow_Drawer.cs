@@ -15,7 +15,7 @@ namespace SplineEditor.Editor
             var prevEnabled = GUI.enabled;
 
             editorWindowState.IsDrawerSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(editorWindowState.IsDrawerSectionFolded, DrawerGroupTitle);
-            GUI.enabled = isSplineEditorEnabled;
+            GUI.enabled = IsSplineEditorEnabled;
 
             if (editorWindowState.IsDrawerSectionFolded)
 			{
@@ -41,8 +41,8 @@ namespace SplineEditor.Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 
-			GUI.enabled = isSplineEditorEnabled && !editorState.CurrentSpline.IsLoop;
-			var toggleState = isSplineEditorEnabled && editorState.IsDrawerMode;
+			GUI.enabled = IsSplineEditorEnabled && !editorState.CurrentSpline.IsLoop;
+			var toggleState = IsSplineEditorEnabled && editorState.IsDrawerMode;
 			if (GUILayout.Toggle(toggleState, DrawCurveButtonContent, toggleButtonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
 			{
 				SplineEditor.ToggleDrawSplineMode();

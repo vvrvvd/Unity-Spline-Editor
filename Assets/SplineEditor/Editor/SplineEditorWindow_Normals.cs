@@ -13,7 +13,7 @@ namespace SplineEditor.Editor
             var prevEnabled = GUI.enabled;
 
 			editorWindowState.IsNormalsSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(editorWindowState.IsNormalsSectionFolded, NormalsEditorGroupTitle);
-            GUI.enabled = isSplineEditorEnabled;
+            GUI.enabled = IsSplineEditorEnabled;
 
             if (editorWindowState.IsNormalsSectionFolded)
 			{
@@ -39,8 +39,8 @@ namespace SplineEditor.Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 
-			GUI.enabled = isSplineEditorEnabled;
-			var toggleState = isSplineEditorEnabled && editorState.IsNormalsEditorMode;
+			GUI.enabled = IsSplineEditorEnabled;
+			var toggleState = IsSplineEditorEnabled && editorState.IsNormalsEditorMode;
 			if (GUILayout.Toggle(toggleState, NormalsEditorButtonContent, toggleButtonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
 			{
 				SplineEditor.ToggleNormalsEditorMode();

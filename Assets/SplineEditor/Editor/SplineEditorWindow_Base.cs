@@ -1,6 +1,4 @@
-using SplineEditor.Editor;
 using System;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -13,14 +11,17 @@ namespace SplineEditor.Editor
         private static SplineEditorWindowState editorWindowState => SplineEditorWindowState.instance;
         private static SplineEditorConfiguration editorSettings => SplineEditorConfiguration.instance;
 
-        private bool repaintScene = false;
-        private bool isSplineEditorEnabled = false;
-        private bool isCurveEditorEnabled = false;
 
         private int buttonsLayoutIndex = 2;
+
+        private bool repaintScene = false;
+        private bool initializeStyles = false;
+
         private Vector2 scrollPos = Vector2.zero;
 
-        private bool initializeStyles = false;
+        private bool IsSplineEditorEnabled => editorState.CurrentSpline != null;
+        private bool IsCurveEditorEnabled => IsSplineEditorEnabled && editorState.IsAnyPointSelected;
+
 
         [MenuItem("Window/Spline Editor")]
         public static void Initialize()
@@ -55,7 +56,6 @@ namespace SplineEditor.Editor
 
         private void OnSelectedSplineChanged()
 		{
-            isSplineEditorEnabled = editorState.CurrentSpline != null;
             editorState.IsDrawerMode = editorState.CurrentEditor != null && editorState.IsDrawerMode;
             editorState.IsNormalsEditorMode = editorState.CurrentEditor != null && editorState.IsNormalsEditorMode;
             OnSelectedCurveChanged();
@@ -63,7 +63,6 @@ namespace SplineEditor.Editor
 
         private void OnSelectedCurveChanged()
         {
-            isCurveEditorEnabled = isSplineEditorEnabled && editorState.IsAnyPointSelected;
             Repaint();
         }
 
@@ -82,9 +81,6 @@ namespace SplineEditor.Editor
             }
 
             editorState.UpdateSplineStates();
-
-            isCurveEditorEnabled &= editorState.CurrentSpline != null;
-            isSplineEditorEnabled &= editorState.CurrentSpline != null;
 
             scrollPos = GUILayout.BeginScrollView(scrollPos, GUILayout.ExpandHeight(true));
             EditorGUILayout.BeginVertical();

@@ -1,4 +1,3 @@
-using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -64,7 +63,6 @@ namespace SplineEditor.Editor
 				curveDrawerPosition = lastPoint.position;
 				editorState.CurrentSpline?.OnSplineChanged?.Invoke();
 			}
-
 
 			if (editorState.SelectedPointIndex >= editorState.CurrentSpline.PointsCount)
 			{
@@ -229,7 +227,7 @@ namespace SplineEditor.Editor
 			for (var i = 0; i < pointsCount; i++)
 			{
 				var worldPosition = handleTransform.TransformPoint(editorState.CurrentSpline.Points[i].position);
-				Vector3Utils.TryCastPoint(worldPosition, direction, out newPointsPositions[i]);
+				PhysicsUtils.TryCastPoint(worldPosition, direction, out newPointsPositions[i]);
 				newPointsPositions[i] = handleTransform.InverseTransformPoint(newPointsPositions[i]);
 			}
 
