@@ -56,7 +56,7 @@ https://github.com/vvrvvd/Unity-Spline-Editor.git#upm
 
 Editor window can be opened by going to `Window->Spline Editor` on the Unity toolbar. Spline can be edited by **adding**, **removing** or **splitting** curves. Additionaly every control point has four **modes** that can influence a neighbour control point. When spline is **looped** the first and the last points are treated as the same point so they share the same position and mode (keep in mind that they are still two distinct points). Splines can also be quickly **factored** or **simplified** by adding or removing mid points from them.
 
- <img src="https://i.imgur.com/I5uwhxj.gif">
+ <img src="https://i.imgur.com/4gnWIvc.gif">
  <img src="https://i.imgur.com/I5uwhxj.gif">
 
 ### Normals Editor <a name="casting-spline"></a>
@@ -92,7 +92,7 @@ It is located in `Samples/Mesh Generator` folder.
 
 It is located in `Samples/Line Renderer` folder.
 
- <img src="https://i.imgur.com/gC0KoT8.gif">
+ <img src="https://i.imgur.com/goQc1uk.gif">
  
  ## License <a name="license"></a>
  
