@@ -77,17 +77,17 @@ Spline points have normals that can be rotated along spline tangents. There is a
 
  <img src="https://i.imgur.com/kG2aeke.gif">
  
- ### Examples <a name="example"></a>
+ 
+## Examples <a name="example"></a>
 
-
-## Mesh Generator <a name="mesh-spline"></a>
+### Mesh Generator <a name="mesh-spline"></a>
 Add **Spline Mesh** component on scene to generate mesh from Bezier Spline.
 
 It is located in `Samples/Mesh Generator` folder.
 
  <img src="https://i.imgur.com/gC0KoT8.gif">
  
-## Line Renderer Spline <a name="mesh-spline"></a>
+### Line Renderer Spline <a name="mesh-spline"></a>
 **Line Renderer** may be used to visualize spline by adding **Line Renderer Spline** component.
 
 It is located in `Samples/Line Renderer` folder.
