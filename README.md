@@ -53,7 +53,7 @@ https://github.com/vvrvvd/Unity-Spline-Editor.git#upm
 
 Editor window can be opened by going to `Window->Spline Editor` on the Unity toolbar. Spline can be edited by **adding**, **removing** or **splitting** curves. Additionaly every control point has three **modes** that can influence a neighbour control point. When spline is **looped** the first and the last points are treated as the same point so they share the same position and mode (keep in mind that they are still two distinct points). Splines can also be quickly **factored** or **simplified** by adding or removing mid points from them.
 
- <img src="https://i.imgur.com/o3CVT8e.gif">
+ <img src="https://imgur.com/xTOfZnt">
  <img src="https://i.imgur.com/uVQE4iX.gif">
  <img src="https://i.imgur.com/AfDWVpm.gif">
 
