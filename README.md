@@ -30,13 +30,14 @@ The tool was written to bring cubic bezier splines to Unity. The tool let you do
 - Four modes for control points: **Free**, **Aligned**, **Mirrored** and **Automatic**
 - Splitting curves by split point value
 - Quick factoring and simplifying splines
+- Normals editor
 - Casting splines to either self, custom transform or camera using Physics Raycast
 - Casting control points to current mouse position using Physics Raycast
 - Drawer tool for drawing splines in Scene View
 - Three buttons layouts types: Image, Text and Image & Text
 - Adjustable editor settings (colors, sizes etc.)
 - Adjustable shortcuts through Unity Shortcuts manager
-- Example scripts showing how the tool may be used along with Line Renderer
+- Example scripts for generating meshes from splines and using line renderers
 
 ## System Requirements <a name="system-requirements"></a>
 
