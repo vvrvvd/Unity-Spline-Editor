@@ -10,7 +10,7 @@ namespace SplineEditor.Editor
         private void DrawCurveOptions()
 		{
             var prevEnabled = GUI.enabled;
-            var isGroupEnabled = isCurveEditorEnabled;
+            var isGroupEnabled = IsCurveEditorEnabled;
 
             editorWindowState.IsCurveSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(editorWindowState.IsCurveSectionFolded, BezierGroupTitle);
             GUI.enabled = isGroupEnabled;

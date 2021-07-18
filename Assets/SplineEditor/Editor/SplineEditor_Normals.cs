@@ -1,6 +1,5 @@
 using UnityEditor;
 using UnityEngine;
-using static SplineEditor.BezierSpline;
 
 namespace SplineEditor.Editor
 {
@@ -58,7 +57,7 @@ namespace SplineEditor.Editor
 
 				Undo.RecordObject(editorState.CurrentSpline, "Rotate Normal Vector");
 
-				var normalAngleDiff = Vector3.SignedAngle(rotation * editorState.CurrentSpline.Normals[normalIndex], editorState.lastRotation * editorState.CurrentSpline.Normals[normalIndex], handleTransform.rotation * (-editorState.CurrentSpline.Tangents[normalIndex]));
+				var normalAngleDiff = QuaternionUtils.GetSignedAngle(editorState.lastRotation, rotation, tangentWorldVector);
 				editorState.CurrentSpline.UpdateNormalAngularOffset(normalIndex, normalAngularOffset + normalAngleDiff);
 				editorState.lastRotation = rotation;
 				editorState.wasSplineModified = true;

@@ -14,7 +14,7 @@ namespace SplineEditor.Editor
 			var prevColor = GUI.color;
 
 			editorWindowState.IsPointSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(editorWindowState.IsPointSectionFolded, PointGroupTitle);
-			GUI.enabled = isCurveEditorEnabled;
+			GUI.enabled = editorState.IsAnyPointSelected;
 			if(editorWindowState.IsPointSectionFolded)
 			{
 				DrawSelectedSplineInspector();

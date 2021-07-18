@@ -13,7 +13,7 @@ namespace SplineEditor.Editor
 			var prevColor = GUI.color;
 
 			editorWindowState.IsSplineSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(editorWindowState.IsSplineSectionFolded, SplineOptionsTitle);
-			GUI.enabled = isSplineEditorEnabled;
+			GUI.enabled = IsSplineEditorEnabled;
 			if (editorWindowState.IsSplineSectionFolded)
 			{
 				DrawSplineStatsSection();
