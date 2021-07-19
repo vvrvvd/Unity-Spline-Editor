@@ -10,7 +10,7 @@ namespace SplineEditor.Editor
 
 		//GUI
 		[SerializeField]
-		private bool useText = false;
+		private bool useText = true;
 		public bool UseText
 		{
 			get => useText;
@@ -27,7 +27,7 @@ namespace SplineEditor.Editor
 		}
 
 		[SerializeField]
-		private bool useImages = false;
+		private bool useImages = true;
 		public bool UseImages
 		{
 			get => useImages;
