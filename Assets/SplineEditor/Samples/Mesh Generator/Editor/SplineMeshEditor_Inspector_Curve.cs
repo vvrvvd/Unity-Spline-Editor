@@ -17,9 +17,11 @@ namespace SplineEditor.MeshGenerator.Editor
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
+				EditorGUI.indentLevel++;
 
 				DrawWidthCurvesFields();
 
+				EditorGUI.indentLevel--;
 				GUILayout.Space(10);
 				GUILayout.EndVertical();
 			}
@@ -31,22 +33,18 @@ namespace SplineEditor.MeshGenerator.Editor
 		private void DrawWidthCurvesFields()
 		{
 			GUILayout.BeginVertical();
-			GUILayout.FlexibleSpace();
 
+			DrawAsymetrictWidthCurvesToggle();
 
-			if(!splineMesh.UseAsymetricWidthCurve)
+			if (!splineMesh.UseAsymetricWidthCurve)
 			{
 				DrawAsymetricCurveToggle();
 			}
 			else
 			{
 				DrawRightSideCurveField();
-				GUILayout.Space(10);
 				DrawLeftSideCurveField();
 			}
-
-			GUILayout.Space(10);
-			DrawAsymetrictWidthCurvesToggle();
 
 			GUILayout.EndVertical();
 		}
@@ -54,11 +52,8 @@ namespace SplineEditor.MeshGenerator.Editor
 		private void DrawAsymetrictWidthCurvesToggle()
 		{
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
 
-			GUILayout.Label(CurveOptionsAsymetricWidthCurveToggleContent);
-			GUILayout.Space(20);
-			var toggleState = GUILayout.Toggle(splineMesh.UseAsymetricWidthCurve, string.Empty);
+			var toggleState = EditorGUILayout.Toggle(CurveOptionsAsymetricWidthCurveToggleContent, splineMesh.UseAsymetricWidthCurve);
 			if (toggleState != splineMesh.UseAsymetricWidthCurve)
 			{
 				Undo.RecordObject(splineMesh, "Toggle asymetric spline width curve");
@@ -66,85 +61,48 @@ namespace SplineEditor.MeshGenerator.Editor
 				EditorUtility.SetDirty(splineMesh);
 			}
 
-			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
 
 		private void DrawRightSideCurveField()
 		{
-			GUILayout.BeginVertical();
-
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			GUILayout.Label(CurveOptionsRightWidthCurveContent);
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			EditorGUILayout.CurveField(string.Empty, splineMesh.RightSideCurve.animationCurve, WidthCurveMaxWidth);
+			EditorGUILayout.CurveField(CurveOptionsRightWidthCurveContent, splineMesh.RightSideCurve.animationCurve);
 			if (splineMesh.RightSideCurve.CheckWasCurveModified())
 			{
 				Undo.RecordObject(splineMesh, "Change mirrored width curve");
 				splineMesh.RightSideCurve = splineMesh.RightSideCurve;
 				EditorUtility.SetDirty(splineMesh);
 			}
-			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
-
-			GUILayout.EndVertical();
 		}
 
 		private void DrawLeftSideCurveField()
 		{
-			GUILayout.BeginVertical();
-
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			GUILayout.Label(CurveOptionsLeftWidthCurveContent);
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
 
 			EditorGUI.BeginChangeCheck();
-			EditorGUILayout.CurveField(string.Empty, splineMesh.LeftSideCurve.animationCurve, WidthCurveMaxWidth);
+			EditorGUILayout.CurveField(CurveOptionsLeftWidthCurveContent, splineMesh.LeftSideCurve.animationCurve);
 			if (splineMesh.LeftSideCurve.CheckWasCurveModified())
 			{
 				Undo.RecordObject(splineMesh, "Change mirrored width curve");
 				splineMesh.LeftSideCurve = splineMesh.LeftSideCurve;
 				EditorUtility.SetDirty(splineMesh);
 			}
-			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
-
-			GUILayout.EndVertical();
 		}
 
 		private void DrawAsymetricCurveToggle()
 		{
-			GUILayout.BeginVertical();
-
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			GUILayout.Label(CurveOptionsWidthCurveContent);
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			EditorGUILayout.CurveField(string.Empty, splineMesh.RightSideCurve.animationCurve, WidthCurveMaxWidth);
+			EditorGUILayout.CurveField(CurveOptionsWidthCurveContent, splineMesh.RightSideCurve.animationCurve);
 			if (splineMesh.RightSideCurve.CheckWasCurveModified())
 			{
 				Undo.RecordObject(splineMesh, "Change mirrored width curve");
 				splineMesh.RightSideCurve = splineMesh.RightSideCurve;
 				EditorUtility.SetDirty(splineMesh);
 			}
-			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
-
-			GUILayout.EndVertical();
 		}
 
 	}

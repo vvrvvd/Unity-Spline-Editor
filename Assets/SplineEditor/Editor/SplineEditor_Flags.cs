@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEditor.ShortcutManagement;
 using UnityEditor;
 
 namespace SplineEditor.Editor

@@ -12,13 +12,8 @@ namespace SplineEditor.Editor
 		private static GUILayoutOption ToolsSettingsButtonHeight { get; } = GUILayout.Height(30);
 		private static GUILayoutOption ToolsHeaderToolbarWidth { get; } = GUILayout.Width(128);
 		private static GUILayoutOption ToolsHeaderToolbarHeight { get; } = GUILayout.Height(18);
-		private static GUILayoutOption ToolsButtonsWidth { get; } = GUILayout.Width(92);
+		private static GUILayoutOption ToolsButtonsMinWidth { get; } = GUILayout.MinWidth(92);
 		private static GUILayoutOption ToolsButtonsHeight { get; } = GUILayout.Height(40);
-		private static GUILayoutOption ToolsPointPositionWidth { get; } = GUILayout.Width(275);
-		private static GUILayoutOption ToolsPointPopupLabelWidth { get; } = GUILayout.Width(50);
-		private static GUILayoutOption ToolsPointPopupWidth { get; } = GUILayout.Width(80);
-		private static GUILayoutOption ToolsSliderWidth { get; } = GUILayout.Width(175);
-		private static GUILayoutOption ToolsCustomTransformFieldWidth { get; } = GUILayout.Width(175);
 
 
 		private const string HeaderTitle = "Spline Editor";
@@ -46,7 +41,7 @@ namespace SplineEditor.Editor
 		private const string PointPositionLabel = "Position";
 		private const string PointScaleLabel = "Scale";
 		private const string PointModeLabel = "Mode";
-		private const string ApplyToAllPointsLabel = "Apply To All";
+		private const string ApplyToAllPointsLabel = "Apply Mode To All";
 		private const string ApplyToAllPointsTooltip = "Apply currently selected mode to all control points.";
 
 		private static GUIContent PointPositionContent = new GUIContent(PointPositionLabel);
@@ -55,12 +50,12 @@ namespace SplineEditor.Editor
 		private static GUIContent ApplyToAllPoinstButtonContent = new GUIContent(ApplyToAllPointsLabel);
 
 		private const string BezierGroupTitle = "Curve";
-		private const string AddCurveButtonTitle = "Add Curve";
+		private const string AddCurveButtonTitle = "Add";
 		private const string AddCurveLengthTitle = "Add Curve Length";
 		private const string AddCurveButtonTooltip = "Add curve at the beginning or the end of the spline.";
-		private const string RemoveCurveButtonTitle = "Remove Curve";
+		private const string RemoveCurveButtonTitle = "Remove";
 		private const string RemoveCurveButtonTooltip = "Remove selected curve.";
-		private const string SplitCurveButtonTitle = "Split Curve";
+		private const string SplitCurveButtonTitle = "Split";
 		private const string SplitCurveButtonTooltip = "Split curve by adding mid point.";
 		private const string SplitPointSliderLabel = "Split Point";
 
@@ -71,17 +66,17 @@ namespace SplineEditor.Editor
 		private static GUIContent SplitPointSliderContent = new GUIContent(SplitPointSliderLabel);
 		
 		private const string SplineOptionsTitle = "Spline";
-		private const string CloseLoopButtonTitle = "Close Loop";
+		private const string CloseLoopButtonTitle = "Close";
 		private const string CloseLoopButtonTooltip = "Loop spline by adding closing curve.";
-		private const string OpenLoopButtonTitle = "Open Loop";
+		private const string OpenLoopButtonTitle = "Open";
 		private const string OpenLoopButtonTooltip = "Open spline by removing last closing curve.";
-		private const string FactorSplineButtonTitle = "Factor Spline";
+		private const string FactorSplineButtonTitle = "Factor";
 		private const string FactorSplineButtonTooltip = "Factor spline by adding mid points to every curve.";
-		private const string SimplifySplineButtonTitle = "Simplify Spline";
+		private const string SimplifySplineButtonTitle = "Simplify";
 		private const string SimplifySplineButtonTooltip = "Simplify spline by removing every second curve.";
-		private const string CastSplineButtonTitle = "Cast Spline";
+		private const string CastSplineButtonTitle = "Cast";
 		private const string CastSplineButtonTooltip = "Cast spline regarding to cast transform or self (transform == null).";
-		private const string CastSplineToCameraButtonTitle = "Cast To Camera";
+		private const string CastSplineToCameraButtonTitle = "Camera Cast";
 		private const string CastSplineToCameraButtonTooltip = "Cast spline regarding to camera view.";
 		private const string CastTransformFieldLabel = "Cast Transform";
 		private const string LengthSplineFieldLabel = "Length";

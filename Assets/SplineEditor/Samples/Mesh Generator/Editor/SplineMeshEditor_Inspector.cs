@@ -19,7 +19,7 @@ namespace SplineEditor.MeshGenerator.Editor
 
 			GUILayout.BeginVertical();
 			GUI.enabled = false;
-			EditorGUILayout.ObjectField("Script:", MonoScript.FromMonoBehaviour((SplineMesh)target), typeof(SplineMesh), false);
+			EditorGUILayout.ObjectField("Script", MonoScript.FromMonoBehaviour((SplineMesh)target), typeof(SplineMesh), false);
 			GUI.enabled = true;
 
 			DrawMeshOptions();

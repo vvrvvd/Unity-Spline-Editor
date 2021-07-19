@@ -20,10 +20,12 @@ namespace SplineEditor.MeshGenerator.Editor
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
+				EditorGUI.indentLevel++;
 
 				DrawDrawPointsToggle();
 				DrawDrawNormalsToggle();
 
+				EditorGUI.indentLevel--;
 				GUILayout.Space(10);
 				GUILayout.EndVertical();
 			}
@@ -35,10 +37,8 @@ namespace SplineEditor.MeshGenerator.Editor
 		private void DrawDrawPointsToggle()
 		{
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
 
-			GUILayout.Label(GuiOptionsDrawPointsToggleContent);
-			var toggleState = GUILayout.Toggle(meshEditorState.DrawPoints, string.Empty);
+			var toggleState = EditorGUILayout.Toggle(GuiOptionsDrawPointsToggleContent, meshEditorState.DrawPoints);
 			if (toggleState != meshEditorState.DrawPoints)
 			{
 				Undo.RecordObject(meshEditorState, "Toggle Draw Points");
@@ -46,17 +46,14 @@ namespace SplineEditor.MeshGenerator.Editor
 				EditorUtility.SetDirty(splineMesh);
 			}
 
-			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
 
 		private void DrawDrawNormalsToggle()
 		{
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
 
-			GUILayout.Label(GuiOptionsDrawNormalToggleContent);
-			var toggleState = GUILayout.Toggle(meshEditorState.DrawNormals, string.Empty);
+			var toggleState = EditorGUILayout.Toggle(GuiOptionsDrawNormalToggleContent, meshEditorState.DrawNormals);
 			if (toggleState != meshEditorState.DrawNormals)
 			{
 				Undo.RecordObject(meshEditorState, "Toggle Draw Normals");
@@ -64,7 +61,6 @@ namespace SplineEditor.MeshGenerator.Editor
 				EditorUtility.SetDirty(splineMesh);
 			}
 
-			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
 

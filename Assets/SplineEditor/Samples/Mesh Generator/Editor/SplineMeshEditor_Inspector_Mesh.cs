@@ -18,6 +18,7 @@ namespace SplineEditor.MeshGenerator.Editor
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
+				EditorGUI.indentLevel++;
 
 				DrawUsePointsScaleToggle();
 				DrawMeshWidthField();
@@ -27,6 +28,7 @@ namespace SplineEditor.MeshGenerator.Editor
 
 				DrawBakeMeshButton();
 
+				EditorGUI.indentLevel--;
 				GUILayout.Space(10);
 				GUILayout.EndVertical();
 			}
@@ -38,7 +40,6 @@ namespace SplineEditor.MeshGenerator.Editor
 		private void DrawUsePointsScaleToggle()
 		{
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
 
 			var toggleState = EditorGUILayout.Toggle(MeshOptionsUsePointsScaleToggleContent, splineMesh.UsePointsScale);
 			if (toggleState != splineMesh.UsePointsScale)
@@ -48,14 +49,12 @@ namespace SplineEditor.MeshGenerator.Editor
 				EditorUtility.SetDirty(splineMesh);
 			}
 
-			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
 
 		private void DrawMeshSpacingField()
 		{
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
 
 			var nextMeshSpacing = EditorGUILayout.FloatField(MeshOptionsMeshSpacingFieldContent, splineMesh.Spacing);
 			if (nextMeshSpacing != splineMesh.Spacing)
@@ -65,14 +64,12 @@ namespace SplineEditor.MeshGenerator.Editor
 				EditorUtility.SetDirty(splineMesh);
 			}
 
-			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
 
 		private void DrawMeshWidthField()
 		{
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
 
 			var nextMeshWidth = EditorGUILayout.FloatField(MeshOptionsMeshWidthFieldContent, splineMesh.Width);
 			if (nextMeshWidth != splineMesh.Width)
@@ -82,15 +79,14 @@ namespace SplineEditor.MeshGenerator.Editor
 				EditorUtility.SetDirty(splineMesh);
 			}
 
-			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
 
 		private void DrawBakeMeshButton()
 		{
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			if (GUILayout.Button(MeshOptionsBakeMeshButtonContent, buttonStyle, ButtonMaxWidth, ButtonHeight))
+			GUILayout.Space(20);
+			if (GUILayout.Button(MeshOptionsBakeMeshButtonContent, buttonStyle, ButtonHeight))
 			{
 				splineMesh.ConstructMesh();
 				var path = EditorUtility.SaveFilePanel(MeshOptionsBakeMeshWindowTitle, MeshOptionsBakeMeshWindowFolderPath, MeshOptionsBakeMeshWindowFileName, MeshOptionsBakeMeshWindowFileExtension);
@@ -102,7 +98,7 @@ namespace SplineEditor.MeshGenerator.Editor
 				AssetDatabase.SaveAssets();
 			}
 
-			GUILayout.FlexibleSpace();
+			GUILayout.Space(20);
 			GUILayout.EndHorizontal();
 		}
 

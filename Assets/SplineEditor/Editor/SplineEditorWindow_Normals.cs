@@ -19,13 +19,14 @@ namespace SplineEditor.Editor
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
+				EditorGUI.indentLevel++;
 
-				GUILayout.Space(10);
-				DrawRotateNormalsButton();
 				DrawFlipNormalsToggle();
 				DrawNormalLocalRotationField();
 				DrawNormalsGlobalRotationField();
+				DrawRotateNormalsButton();
 
+				EditorGUI.indentLevel--;
 				GUILayout.Space(10);
 				GUILayout.EndVertical();
 			}
@@ -37,28 +38,25 @@ namespace SplineEditor.Editor
 		private void DrawRotateNormalsButton()
 		{
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
+			GUILayout.Space(15);
 
 			GUI.enabled = IsSplineEditorEnabled;
 			var toggleState = IsSplineEditorEnabled && editorState.IsNormalsEditorMode;
-			if (GUILayout.Toggle(toggleState, NormalsEditorButtonContent, toggleButtonStyle, ToolsButtonsWidth, ToolsButtonsHeight))
+			if (GUILayout.Toggle(toggleState, NormalsEditorButtonContent, toggleButtonStyle, ToolsButtonsHeight))
 			{
 				SplineEditor.ToggleNormalsEditorMode();
 				repaintScene = true;
 			}
 
-			GUILayout.FlexibleSpace();
+			GUILayout.Space(15);
 			GUILayout.EndHorizontal();
 		}
 
 		private void DrawFlipNormalsToggle()
 		{
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
 			editorWindowState.PreviousFlipNormals = editorState.CurrentSpline != null ? editorState.CurrentSpline.FlipNormals : editorWindowState.PreviousFlipNormals;
-			GUILayout.Label(FlipNormalsToggleFieldContent);
-			GUILayout.Space(75);
-			var nextFlipNormals = GUILayout.Toggle(editorWindowState.PreviousFlipNormals, string.Empty);
+			var nextFlipNormals = EditorGUILayout.Toggle(FlipNormalsToggleFieldContent, editorWindowState.PreviousFlipNormals);
 			if (nextFlipNormals != editorWindowState.PreviousFlipNormals)
 			{
 				Undo.RecordObject(editorState.CurrentSpline, "Toggle Flip Normals");
@@ -67,7 +65,7 @@ namespace SplineEditor.Editor
 				repaintScene = true;
 			}
 			editorWindowState.PreviousFlipNormals = nextFlipNormals;
-			GUILayout.FlexibleSpace();
+			GUILayout.Space(15);
 			GUILayout.EndHorizontal();
 		}
 
@@ -79,7 +77,6 @@ namespace SplineEditor.Editor
 			var normalIndex = editorState.SelectedPointIndex / 3;
 
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
 			GUI.enabled = isNormalsEditorEnabled;
 			editorWindowState.PreviousNormalLocalRotation = isNormalsEditorEnabled ? currentSpline.NormalsAngularOffsets[normalIndex] : editorWindowState.PreviousNormalLocalRotation;
 			var nextNormalsRotation = EditorGUILayout.FloatField(NormalsEditorLocalRotationContent, editorWindowState.PreviousNormalLocalRotation);
@@ -92,7 +89,7 @@ namespace SplineEditor.Editor
 			}
 
 			editorWindowState.PreviousNormalLocalRotation = nextNormalsRotation;
-			GUILayout.FlexibleSpace();
+			GUILayout.Space(15);
 			GUILayout.EndHorizontal();
 
 			GUI.enabled = prevEnabled;
@@ -101,7 +98,6 @@ namespace SplineEditor.Editor
 		private void DrawNormalsGlobalRotationField()
 		{
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
 			editorWindowState.PreviousNormalsGlobalRotation = editorState.CurrentSpline != null ? editorState.CurrentSpline.GlobalNormalsRotation : editorWindowState.PreviousNormalsGlobalRotation;
 			var nextNormalsRotation = EditorGUILayout.FloatField(NormalsEditorGlobalRotationContent, editorWindowState.PreviousNormalsGlobalRotation);
 			if (nextNormalsRotation != editorWindowState.PreviousNormalsGlobalRotation)
@@ -114,7 +110,7 @@ namespace SplineEditor.Editor
 			}
 
 			editorWindowState.PreviousNormalsGlobalRotation = nextNormalsRotation;
-			GUILayout.FlexibleSpace();
+			GUILayout.Space(15);
 			GUILayout.EndHorizontal();
 		}
 

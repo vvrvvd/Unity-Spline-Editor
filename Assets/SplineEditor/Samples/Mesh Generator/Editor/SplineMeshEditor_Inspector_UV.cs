@@ -18,12 +18,14 @@ namespace SplineEditor.MeshGenerator.Editor
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
+				EditorGUI.indentLevel++;
 
 				DrawMirrorUvToggle();
 				DrawUvModeDropdown();
 				GUILayout.Space(10);
 				DrawShowUvButton();
 
+				EditorGUI.indentLevel--;
 				GUILayout.Space(10);
 				GUILayout.EndVertical();
 			}
@@ -35,11 +37,8 @@ namespace SplineEditor.MeshGenerator.Editor
 		private void DrawMirrorUvToggle()
 		{
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
 
-			GUILayout.Label(UvOptionsMirrorUvToggleContent);
-			GUILayout.Space(10);
-			var toggleState = GUILayout.Toggle(splineMesh.MirrorUV, string.Empty);
+			var toggleState = EditorGUILayout.Toggle(UvOptionsMirrorUvToggleContent, splineMesh.MirrorUV);
 			if (toggleState != splineMesh.MirrorUV)
 			{
 				Undo.RecordObject(splineMesh, "Toggle mirror mesh UV ");
@@ -47,17 +46,14 @@ namespace SplineEditor.MeshGenerator.Editor
 				EditorUtility.SetDirty(splineMesh);
 			}
 
-			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
 
 		private void DrawUvModeDropdown()
 		{
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
 
-			GUILayout.Label(UvOptionsUvModeDropdownContent);
-			var modeState = (SplineMesh.UVMode)EditorGUILayout.EnumPopup(string.Empty, splineMesh.UvMode, MaxDropdownWidth);
+			var modeState = (SplineMesh.UVMode)EditorGUILayout.EnumPopup(UvOptionsUvModeDropdownContent, splineMesh.UvMode);
 			if (modeState != splineMesh.UvMode)
 			{
 				Undo.RecordObject(splineMesh, "Change mesh UV Mode");
@@ -65,23 +61,22 @@ namespace SplineEditor.MeshGenerator.Editor
 				EditorUtility.SetDirty(splineMesh);
 			}
 
-			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
 
 		private void DrawShowUvButton()
 		{
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
+			GUILayout.Space(20);
 
 			var isDebugModeView = meshEditorState.IsDebugModeView(splineMesh);
 			var uvButtonContent = isDebugModeView ? UvOptionsHideDebugViewButtonContent : UvOptionsShowDebugViewButtonContent;
-			if (GUILayout.Button(uvButtonContent, buttonStyle, ButtonMaxWidth, ButtonHeight))
+			if (GUILayout.Button(uvButtonContent, buttonStyle, ButtonHeight))
 			{
 				meshEditorState.SetDebugModeView(splineMesh, !isDebugModeView);
 			}
-
-			GUILayout.FlexibleSpace();
+			
+			GUILayout.Space(20);
 			GUILayout.EndHorizontal();
 		}
 
