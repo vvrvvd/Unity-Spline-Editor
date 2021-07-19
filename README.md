@@ -1,5 +1,5 @@
 # Unity Spline Editor
-[![Unity 2019.4+](https://img.shields.io/badge/unity-2019.4%2B-blue.svg)](https://unity3d.com/get-unity/download) [![openupm](https://img.shields.io/npm/v/com.vvrvvd.spline-editor?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.vvrvvd.spline-editor/) [![license badge](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Unity 2019.4+](https://img.shields.io/badge/unity-2019.4%2B-blue.svg)](https://unity3d.com/get-unity/download) [![openupm](https://img.shields.io/npm/v/com.vvrvvd.spline-editor?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.vvrvvd.spline-editor/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Table Of Contents
 
@@ -97,4 +97,4 @@ It is located in `Samples/Line Renderer` folder.
  
  ## License <a name="license"></a>
  
-[MIT](LICENSE)
+[MIT](https://opensource.org/licenses/MIT)
