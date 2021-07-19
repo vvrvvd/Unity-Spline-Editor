@@ -89,7 +89,7 @@ It is located in `Samples/Mesh Generator` folder.
  <img src="https://i.imgur.com/gC0KoT8.gif">
  
 ### Line Renderer Spline <a name="mesh-spline"></a>
-**Line Renderer** may be used to visualize spline by adding **Line Renderer Spline** component.
+To visualize spline using **Line Renderer**, add **Line Renderer Spline** component on scene.
 
 It is located in `Samples/Line Renderer` folder.
 
