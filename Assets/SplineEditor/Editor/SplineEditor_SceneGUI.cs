@@ -165,7 +165,7 @@ namespace SplineEditor.Editor
 				{
 					Undo.RecordObject(editorState.CurrentSpline, "Cast Spline Point To Mouse");
 					worldPoint = castedPosition;
-					editorState.CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(worldPoint));
+					editorState.CurrentSpline.SetPoint(index, handleTransform.InverseTransformPoint(worldPoint));
 					editorState.wasSplineModified = true;
 				}
 			}
@@ -178,13 +178,13 @@ namespace SplineEditor.Editor
 				{
 					Undo.RecordObject(editorState.CurrentSpline, "Move Spline Point");
 					editorState.isDraggingPoint = true;
-					editorState.CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(worldPoint));
+					editorState.CurrentSpline.SetPoint(index, handleTransform.InverseTransformPoint(worldPoint));
 					editorState.wasSplineModified = true;
 				}
 				else if ((editorState.isDraggingPoint && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
 				{
 					Undo.RecordObject(editorState.CurrentSpline, "Move Spline Point");
-					editorState.CurrentSpline.UpdatePoint(index, handleTransform.InverseTransformPoint(worldPoint));
+					editorState.CurrentSpline.SetPoint(index, handleTransform.InverseTransformPoint(worldPoint));
 					editorState.isDraggingPoint = false;
 					castSelectedPointFlag = false;
 					editorState.wasSplineModified = true;
@@ -222,12 +222,12 @@ namespace SplineEditor.Editor
 				Undo.RecordObject(editorState.CurrentSpline, "Scale Spline Point");
 				editorState.isScaling = true;
 
-				editorState.CurrentSpline.UpdatePointsScale(pointScaleIndex, editorState.lastScale);
+				editorState.CurrentSpline.SetPointsScale(pointScaleIndex, editorState.lastScale);
 				editorState.wasSplineModified = true;
 			}
 			else if ((editorState.isScaling && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
 			{
-				editorState.CurrentSpline.UpdatePointsScale(pointScaleIndex, editorState.lastScale);
+				editorState.CurrentSpline.SetPointsScale(pointScaleIndex, editorState.lastScale);
 				editorState.isScaling = false;
 				editorState.wasSplineModified = true;
 			}
@@ -255,14 +255,14 @@ namespace SplineEditor.Editor
 				{
 					var point1 = handleTransform.TransformPoint(editorState.CurrentSpline.Points[point1Index].position);
 					var rotatedPoint1 = VectorUtils.RotateAround(point1, worldPoint, rotationDiff);
-					editorState.CurrentSpline.UpdatePoint(point1Index, handleTransform.InverseTransformPoint(rotatedPoint1));
+					editorState.CurrentSpline.SetPoint(point1Index, handleTransform.InverseTransformPoint(rotatedPoint1));
 				}
 
 				if (point2Index >= 0 && point2Index < editorState.CurrentSpline.PointsCount)
 				{
 					var point2 = handleTransform.TransformPoint(editorState.CurrentSpline.Points[point2Index].position);
 					var rotatedPoint2 = VectorUtils.RotateAround(point2, worldPoint, rotationDiff);
-					editorState.CurrentSpline.UpdatePoint(point2Index, handleTransform.InverseTransformPoint(rotatedPoint2));
+					editorState.CurrentSpline.SetPoint(point2Index, handleTransform.InverseTransformPoint(rotatedPoint2));
 				}
 
 				editorState.lastRotation = rotation;

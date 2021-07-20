@@ -58,7 +58,7 @@ namespace SplineEditor.Editor
 				Undo.RecordObject(editorState.CurrentSpline, "Rotate Normal Vector");
 
 				var normalAngleDiff = QuaternionUtils.GetSignedAngle(editorState.lastRotation, rotation, tangentWorldVector);
-				editorState.CurrentSpline.UpdateNormalAngularOffset(normalIndex, normalAngularOffset + normalAngleDiff);
+				editorState.CurrentSpline.SetNormalAngularOffset(normalIndex, normalAngularOffset + normalAngleDiff);
 				editorState.lastRotation = rotation;
 				editorState.wasSplineModified = true;
 			}

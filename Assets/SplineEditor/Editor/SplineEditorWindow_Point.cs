@@ -70,7 +70,7 @@ namespace SplineEditor.Editor
 			if (EditorGUI.EndChangeCheck())
 			{
 				Undo.RecordObject(currentSpline, "Move Point");
-				currentSpline.UpdatePoint(selectedPointIndex, point);
+				currentSpline.SetPoint(selectedPointIndex, point);
 				repaintScene = true;
 			}
 			GUILayout.Space(15);
@@ -95,7 +95,7 @@ namespace SplineEditor.Editor
 			if (EditorGUI.EndChangeCheck())
 			{
 				Undo.RecordObject(currentSpline, "Scale Point");
-				currentSpline.UpdatePointsScale(pointIndex, nextPointScale);
+				currentSpline.SetPointsScale(pointIndex, nextPointScale);
 			}
 			editorWindowState.PreviousPointScale = currentPointScale;
 

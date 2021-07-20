@@ -209,8 +209,7 @@ namespace SplineEditor.Editor
 
 			Undo.RecordObject(editorState.CurrentSpline, "Remove Curve");
 			var curveToRemove = editorState.SelectedCurveIndex;
-			var removeFirstPoint = (editorState.SelectedPointIndex - curveToRemove * 3) < 2;
-			editorState.CurrentSpline.RemoveCurve(curveToRemove, removeFirstPoint);
+			editorState.CurrentSpline.RemoveCurve(curveToRemove);
 			var nextSelectedIndex = Mathf.Min(editorState.SelectedPointIndex, editorState.CurrentSpline.PointsCount - 1);
 			UpdateSelectedIndex(nextSelectedIndex);
 
@@ -236,18 +235,18 @@ namespace SplineEditor.Editor
 				var prevPoint = i > 0 ? editorState.CurrentSpline.Points[i - 1].position : Vector3.zero;
 				var nextPoint = i < pointsCount - 1 ? editorState.CurrentSpline.Points[i + 1].position : Vector3.zero;
 
-				editorState.CurrentSpline.UpdatePoint(i, newPointsPositions[i], false, true);
+				editorState.CurrentSpline.SetPoint(i, newPointsPositions[i], false, true);
 
 				var isPreviousPointCasted = i > 0 && newPointsPositions[i - 1] != prevPoint;
 				if (isPreviousPointCasted)
 				{
-					editorState.CurrentSpline.UpdatePoint(i - 1, newPointsPositions[i - 1], false, false);
+					editorState.CurrentSpline.SetPoint(i - 1, newPointsPositions[i - 1], false, false);
 				}
 
 				var isNextPointCasted = i < pointsCount - 1 && newPointsPositions[i + 1] != nextPoint;
 				if (isNextPointCasted)
 				{
-					editorState.CurrentSpline.UpdatePoint(i + 1, newPointsPositions[i + 1], false, false);
+					editorState.CurrentSpline.SetPoint(i + 1, newPointsPositions[i + 1], false, false);
 				}
 			}
 
@@ -257,7 +256,7 @@ namespace SplineEditor.Editor
 		private void ToggleCloseLoop()
 		{
 			Undo.RecordObject(editorState.CurrentSpline, "Toggle Close Loop");
-			editorState.CurrentSpline.ToggleCloseLoop();
+			editorState.CurrentSpline.ToggleClosingLoopCurve();
 			editorState.CurrentEditor.SelectIndex(0);
 
 			editorState.wasSplineModified = true;

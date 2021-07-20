@@ -83,7 +83,7 @@ namespace SplineEditor.Editor
 			if (nextNormalsRotation != editorWindowState.PreviousNormalLocalRotation)
 			{
 				Undo.RecordObject(editorState.CurrentSpline, "Change Normal Local Rotation");
-				currentSpline.UpdateNormalAngularOffset(normalIndex, nextNormalsRotation);
+				currentSpline.SetNormalAngularOffset(normalIndex, nextNormalsRotation);
 				EditorUtility.SetDirty(editorState.CurrentSpline);
 				repaintScene = true;
 			}
