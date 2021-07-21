@@ -70,8 +70,8 @@ namespace SplineEditor.MeshGenerator
 		/// </summary>
 		public Vector3[] Points
 		{
-			get => splinePath.points;
-			set => splinePath.points = value;
+			get => splinePath.Points;
+			set => splinePath.Points = value;
 		}
 
 		/// <summary>
@@ -80,8 +80,8 @@ namespace SplineEditor.MeshGenerator
 		/// </summary>
 		public Vector3[] Normals
 		{
-			get => splinePath.normals;
-			set => splinePath.normals = value;
+			get => splinePath.Normals;
+			set => splinePath.Normals = value;
 		}
 
 		/// <summary>
@@ -89,8 +89,8 @@ namespace SplineEditor.MeshGenerator
 		/// </summary>
 		public Vector3[] Tangents
 		{
-			get => splinePath.tangents;
-			set => splinePath.tangents = value;
+			get => splinePath.Tangents;
+			set => splinePath.Tangents = value;
 		}
 
 		/// <summary>
@@ -98,8 +98,8 @@ namespace SplineEditor.MeshGenerator
 		/// </summary>
 		public Vector3[] Scale
 		{
-			get => splinePath.scales;
-			set => splinePath.scales = value;
+			get => splinePath.Scales;
+			set => splinePath.Scales = value;
 		}
 
 		/// <summary>
@@ -107,8 +107,8 @@ namespace SplineEditor.MeshGenerator
 		/// </summary>
 		public float[] ParametersT
 		{
-			get => splinePath.parametersT;
-			set => splinePath.parametersT = value;
+			get => splinePath.ParametersT;
+			set => splinePath.ParametersT = value;
 		}
 
 		/// <summary>

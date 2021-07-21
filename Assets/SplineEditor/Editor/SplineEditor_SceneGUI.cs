@@ -46,7 +46,7 @@ namespace SplineEditor.Editor
 				var curveStartIndex = i * 3;
 				if(i > 0 && i%3!=0)
 				{
-					p0 = handleTransform.TransformPoint(editorState.CurrentSpline.Points[curveStartIndex].position);
+					p0 = handleTransform.TransformPoint(editorState.CurrentSpline.Points[curveStartIndex].Position);
 				}
 				else
 				{
@@ -54,7 +54,7 @@ namespace SplineEditor.Editor
 				}
 				p1 = DrawPoint(curveStartIndex + 1);
 				p2 = DrawPoint(curveStartIndex + 2);
-				p3 = handleTransform.TransformPoint(editorState.CurrentSpline.Points[curveStartIndex + 3].position);
+				p3 = handleTransform.TransformPoint(editorState.CurrentSpline.Points[curveStartIndex + 3].Position);
 
 				if (!editorState.IsDrawerMode || i < editorState.CurrentSpline.CurvesCount - 1)
 				{
@@ -70,9 +70,9 @@ namespace SplineEditor.Editor
 		{
 			for (var i = 0; i < editorState.CurrentSpline.PointsCount; i+=3)
 			{
-				var point = handleTransform.TransformPoint(editorState.CurrentSpline.Points[i].position);
+				var point = handleTransform.TransformPoint(editorState.CurrentSpline.Points[i].Position);
 				var normalIndex = i / 3;
-				if (editorState.CurrentSpline.Normals.Length <= normalIndex)
+				if (editorState.CurrentSpline.Normals.Count <= normalIndex)
 				{
 					editorState.CurrentSpline.RecalculateNormals();
 				}
@@ -118,7 +118,7 @@ namespace SplineEditor.Editor
 
 		private Vector3 DrawPoint(int index, Color pointColor)
 		{
-			var worldPoint = handleTransform.TransformPoint(editorState.CurrentSpline.Points[index].position);
+			var worldPoint = handleTransform.TransformPoint(editorState.CurrentSpline.Points[index].Position);
 			var size = editorSettings.ScalePointOnScreen ? HandleUtility.GetHandleSize(worldPoint) : 1f;
 
 			Handles.color = pointColor;
@@ -253,14 +253,14 @@ namespace SplineEditor.Editor
 
 				if (point1Index >= 0 && point1Index < editorState.CurrentSpline.PointsCount)
 				{
-					var point1 = handleTransform.TransformPoint(editorState.CurrentSpline.Points[point1Index].position);
+					var point1 = handleTransform.TransformPoint(editorState.CurrentSpline.Points[point1Index].Position);
 					var rotatedPoint1 = VectorUtils.RotateAround(point1, worldPoint, rotationDiff);
 					editorState.CurrentSpline.SetPoint(point1Index, handleTransform.InverseTransformPoint(rotatedPoint1));
 				}
 
 				if (point2Index >= 0 && point2Index < editorState.CurrentSpline.PointsCount)
 				{
-					var point2 = handleTransform.TransformPoint(editorState.CurrentSpline.Points[point2Index].position);
+					var point2 = handleTransform.TransformPoint(editorState.CurrentSpline.Points[point2Index].Position);
 					var rotatedPoint2 = VectorUtils.RotateAround(point2, worldPoint, rotationDiff);
 					editorState.CurrentSpline.SetPoint(point2Index, handleTransform.InverseTransformPoint(rotatedPoint2));
 				}
@@ -282,10 +282,10 @@ namespace SplineEditor.Editor
 			for (var i = 0; i < spline.CurvesCount; i++)
 			{
 				var curveStartIndex = i * 3;
-				var p0 = transformHandle.TransformPoint(spline.Points[curveStartIndex].position);
-				var p1 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 1].position);
-				var p2 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 2].position);
-				var p3 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 3].position);
+				var p0 = transformHandle.TransformPoint(spline.Points[curveStartIndex].Position);
+				var p1 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 1].Position);
+				var p2 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 2].Position);
+				var p3 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 3].Position);
 
 				var splineColor = (i == selectedSplineIndex && editorState.DrawPoints) ? editorSettings.SelectedCurveColor : editorSettings.SplineColor;
 				Handles.DrawBezier(p0, p3, p1, p2, splineColor, null, editorSettings.SplineWidth * 1.5f);

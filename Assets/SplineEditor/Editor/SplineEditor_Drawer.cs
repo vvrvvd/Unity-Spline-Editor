@@ -45,7 +45,7 @@ namespace SplineEditor.Editor
 			{
 				ToggleNormalsEditorMode(false);
 				var lastPoint = editorState.CurrentSpline.Points[editorState.CurrentSpline.PointsCount - 1];
-				StartDrawCurveMode(lastPoint.position);
+				StartDrawCurveMode(lastPoint.Position);
 				SelectIndex(-1);
 			}
 
@@ -107,7 +107,7 @@ namespace SplineEditor.Editor
 						SpawnDrawCurveModeCurve(editorState.DrawCurveSmoothAcuteAngles);
 					}
 
-					var defaultDrawerPosition = editorState.CurrentSpline.Points[editorState.CurrentSpline.PointsCount - 1].position;
+					var defaultDrawerPosition = editorState.CurrentSpline.Points[editorState.CurrentSpline.PointsCount - 1].Position;
 					StartDrawCurveMode(defaultDrawerPosition);
 					isDraggingNewCurve = false;
 					castSelectedPointFlag = false;

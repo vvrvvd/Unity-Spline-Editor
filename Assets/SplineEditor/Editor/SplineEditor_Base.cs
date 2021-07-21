@@ -60,7 +60,7 @@ namespace SplineEditor.Editor
 			{
 				editorState.wasSplineModified = true;
 				var lastPoint = editorState.CurrentSpline.Points[editorState.CurrentSpline.PointsCount - 1];
-				curveDrawerPosition = lastPoint.position;
+				curveDrawerPosition = lastPoint.Position;
 				editorState.CurrentSpline?.OnSplineChanged?.Invoke();
 			}
 
@@ -149,8 +149,8 @@ namespace SplineEditor.Editor
 		private void AddEndingCurve(float curveLength)
 		{
 			var pointsCount = editorState.CurrentSpline.PointsCount;
-			var deltaDir = (editorState.CurrentSpline.Points[pointsCount - 1].position - editorState.CurrentSpline.Points[pointsCount - 2].position).normalized * curveLength / 3;
-			var p1 = editorState.CurrentSpline.Points[pointsCount - 1].position + deltaDir;
+			var deltaDir = (editorState.CurrentSpline.Points[pointsCount - 1].Position - editorState.CurrentSpline.Points[pointsCount - 2].Position).normalized * curveLength / 3;
+			var p1 = editorState.CurrentSpline.Points[pointsCount - 1].Position + deltaDir;
 			var p2 = p1 + deltaDir;
 			var p3 = p2 + deltaDir;
 
@@ -162,8 +162,8 @@ namespace SplineEditor.Editor
 
 		private void AddBeginningCurve(float curveLength)
 		{
-			var deltaDir = (editorState.CurrentSpline.Points[1].position - editorState.CurrentSpline.Points[0].position).normalized * curveLength / 3;
-			var p1 = editorState.CurrentSpline.Points[0].position - deltaDir;
+			var deltaDir = (editorState.CurrentSpline.Points[1].Position - editorState.CurrentSpline.Points[0].Position).normalized * curveLength / 3;
+			var p1 = editorState.CurrentSpline.Points[0].Position - deltaDir;
 			var p2 = p1 - deltaDir;
 			var p3 = p2 - deltaDir;
 
@@ -225,15 +225,15 @@ namespace SplineEditor.Editor
 			var newPointsPositions = new Vector3[pointsCount];
 			for (var i = 0; i < pointsCount; i++)
 			{
-				var worldPosition = handleTransform.TransformPoint(editorState.CurrentSpline.Points[i].position);
+				var worldPosition = handleTransform.TransformPoint(editorState.CurrentSpline.Points[i].Position);
 				PhysicsUtils.TryCastPoint(worldPosition, direction, out newPointsPositions[i]);
 				newPointsPositions[i] = handleTransform.InverseTransformPoint(newPointsPositions[i]);
 			}
 
 			for (var i = 0; i < pointsCount; i += 3)
 			{
-				var prevPoint = i > 0 ? editorState.CurrentSpline.Points[i - 1].position : Vector3.zero;
-				var nextPoint = i < pointsCount - 1 ? editorState.CurrentSpline.Points[i + 1].position : Vector3.zero;
+				var prevPoint = i > 0 ? editorState.CurrentSpline.Points[i - 1].Position : Vector3.zero;
+				var nextPoint = i < pointsCount - 1 ? editorState.CurrentSpline.Points[i + 1].Position : Vector3.zero;
 
 				editorState.CurrentSpline.SetPoint(i, newPointsPositions[i], false, true);
 

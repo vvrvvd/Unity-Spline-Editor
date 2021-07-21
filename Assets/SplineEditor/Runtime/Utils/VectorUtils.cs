@@ -1,8 +1,15 @@
+// <copyright file="VectorUtils.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using UnityEngine;
 
 namespace SplineEditor
 {
-
+	/// <summary>
+	/// 
+	/// </summary>
 	public static class VectorUtils
 	{
 
@@ -15,7 +22,7 @@ namespace SplineEditor
 		/// <returns></returns>
 		public static Vector3 RotateAround(Vector3 target, Vector3 pivotPoint, Quaternion rot)
 		{
-			return rot * (target - pivotPoint) + pivotPoint;
+			return (rot * (target - pivotPoint)) + pivotPoint;
 		}
 
 		/// <summary>
@@ -27,12 +34,9 @@ namespace SplineEditor
 		/// <returns></returns>
 		public static float InverseLerp(Vector3 startPoint, Vector3 endPoint, Vector3 lerpedPoint)
 		{
-			Vector3 AB = endPoint - startPoint;
-			Vector3 AV = lerpedPoint - startPoint;
-			return Vector3.Dot(AV, AB) / Vector3.Dot(AB, AB);
+			Vector3 aB = endPoint - startPoint;
+			Vector3 aV = lerpedPoint - startPoint;
+			return Vector3.Dot(aV, aB) / Vector3.Dot(aB, aB);
 		}
-
 	}
-
 }
-

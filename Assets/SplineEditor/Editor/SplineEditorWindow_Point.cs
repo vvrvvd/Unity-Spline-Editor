@@ -65,7 +65,7 @@ namespace SplineEditor.Editor
 
 			GUILayout.BeginHorizontal();
 			EditorGUI.BeginChangeCheck();
-			var pointPosition = isPointSelected ? currentSpline.Points[selectedPointIndex].position : editorWindowState.PreviousPointPosition;
+			var pointPosition = isPointSelected ? currentSpline.Points[selectedPointIndex].Position : editorWindowState.PreviousPointPosition;
 			var point = EditorGUILayout.Vector3Field(PointPositionContent, pointPosition);
 			if (EditorGUI.EndChangeCheck())
 			{
