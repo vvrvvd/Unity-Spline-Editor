@@ -1,20 +1,26 @@
+// <copyright file="SplineMeshEditor_Inspector_UV.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using UnityEditor;
 using UnityEngine;
 
 namespace SplineEditor.MeshGenerator.Editor
 {
-
+	/// <summary>
+	/// Class providing custom editor to SplineMesh component.
+	/// Partial class providing UV options for custom inspector to SplineMesh component.
+	/// </summary>
 	public partial class SplineMeshEditor : UnityEditor.Editor
 	{
-
-
 		private void DrawUvOptions()
 		{
 			var prevEnabled = GUI.enabled;
 
-			meshEditorState.IsUvSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(meshEditorState.IsUvSectionFolded, UvOptionsGroupTitle);
+			MeshEditorState.IsUvSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(MeshEditorState.IsUvSectionFolded, UvOptionsGroupTitle);
 			GUI.enabled = true;
-			if (meshEditorState.IsUvSectionFolded)
+			if (MeshEditorState.IsUvSectionFolded)
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
@@ -69,19 +75,15 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.Space(20);
 
-			var isDebugModeView = meshEditorState.IsDebugModeView(splineMesh);
+			var isDebugModeView = MeshEditorState.IsDebugModeView(splineMesh);
 			var uvButtonContent = isDebugModeView ? UvOptionsHideDebugViewButtonContent : UvOptionsShowDebugViewButtonContent;
 			if (GUILayout.Button(uvButtonContent, buttonStyle, ButtonHeight))
 			{
-				meshEditorState.SetDebugModeView(splineMesh, !isDebugModeView);
+				MeshEditorState.SetDebugModeView(splineMesh, !isDebugModeView);
 			}
-			
+
 			GUILayout.Space(20);
 			GUILayout.EndHorizontal();
 		}
-
-
-
 	}
-
 }

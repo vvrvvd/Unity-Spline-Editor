@@ -1,19 +1,26 @@
+// <copyright file="SplineMeshEditor_Inspector_Curve.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using UnityEditor;
 using UnityEngine;
 
 namespace SplineEditor.MeshGenerator.Editor
 {
-
+	/// <summary>
+	/// Class providing custom editor to SplineMesh component.
+	/// Partial class providing Curve options for custom inspector to SplineMesh component.
+	/// </summary>
 	public partial class SplineMeshEditor : UnityEditor.Editor
 	{
-
 		private void DrawWidthCurveOptions()
 		{
 			var prevEnabled = GUI.enabled;
 
-			meshEditorState.IsCurveSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(meshEditorState.IsCurveSectionFolded, CurveOptionsGroupTitle);
+			MeshEditorState.IsCurveSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(MeshEditorState.IsCurveSectionFolded, CurveOptionsGroupTitle);
 			GUI.enabled = true;
-			if (meshEditorState.IsCurveSectionFolded)
+			if (MeshEditorState.IsCurveSectionFolded)
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
@@ -74,6 +81,7 @@ namespace SplineEditor.MeshGenerator.Editor
 				splineMesh.RightSideCurve = splineMesh.RightSideCurve;
 				EditorUtility.SetDirty(splineMesh);
 			}
+
 			GUILayout.EndHorizontal();
 		}
 
@@ -89,6 +97,7 @@ namespace SplineEditor.MeshGenerator.Editor
 				splineMesh.LeftSideCurve = splineMesh.LeftSideCurve;
 				EditorUtility.SetDirty(splineMesh);
 			}
+
 			GUILayout.EndHorizontal();
 		}
 
@@ -102,9 +111,8 @@ namespace SplineEditor.MeshGenerator.Editor
 				splineMesh.RightSideCurve = splineMesh.RightSideCurve;
 				EditorUtility.SetDirty(splineMesh);
 			}
+
 			GUILayout.EndHorizontal();
 		}
-
 	}
-
 }

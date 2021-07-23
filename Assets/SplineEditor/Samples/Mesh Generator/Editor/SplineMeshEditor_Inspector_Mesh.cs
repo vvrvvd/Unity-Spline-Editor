@@ -1,20 +1,26 @@
+// <copyright file="SplineMeshEditor_Inspector_Mesh.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using UnityEditor;
 using UnityEngine;
 
 namespace SplineEditor.MeshGenerator.Editor
 {
-
+	/// <summary>
+	/// Class providing custom editor to SplineMesh component.
+	/// Partial class providing Mesh options for custom inspector to SplineMesh component.
+	/// </summary>
 	public partial class SplineMeshEditor : UnityEditor.Editor
 	{
-
-
 		private void DrawMeshOptions()
 		{
 			var prevEnabled = GUI.enabled;
 
-			meshEditorState.IsMeshSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(meshEditorState.IsMeshSectionFolded, MeshOptionsGroupTitle);
+			MeshEditorState.IsMeshSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(MeshEditorState.IsMeshSectionFolded, MeshOptionsGroupTitle);
 			GUI.enabled = true;
-			if (meshEditorState.IsMeshSectionFolded)
+			if (MeshEditorState.IsMeshSectionFolded)
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
@@ -90,7 +96,10 @@ namespace SplineEditor.MeshGenerator.Editor
 			{
 				splineMesh.ConstructMesh();
 				var path = EditorUtility.SaveFilePanel(MeshOptionsBakeMeshWindowTitle, MeshOptionsBakeMeshWindowFolderPath, MeshOptionsBakeMeshWindowFileName, MeshOptionsBakeMeshWindowFileExtension);
-				if (string.IsNullOrEmpty(path)) return;
+				if (string.IsNullOrEmpty(path))
+				{
+					return;
+				}
 
 				path = FileUtil.GetProjectRelativePath(path);
 				var mesh = splineMesh.MeshFilter.sharedMesh;
@@ -101,8 +110,5 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.Space(20);
 			GUILayout.EndHorizontal();
 		}
-
-
 	}
-
 }
