@@ -317,12 +317,13 @@ namespace SplineEditor.MeshGenerator
 			bezierSpline.OnSplineChanged += GenerateMesh;
 		}
 
-		private void OnDisable() {
+		private void OnDisable()
+		{
 			bezierSpline.OnSplineChanged -= GenerateMesh;
 		}
 
 
-        private void LateUpdate()
+		private void LateUpdate()
 		{
 			if (!updateMesh)
 			{
@@ -331,7 +332,7 @@ namespace SplineEditor.MeshGenerator
 
 #if UNITY_EDITOR
 
-			if(useEditorDelay && editorLateUpdateCounter < EditorLateUpdateFramesDelay)
+			if (useEditorDelay && editorLateUpdateCounter < EditorLateUpdateFramesDelay)
 			{
 				editorLateUpdateCounter++;
 				return;

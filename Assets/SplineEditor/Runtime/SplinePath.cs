@@ -58,26 +58,46 @@ namespace SplineEditor
 		/// <summary>
 		/// Gets or sets scales for path points.
 		/// </summary>
-		public Vector3[] Scales { get => scales; set => scales = value; }
+		public Vector3[] Scales
+		{
+			get => scales;
+			set => scales = value;
+		}
 
 		/// <summary>
 		/// Gets or sets positions for path points.
 		/// </summary>
-		public Vector3[] Points { get => points; set => points = value; }
+		public Vector3[] Points
+		{
+			get => points;
+			set => points = value;
+		}
 
 		/// <summary>
 		/// Gets or sets normal vectors for path points.
 		/// </summary>
-		public Vector3[] Normals { get => normals; set => normals = value; }
+		public Vector3[] Normals
+		{
+			get => normals;
+			set => normals = value;
+		}
 
 		/// <summary>
 		/// Gets or sets tangents for path points.
 		/// </summary>
-		public Vector3[] Tangents { get => tangents; set => tangents = value; }
+		public Vector3[] Tangents
+		{
+			get => tangents;
+			set => tangents = value;
+		}
 
 		/// <summary>
 		/// Gets or sets t parameters of bezier spline for path points.
 		/// </summary>
-		public float[] ParametersT { get => parametersT; set => parametersT = value; }
+		public float[] ParametersT
+		{
+			get => parametersT;
+			set => parametersT = value;
+		}
 	}
 }

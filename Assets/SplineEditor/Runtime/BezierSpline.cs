@@ -53,7 +53,7 @@ namespace SplineEditor
 		/// <summary>
 		/// Event invoked when spline properties were modified in any way.
 		/// </summary>
-		public Action OnSplineChanged;
+		public event Action OnSplineChanged;
 
 		/// <summary>
 		/// Bezier curve control point mode.
@@ -602,6 +602,19 @@ namespace SplineEditor
 				RecalculateNormals();
 				OnSplineChanged?.Invoke();
 			}
+		}
+
+		/// <summary>
+		/// Invokes OnSplineChanged event.
+		/// </summary>
+		public void UpdateSpline()
+		{
+			if (OnSplineChanged == null)
+			{
+				return;
+			}
+
+			OnSplineChanged.Invoke();
 		}
 
 		/// <summary>
