@@ -30,6 +30,7 @@ namespace SplineEditor.MeshGenerator.Editor
 
 		/// <summary>
 		/// Gets or sets a value indicating whether points are drawn on scene GUI for SplineMesh components.
+		/// Is serialized.
 		/// </summary>
 		public bool DrawPoints
 		{
@@ -48,6 +49,7 @@ namespace SplineEditor.MeshGenerator.Editor
 
 		/// <summary>
 		/// Gets or sets a value indicating whether normal vectors are drawn on scene GUI for SplineMesh components.
+		/// Is serialized.
 		/// </summary>
 		public bool DrawNormals
 		{
@@ -66,6 +68,7 @@ namespace SplineEditor.MeshGenerator.Editor
 
 		/// <summary>
 		/// Gets or sets a value indicating whether UV options sections are folded on SplineMesh components.
+		/// Is serialized.
 		/// </summary>
 		public bool IsUvSectionFolded
 		{
@@ -84,6 +87,7 @@ namespace SplineEditor.MeshGenerator.Editor
 
 		/// <summary>
 		/// Gets or sets a value indicating whether curve options sections are folded on SplineMesh components.
+		/// Is serialized.
 		/// </summary>
 		public bool IsCurveSectionFolded
 		{
@@ -102,6 +106,7 @@ namespace SplineEditor.MeshGenerator.Editor
 
 		/// <summary>
 		/// Gets or sets a value indicating whether mesh options sections are folded on SplineMesh components.
+		/// Is serialized.
 		/// </summary>
 		public bool IsMeshSectionFolded
 		{

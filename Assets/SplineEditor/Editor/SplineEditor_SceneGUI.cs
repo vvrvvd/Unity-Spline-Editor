@@ -1,17 +1,47 @@
+// <copyright file="SplineEditor_SceneGUI.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using UnityEditor;
 using UnityEngine;
 
 namespace SplineEditor.Editor
 {
+	/// <summary>
+	/// Class providing custom editor to BezierSpline component.
+	/// Partial class providing custom scene GUI for BezierSpline.
+	/// </summary>
 	public partial class SplineEditor : UnityEditor.Editor
 	{
+		private static void DrawLine(Vector3 p0, Vector3 p1, Color color)
+		{
+			Handles.color = color;
+			Handles.DrawLine(p0, p1);
+		}
+
+		private static void DrawSpline(BezierSpline spline, int selectedSplineIndex = -1)
+		{
+			var transformHandle = spline.transform;
+			for (var i = 0; i < spline.CurvesCount; i++)
+			{
+				var curveStartIndex = i * 3;
+				var p0 = transformHandle.TransformPoint(spline.Points[curveStartIndex].Position);
+				var p1 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 1].Position);
+				var p2 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 2].Position);
+				var p3 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 3].Position);
+
+				var splineColor = (i == selectedSplineIndex && EditorState.DrawPoints) ? EditorSettings.SelectedCurveColor : EditorSettings.SplineColor;
+				Handles.DrawBezier(p0, p3, p1, p2, splineColor, null, EditorSettings.SplineWidth * 1.5f);
+			}
+		}
 
 		private void InitializeSceneGUI()
 		{
-			EditorState.isScaling = false;
-			EditorState.isRotating = false;
-			EditorState.isDraggingPoint = false;
-			EditorState.lastRotation = Quaternion.identity;
+			EditorState.IsScaling = false;
+			EditorState.IsRotating = false;
+			EditorState.IsDraggingPoint = false;
+			EditorState.LastRotation = Quaternion.identity;
 		}
 
 		private void DrawSceneGUI()
@@ -35,7 +65,6 @@ namespace SplineEditor.Editor
 			{
 				DrawNormals();
 			}
-
 		}
 
 		private void DrawPoints()
@@ -44,7 +73,7 @@ namespace SplineEditor.Editor
 			for (var i = 0; i < EditorState.CurrentSpline.CurvesCount; i++)
 			{
 				var curveStartIndex = i * 3;
-				if(i > 0 && i%3!=0)
+				if (i > 0 && i % 3 != 0)
 				{
 					p0 = handleTransform.TransformPoint(EditorState.CurrentSpline.Points[curveStartIndex].Position);
 				}
@@ -52,6 +81,7 @@ namespace SplineEditor.Editor
 				{
 					p0 = DrawPoint(curveStartIndex);
 				}
+
 				p1 = DrawPoint(curveStartIndex + 1);
 				p2 = DrawPoint(curveStartIndex + 2);
 				p3 = handleTransform.TransformPoint(EditorState.CurrentSpline.Points[curveStartIndex + 3].Position);
@@ -68,7 +98,7 @@ namespace SplineEditor.Editor
 
 		private void DrawNormals()
 		{
-			for (var i = 0; i < EditorState.CurrentSpline.PointsCount; i+=3)
+			for (var i = 0; i < EditorState.CurrentSpline.PointsCount; i += 3)
 			{
 				var point = handleTransform.TransformPoint(EditorState.CurrentSpline.Points[i].Position);
 				var normalIndex = i / 3;
@@ -76,18 +106,12 @@ namespace SplineEditor.Editor
 				{
 					EditorState.CurrentSpline.RecalculateNormals();
 				}
+
 				var normalVector = EditorState.CurrentSpline.GetNormal(normalIndex);
 				var normalLength = EditorSettings.NormalVectorLength;
 				Handles.color = EditorSettings.NormalsColor;
-				Handles.DrawLine(point, point + EditorState.CurrentSpline.transform.TransformDirection((normalVector) * normalLength));
+				Handles.DrawLine(point, point + EditorState.CurrentSpline.transform.TransformDirection(normalVector * normalLength));
 			}
-			
-		}
-
-		private static void DrawLine(Vector3 p0, Vector3 p1, Color color)
-		{
-			Handles.color = color;
-			Handles.DrawLine(p0, p1);
 		}
 
 		private Vector3 DrawPoint(int index)
@@ -111,6 +135,8 @@ namespace SplineEditor.Editor
 					return EditorSettings.MirroredModeColor;
 				case BezierSpline.BezierControlPointMode.Auto:
 					return EditorSettings.AutoModeColor;
+				default:
+					break;
 			}
 
 			return Color.cyan;
@@ -128,12 +154,12 @@ namespace SplineEditor.Editor
 			{
 				SelectIndex(index);
 				Repaint();
-				EditorState.wasSplineModified = true;
+				EditorState.WasSplineModified = true;
 			}
 
 			if (EditorState.SelectedPointIndex == index)
 			{
-				if (EditorState.savedTool == Tool.Rotate && index % 3 == 0)
+				if (EditorState.SavedTool == Tool.Rotate && index % 3 == 0)
 				{
 					if (EditorState.IsNormalsEditorMode)
 					{
@@ -144,7 +170,7 @@ namespace SplineEditor.Editor
 						RotatePoints(index, worldPoint);
 					}
 				}
-				else if(EditorState.savedTool == Tool.Scale && index % 3 == 0)
+				else if (EditorState.SavedTool == Tool.Scale && index % 3 == 0)
 				{
 					ScalePoint(index, worldPoint);
 				}
@@ -166,7 +192,7 @@ namespace SplineEditor.Editor
 					Undo.RecordObject(EditorState.CurrentSpline, "Cast Spline Point To Mouse");
 					worldPoint = castedPosition;
 					EditorState.CurrentSpline.SetPoint(index, handleTransform.InverseTransformPoint(worldPoint));
-					EditorState.wasSplineModified = true;
+					EditorState.WasSplineModified = true;
 				}
 			}
 			else
@@ -177,17 +203,17 @@ namespace SplineEditor.Editor
 				if (wasChanged)
 				{
 					Undo.RecordObject(EditorState.CurrentSpline, "Move Spline Point");
-					EditorState.isDraggingPoint = true;
+					EditorState.IsDraggingPoint = true;
 					EditorState.CurrentSpline.SetPoint(index, handleTransform.InverseTransformPoint(worldPoint));
-					EditorState.wasSplineModified = true;
+					EditorState.WasSplineModified = true;
 				}
-				else if ((EditorState.isDraggingPoint && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
+				else if ((EditorState.IsDraggingPoint && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
 				{
 					Undo.RecordObject(EditorState.CurrentSpline, "Move Spline Point");
 					EditorState.CurrentSpline.SetPoint(index, handleTransform.InverseTransformPoint(worldPoint));
-					EditorState.isDraggingPoint = false;
+					EditorState.IsDraggingPoint = false;
 					castSelectedPointFlag = false;
-					EditorState.wasSplineModified = true;
+					EditorState.WasSplineModified = true;
 				}
 			}
 		}
@@ -196,7 +222,7 @@ namespace SplineEditor.Editor
 		{
 			var normalIndex = index / 3;
 			var pointScaleIndex = index / 3;
-			
+
 			var handleSize = HandleUtility.GetHandleSize(worldPoint);
 			var pointScale = EditorState.CurrentSpline.PointsScales[pointScaleIndex];
 			var normalVector = EditorState.CurrentSpline.GetNormal(normalIndex);
@@ -207,29 +233,28 @@ namespace SplineEditor.Editor
 			var baseHandleRotation = Quaternion.LookRotation(normalWorldVector, tangentWorldVector);
 
 			EditorGUI.BeginChangeCheck();
-			EditorState.lastScale = Handles.DoScaleHandle(EditorState.isScaling ? EditorState.lastScale : pointScale, worldPoint, baseHandleRotation, handleSize);
+			EditorState.LastScale = Handles.DoScaleHandle(EditorState.IsScaling ? EditorState.LastScale : pointScale, worldPoint, baseHandleRotation, handleSize);
 			var wasChanged = EditorGUI.EndChangeCheck();
 			if (wasChanged)
 			{
-
-				if (!EditorState.isScaling)
+				if (!EditorState.IsScaling)
 				{
-					EditorState.isScaling = true;
-					EditorState.lastScale = new Vector3(EditorState.lastScale.x, EditorState.lastScale.y, EditorState.lastScale.z);
+					EditorState.IsScaling = true;
+					EditorState.LastScale = new Vector3(EditorState.LastScale.x, EditorState.LastScale.y, EditorState.LastScale.z);
 					return;
 				}
 
 				Undo.RecordObject(EditorState.CurrentSpline, "Scale Spline Point");
-				EditorState.isScaling = true;
+				EditorState.IsScaling = true;
 
-				EditorState.CurrentSpline.SetPointsScale(pointScaleIndex, EditorState.lastScale);
-				EditorState.wasSplineModified = true;
+				EditorState.CurrentSpline.SetPointsScale(pointScaleIndex, EditorState.LastScale);
+				EditorState.WasSplineModified = true;
 			}
-			else if ((EditorState.isScaling && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
+			else if ((EditorState.IsScaling && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
 			{
-				EditorState.CurrentSpline.SetPointsScale(pointScaleIndex, EditorState.lastScale);
-				EditorState.isScaling = false;
-				EditorState.wasSplineModified = true;
+				EditorState.CurrentSpline.SetPointsScale(pointScaleIndex, EditorState.LastScale);
+				EditorState.IsScaling = false;
+				EditorState.WasSplineModified = true;
 			}
 		}
 
@@ -239,13 +264,13 @@ namespace SplineEditor.Editor
 			var rotation = Handles.DoRotationHandle(handleRotation, worldPoint);
 			if (EditorGUI.EndChangeCheck())
 			{
-				if (!EditorState.isRotating)
+				if (!EditorState.IsRotating)
 				{
-					EditorState.lastRotation = handleRotation;
-					EditorState.isRotating = true;
+					EditorState.LastRotation = handleRotation;
+					EditorState.IsRotating = true;
 				}
 
-				var rotationDiff = rotation * Quaternion.Inverse(EditorState.lastRotation);
+				var rotationDiff = rotation * Quaternion.Inverse(EditorState.LastRotation);
 
 				Undo.RecordObject(EditorState.CurrentSpline, "Rotate Spline Point");
 				var point1Index = index == EditorState.CurrentSpline.PointsCount - 1 && EditorState.CurrentSpline.IsLoop ? 1 : index + 1;
@@ -265,33 +290,15 @@ namespace SplineEditor.Editor
 					EditorState.CurrentSpline.SetPoint(point2Index, handleTransform.InverseTransformPoint(rotatedPoint2));
 				}
 
-				EditorState.lastRotation = rotation;
-				EditorState.wasSplineModified = true;
+				EditorState.LastRotation = rotation;
+				EditorState.WasSplineModified = true;
 			}
-			else if ((EditorState.isRotating && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
+			else if ((EditorState.IsRotating && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
 			{
-				EditorState.lastRotation = handleRotation;
-				EditorState.isRotating = false;
-				EditorState.wasSplineModified = true;
+				EditorState.LastRotation = handleRotation;
+				EditorState.IsRotating = false;
+				EditorState.WasSplineModified = true;
 			}
 		}
-
-		private static void DrawSpline(BezierSpline spline, int selectedSplineIndex = -1)
-		{
-			var transformHandle = spline.transform;
-			for (var i = 0; i < spline.CurvesCount; i++)
-			{
-				var curveStartIndex = i * 3;
-				var p0 = transformHandle.TransformPoint(spline.Points[curveStartIndex].Position);
-				var p1 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 1].Position);
-				var p2 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 2].Position);
-				var p3 = transformHandle.TransformPoint(spline.Points[curveStartIndex + 3].Position);
-
-				var splineColor = (i == selectedSplineIndex && EditorState.DrawPoints) ? EditorSettings.SelectedCurveColor : EditorSettings.SplineColor;
-				Handles.DrawBezier(p0, p3, p1, p2, splineColor, null, EditorSettings.SplineWidth * 1.5f);
-			}
-		}
-
 	}
-
 }

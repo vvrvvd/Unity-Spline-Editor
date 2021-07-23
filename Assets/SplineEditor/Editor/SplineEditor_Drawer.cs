@@ -1,20 +1,29 @@
+// <copyright file="SplineEditor_Drawer.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using UnityEditor;
 using UnityEngine;
 using static SplineEditor.BezierSpline;
 
 namespace SplineEditor.Editor
 {
+	/// <summary>
+	/// Class providing custom editor to BezierSpline component.
+	/// Partial class providing Draw Curve Mode feature implementation.
+	/// </summary>
 	public partial class SplineEditor : UnityEditor.Editor
 	{
-
 		private const float DrawCurveMinLengthToVisualize = 0.1f;
+
+		private readonly Vector3[] newCurvePoints = new Vector3[4];
 
 		private bool isDraggingNewCurve;
 		private bool firstControlPointSet;
 		private bool secondControlPointSet;
 
 		private Vector3 curveDrawerPosition = Vector3.zero;
-		private Vector3[] newCurvePoints = new Vector3[4];
 
 		private void InitializeDrawCurveMode()
 		{
@@ -26,13 +35,12 @@ namespace SplineEditor.Editor
 			ToggleDrawCurveMode(true);
 		}
 
-		public void ToggleDrawCurveMode(bool state)
+		private void ToggleDrawCurveMode(bool state)
 		{
-			if ((state && EditorState.CurrentSpline.IsLoop))
+			if (state && EditorState.CurrentSpline.IsLoop)
 			{
 				return;
 			}
-
 
 			if (EditorState.IsDrawerMode != state)
 			{
@@ -49,7 +57,7 @@ namespace SplineEditor.Editor
 				SelectIndex(-1);
 			}
 
-			EditorState.wasSplineModified = true;
+			EditorState.WasSplineModified = true;
 		}
 
 		private void StartDrawCurveMode(Vector3 startPoint)
@@ -151,9 +159,7 @@ namespace SplineEditor.Editor
 					Handles.color = EditorSettings.DrawModePointColor;
 					Handles.CubeHandleCap(0, g, Quaternion.identity, size * EditorSettings.MainPointSize, EventType.Repaint);
 				}
-
 			}
-
 		}
 
 		private void UpdateNewDrawCurvePainterPosition(Vector3 newEndPosition)
@@ -184,7 +190,7 @@ namespace SplineEditor.Editor
 				}
 				else if (distance >= secondPointDistance)
 				{
-					newCurvePoints[1] = newCurvePoints[0] + dir * firstPointDistance;
+					newCurvePoints[1] = newCurvePoints[0] + (dir * firstPointDistance);
 					firstControlPointSet = true;
 				}
 			}
@@ -197,7 +203,7 @@ namespace SplineEditor.Editor
 				}
 				else if (distance >= EditorState.DrawCurveSegmentLength)
 				{
-					newCurvePoints[2] = newCurvePoints[0] + dir * secondPointDistance;
+					newCurvePoints[2] = newCurvePoints[0] + (dir * secondPointDistance);
 					secondControlPointSet = true;
 				}
 			}
@@ -234,7 +240,6 @@ namespace SplineEditor.Editor
 				StartDrawCurveMode(newCurvePoints[3]);
 				UpdateNewDrawCurvePainterPosition(newEndPosition);
 			}
-
 		}
 
 		private void SpawnDrawCurveModeCurve(bool smoothAcuteAngles)
@@ -250,9 +255,5 @@ namespace SplineEditor.Editor
 
 			EditorState.CurrentSpline.AppendCurve(p1, p2, p3, BezierControlPointMode.Free, false);
 		}
-
-		
-
 	}
-
 }

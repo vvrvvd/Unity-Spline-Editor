@@ -1,16 +1,60 @@
+// <copyright file="SplineEditorWindowState.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using UnityEditor;
 using UnityEngine;
 using static SplineEditor.BezierSpline;
 
 namespace SplineEditor.Editor
 {
+	/// <summary>
+	/// Class providing serializable state for SplineEditor.
+	/// </summary>
 	[FilePath("SplineEditor/SplineEditorWindowState.conf", FilePathAttribute.Location.ProjectFolder)]
 	public partial class SplineEditorWindowState : ScriptableSingleton<SplineEditorWindowState>
 	{
-
-		//GUI
+		// GUI
 		[SerializeField]
 		private bool useText = true;
+		[SerializeField]
+		private bool useImages = true;
+
+		// Point
+		[SerializeField]
+		private bool isPointSectionFolded = true;
+		private Vector3 previousPointScale = Vector3.one;
+		private Vector3 previousPointPosition = Vector3.zero;
+		private BezierControlPointMode previousPointMode = BezierControlPointMode.Free;
+
+		[SerializeField]
+		private bool isCurveSectionFolded = true;
+		[SerializeField]
+		private float addCurveLength = 1f;
+		[SerializeField]
+		private float splitCurveValue = 0.5f;
+
+		// Spline
+		[SerializeField]
+		private bool isSplineSectionFolded = true;
+		private Transform customTransform = null;
+
+		// Normals
+		private bool previousFlipNormals = false;
+		[SerializeField]
+		private bool isNormalsSectionFolded = true;
+		private float previousNormalLocalRotation = 0f;
+		private float previousNormalsGlobalRotation = 0f;
+
+		// Drawer Tool
+		[SerializeField]
+		private bool isDrawerSectionFolded = true;
+		private float previousSplineLength = 0f;
+
+		/// <summary>
+		/// Gets or sets a value indicating whether GUI displays text on buttons.
+		/// </summary>
 		public bool UseText
 		{
 			get => useText;
@@ -26,8 +70,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		[SerializeField]
-		private bool useImages = true;
+		/// <summary>
+		/// Gets or sets a value indicating whether GUI displays image icons on buttons.
+		/// </summary>
 		public bool UseImages
 		{
 			get => useImages;
@@ -43,9 +88,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		//Point
-		[SerializeField]
-		private bool isPointSectionFolded = true;
+		/// <summary>
+		/// Gets or sets a value indicating whether Point options section is folded.
+		/// </summary>
 		public bool IsPointSectionFolded
 		{
 			get => isPointSectionFolded;
@@ -61,7 +106,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private Vector3 previousPointScale = Vector3.one;
+		/// <summary>
+		/// Gets or sets selected point position from the last available frame.
+		/// </summary>
 		public Vector3 PreviousPointPosition
 		{
 			get => previousPointPosition;
@@ -76,7 +123,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private Vector3 previousPointPosition = Vector3.zero;
+		/// <summary>
+		/// Gets or sets selected point scale from the last available frame.
+		/// </summary>
 		public Vector3 PreviousPointScale
 		{
 			get => previousPointScale;
@@ -91,7 +140,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private BezierControlPointMode previousPointMode = BezierControlPointMode.Free;
+		/// <summary>
+		/// Gets or sets selected point mode from the last available frame.
+		/// </summary>
 		public BezierControlPointMode PreviousPointMode
 		{
 			get => previousPointMode;
@@ -106,9 +157,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		//Curve
-		[SerializeField]
-		private bool isCurveSectionFolded = true;
+		/// <summary>
+		/// Gets or sets a value indicating whether Curve options section is folded.
+		/// </summary>
 		public bool IsCurveSectionFolded
 		{
 			get => isCurveSectionFolded;
@@ -124,8 +175,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		[SerializeField]
-		private float addCurveLength = 1f;
+		/// <summary>
+		/// Gets or sets new curves initial length.
+		/// </summary>
 		public float AddCurveLength
 		{
 			get => addCurveLength;
@@ -141,8 +193,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		[SerializeField]
-		private float splitCurveValue = 0.5f;
+		/// <summary>
+		/// Gets or sets split curve value (parameter t to be used for getting split point on a bezier curve).
+		/// </summary>
 		public float SplitCurveValue
 		{
 			get => splitCurveValue;
@@ -158,9 +211,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		//Spline
-		[SerializeField]
-		private bool isSplineSectionFolded = true;
+		/// <summary>
+		/// Gets or sets a value indicating whether Spline options section is folded.
+		/// </summary>
 		public bool IsSplineSectionFolded
 		{
 			get => isSplineSectionFolded;
@@ -176,7 +229,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private Transform customTransform = null;
+		/// <summary>
+		/// Gets or sets custom transform for casting spline.
+		/// </summary>
 		public Transform CustomTransform
 		{
 			get => customTransform;
@@ -191,39 +246,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		//Normals
-		private bool previousFlipNormals = false;
-		public bool PreviousFlipNormals
-		{
-			get => previousFlipNormals;
-			set
-			{
-				if (previousFlipNormals == value)
-				{
-					return;
-				}
-
-				previousFlipNormals = value;
-			}
-		}
-
-		private bool previousDrawNormals = false;
-		public bool PreviousDrawNormals
-		{
-			get => previousDrawNormals;
-			set
-			{
-				if (previousDrawNormals == value)
-				{
-					return;
-				}
-
-				previousDrawNormals = value;
-			}
-		}
-
-		[SerializeField]
-		private bool isNormalsSectionFolded = true;
+		/// <summary>
+		/// Gets or sets a value indicating whether Normals Editor Mode options section is folded.
+		/// </summary>
 		public bool IsNormalsSectionFolded
 		{
 			get => isNormalsSectionFolded;
@@ -239,7 +264,26 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private float previousNormalLocalRotation = 0f;
+		/// <summary>
+		/// Gets or sets a value indicating whether normals were flipped in the last available frame.
+		/// </summary>
+		public bool PreviousFlipNormals
+		{
+			get => previousFlipNormals;
+			set
+			{
+				if (previousFlipNormals == value)
+				{
+					return;
+				}
+
+				previousFlipNormals = value;
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets selected point normal rotation offset from the last available frame.
+		/// </summary>
 		public float PreviousNormalLocalRotation
 		{
 			get => previousNormalLocalRotation;
@@ -254,7 +298,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private float previousNormalsGlobalRotation = 0f;
+		/// <summary>
+		/// Gets or sets selected point normal rotation offset from the last available frame.
+		/// </summary>
 		public float PreviousNormalsGlobalRotation
 		{
 			get => previousNormalsGlobalRotation;
@@ -269,9 +315,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		//Drawer Tool
-		[SerializeField]
-		private bool isDrawerSectionFolded = true;
+		/// <summary>
+		/// Gets or sets a value indicating whether Draw Curve Mode options section is folded.
+		/// </summary>
 		public bool IsDrawerSectionFolded
 		{
 			get => isDrawerSectionFolded;
@@ -287,7 +333,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private float previousSplineLength = 0f;
+		/// <summary>
+		/// Gets or sets bezier spline length from the last available frame.
+		/// </summary>
 		public float PreviousSplineLength
 		{
 			get => previousSplineLength;
@@ -301,6 +349,5 @@ namespace SplineEditor.Editor
 				previousSplineLength = value;
 			}
 		}
-	
 	}
 }

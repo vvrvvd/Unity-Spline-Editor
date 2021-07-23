@@ -1,12 +1,19 @@
+// <copyright file="SplineEditor_Inspector.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using UnityEditor;
 using UnityEngine;
-using static SplineEditor.BezierSpline;
 
 namespace SplineEditor.Editor
 {
+	/// <summary>
+	/// Class providing custom editor to BezierSpline component.
+	/// Partial class providing custom inspector for BezierSpline.
+	/// </summary>
 	public partial class SplineEditor : UnityEditor.Editor
 	{
-
 		private void DrawInspectorGUI()
 		{
 			DrawStandardScriptReferenceField();
@@ -29,9 +36,5 @@ namespace SplineEditor.Editor
 
 			GUI.enabled = prevEnabled;
 		}
-
-		
-
 	}
-
 }

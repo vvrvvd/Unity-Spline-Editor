@@ -20,7 +20,7 @@ namespace SplineEditor.Editor
 
 		private static SplineEditorState EditorState => SplineEditorState.instance;
 
-		private static SplineEditorConfiguration EditorSettings => SplineEditorConfiguration.instance;
+		private static SplineEditorConfiguration EditorSettings => SplineEditorConfiguration.Instance;
 
 		/// <summary>
 		/// Draws custom inspector GUI for BezierSpline.
@@ -46,7 +46,7 @@ namespace SplineEditor.Editor
 
 		private void OnEnable()
 		{
-			if (SplineEditorConfiguration.instance.OpenSplineEditorWithSpline && !EditorWindow.HasOpenInstances<SplineEditorWindow>())
+			if (SplineEditorConfiguration.Instance.OpenSplineEditorWithSpline && !EditorWindow.HasOpenInstances<SplineEditorWindow>())
 			{
 				SplineEditorWindow.Initialize();
 			}
@@ -86,7 +86,7 @@ namespace SplineEditor.Editor
 
 			if (currentEvent.type == EventType.ValidateCommand)
 			{
-				EditorState.wasSplineModified = true;
+				EditorState.WasSplineModified = true;
 				var lastPoint = EditorState.CurrentSpline.Points[EditorState.CurrentSpline.PointsCount - 1];
 				curveDrawerPosition = lastPoint.Position;
 				if (EditorState.CurrentSpline != null)
@@ -110,9 +110,9 @@ namespace SplineEditor.Editor
 
 			EditorState.UpdateSplineStates();
 
-			if (EditorState.CurrentEditor != null && EditorState.IsSplineLooped && EditorState.IsDrawerMode)
+			if (EditorState.IsSplineLooped && EditorState.IsDrawerMode)
 			{
-				EditorState.CurrentEditor.ToggleDrawCurveMode(false);
+				ToggleDrawCurveMode(false);
 			}
 		}
 
@@ -130,7 +130,7 @@ namespace SplineEditor.Editor
 		private void UpdateSelectedIndex(int pointIndex)
 		{
 			EditorState.SelectedPointIndex = pointIndex;
-			EditorState.lastRotation = handleRotation;
+			EditorState.LastRotation = handleRotation;
 
 			if (pointIndex != -1)
 			{
@@ -210,7 +210,7 @@ namespace SplineEditor.Editor
 				EditorState.CurrentEditor.SelectIndex(3);
 			}
 
-			EditorState.wasSplineModified = true;
+			EditorState.WasSplineModified = true;
 		}
 
 		private void RemoveSelectedCurve()
@@ -226,7 +226,7 @@ namespace SplineEditor.Editor
 			var nextSelectedIndex = Mathf.Min(EditorState.SelectedPointIndex, EditorState.CurrentSpline.PointsCount - 1);
 			UpdateSelectedIndex(nextSelectedIndex);
 
-			EditorState.wasSplineModified = true;
+			EditorState.WasSplineModified = true;
 		}
 
 		private void CastSpline(Vector3 direction)
@@ -263,7 +263,7 @@ namespace SplineEditor.Editor
 				}
 			}
 
-			EditorState.wasSplineModified = true;
+			EditorState.WasSplineModified = true;
 		}
 
 		private void ToggleCloseLoop()
@@ -272,7 +272,7 @@ namespace SplineEditor.Editor
 			EditorState.CurrentSpline.ToggleClosingLoopCurve();
 			EditorState.CurrentEditor.SelectIndex(0);
 
-			EditorState.wasSplineModified = true;
+			EditorState.WasSplineModified = true;
 		}
 
 		private void FactorCurve()
@@ -284,7 +284,7 @@ namespace SplineEditor.Editor
 				EditorState.CurrentEditor.SelectIndex(EditorState.SelectedPointIndex * 2);
 			}
 
-			EditorState.wasSplineModified = true;
+			EditorState.WasSplineModified = true;
 		}
 
 		private void SimplifySpline()
@@ -301,7 +301,7 @@ namespace SplineEditor.Editor
 				EditorState.CurrentEditor.SelectIndex(EditorState.SelectedPointIndex / 2);
 			}
 
-			EditorState.wasSplineModified = true;
+			EditorState.WasSplineModified = true;
 		}
 
 		private bool TryCastMousePoint(out Vector3 castedPoint)

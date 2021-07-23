@@ -56,26 +56,31 @@ namespace SplineEditor.MeshGenerator
 
 		/// <summary>
 		/// Gets or sets material used for visualizing mesh UV in editor.
+		/// Is serialized.
 		/// </summary>
 		public Material UvMaterial { get => uvMaterial; set => uvMaterial = value; }
 
 		/// <summary>
 		/// Gets or sets skin used for custom editor GUI.
+		/// Is serialized.
 		/// </summary>
 		public GUISkin GuiSkin { get => guiSkin; set => guiSkin = value; }
 
 		/// <summary>
 		/// Gets or sets color of points drawn in the scene view.
+		/// Is serialized.
 		/// </summary>
 		public Color PointsColor { get => pointsColor; set => pointsColor = value; }
 
 		/// <summary>
 		/// Gets or sets color of normal vectors drawn in the scene view.
+		/// Is serialized.
 		/// </summary>
 		public Color NormalsColor { get => normalsColor; set => normalsColor = value; }
 
 		/// <summary>
 		/// Gets or sets length of normal vectors length drawn in the scene view.
+		/// Is serialized.
 		/// </summary>
 		public float NormalVectorLength { get => normalVectorLength; set => normalVectorLength = value; }
 	}

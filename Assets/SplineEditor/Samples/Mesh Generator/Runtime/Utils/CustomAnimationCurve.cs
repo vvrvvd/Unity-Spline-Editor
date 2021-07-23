@@ -16,6 +16,7 @@ namespace SplineEditor.MeshGenerator
 	[Serializable]
 	public class CustomAnimationCurve
 	{
+		[SerializeField]
 		private AnimationCurve animationCurve;
 
 		[SerializeField]

@@ -1,11 +1,19 @@
+// <copyright file="SplineEditor_Normals.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using UnityEditor;
 using UnityEngine;
 
 namespace SplineEditor.Editor
 {
+	/// <summary>
+	/// Class providing custom editor to BezierSpline component.
+	/// Partial class providing Normals Editor feature implementation.
+	/// </summary>
 	public partial class SplineEditor : UnityEditor.Editor
 	{
-
 		private void InitializeNormalsEditorMode()
 		{
 			if (!EditorState.IsNormalsEditorMode)
@@ -18,20 +26,19 @@ namespace SplineEditor.Editor
 
 		private void ToggleNormalsEditorMode(bool state)
 		{
-
 			if (EditorState.IsNormalsEditorMode != state)
 			{
 				Undo.RecordObject(EditorState, "Toggle Normals Editor Mode");
 			}
 
-			if(state)
+			if (state)
 			{
 				Tools.current = Tool.Rotate;
 				ToggleDrawCurveMode(false);
 			}
 
 			EditorState.IsNormalsEditorMode = state;
-			EditorState.wasSplineModified = true;
+			EditorState.WasSplineModified = true;
 		}
 
 		private void RotateNormals(int index, Vector3 worldPoint)
@@ -49,29 +56,25 @@ namespace SplineEditor.Editor
 			var rotation = Handles.DoRotationHandle(baseHandleRotation, worldPoint);
 			if (EditorGUI.EndChangeCheck())
 			{
-				if (!EditorState.isRotating)
+				if (!EditorState.IsRotating)
 				{
-					EditorState.lastRotation = baseHandleRotation;
-					EditorState.isRotating = true;
+					EditorState.LastRotation = baseHandleRotation;
+					EditorState.IsRotating = true;
 				}
 
 				Undo.RecordObject(EditorState.CurrentSpline, "Rotate Normal Vector");
 
-				var normalAngleDiff = QuaternionUtils.GetSignedAngle(EditorState.lastRotation, rotation, tangentWorldVector);
+				var normalAngleDiff = QuaternionUtils.GetSignedAngle(EditorState.LastRotation, rotation, tangentWorldVector);
 				EditorState.CurrentSpline.SetNormalAngularOffset(normalIndex, normalAngularOffset + normalAngleDiff);
-				EditorState.lastRotation = rotation;
-				EditorState.wasSplineModified = true;
+				EditorState.LastRotation = rotation;
+				EditorState.WasSplineModified = true;
 			}
-			else if ((EditorState.isRotating && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
+			else if ((EditorState.IsRotating && Event.current.type == EventType.Used) || Event.current.type == EventType.ValidateCommand)
 			{
-				EditorState.lastRotation = baseHandleRotation;
-				EditorState.isRotating = false;
-				EditorState.wasSplineModified = true;
+				EditorState.LastRotation = baseHandleRotation;
+				EditorState.IsRotating = false;
+				EditorState.WasSplineModified = true;
 			}
 		}
-
-		
-
 	}
-
 }
