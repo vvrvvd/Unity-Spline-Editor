@@ -1,3 +1,8 @@
+// <copyright file="SplineMesh.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -7,7 +12,9 @@ using UnityEditor;
 
 namespace SplineEditor.MeshGenerator
 {
-
+	/// <summary>
+	/// Component for generating flat mesh based on a bezier spline.
+	/// </summary>
 	[RequireComponent(typeof(MeshFilter))]
 	[RequireComponent(typeof(MeshRenderer))]
 	[RequireComponent(typeof(BezierSpline))]
@@ -15,17 +22,9 @@ namespace SplineEditor.MeshGenerator
 	[ExecuteAlways]
 	public class SplineMesh : MonoBehaviour
 	{
-
-		public enum UVMode
-		{
-			Linear,
-			PingPong,
-		}
-
 		private const float Precision = 0.0001f;
 		private const float MinSpacingValue = 0.1f;
 		private const float MinWidthValue = 0.001f;
-		private const float LengthCalculationPrecision = 0.0001f;
 
 #if UNITY_EDITOR
 		private const int EditorLateUpdateFramesDelay = 5;
@@ -66,7 +65,24 @@ namespace SplineEditor.MeshGenerator
 		private bool updateMesh = false;
 
 		/// <summary>
-		/// Points on generated on the spline to create the mesh
+		/// UV generation mode type.
+		/// Determines how the UV is generated.
+		/// </summary>
+		public enum UVMode
+		{
+			/// <summary>
+			/// UV is simply generated from [0..1].
+			/// </summary>
+			Linear,
+
+			/// <summary>
+			/// UV is generated to the half of the texture and then is mirrored [0..1..0].
+			/// </summary>
+			PingPong,
+		}
+
+		/// <summary>
+		/// Gets or sets points on generated on the spline to create the mesh.
 		/// </summary>
 		public Vector3[] Points
 		{
@@ -75,7 +91,7 @@ namespace SplineEditor.MeshGenerator
 		}
 
 		/// <summary>
-		/// Normals corresponding to the points on mesh.
+		/// Gets or sets normals corresponding to the points on mesh.
 		/// Generated based on Tangents.
 		/// </summary>
 		public Vector3[] Normals
@@ -85,7 +101,7 @@ namespace SplineEditor.MeshGenerator
 		}
 
 		/// <summary>
-		/// Tangents of the points on the mesh based on the spline.
+		/// Gets or sets tangents of the points on the mesh based on the spline.
 		/// </summary>
 		public Vector3[] Tangents
 		{
@@ -94,7 +110,7 @@ namespace SplineEditor.MeshGenerator
 		}
 
 		/// <summary>
-		/// Scale of the points on the mesh.
+		/// Gets or sets scales of the points on the mesh.
 		/// </summary>
 		public Vector3[] Scale
 		{
@@ -103,7 +119,7 @@ namespace SplineEditor.MeshGenerator
 		}
 
 		/// <summary>
-		/// Value of parameter T on the points on mesh regarding to spline.
+		/// Gets or sets value of parameter T on the points on mesh regarding to spline.
 		/// </summary>
 		public float[] ParametersT
 		{
@@ -112,8 +128,7 @@ namespace SplineEditor.MeshGenerator
 		}
 
 		/// <summary>
-		/// Width of generated mesh. 
-		/// In Unity points.
+		/// Gets or sets width of the generated mesh.
 		/// </summary>
 		public float Width
 		{
@@ -131,8 +146,7 @@ namespace SplineEditor.MeshGenerator
 		}
 
 		/// <summary>
-		/// Distance between evenly spaced points on the curve.
-		/// In Unity points.
+		/// Gets or sets distance between evenly spaced points on the curve.
 		/// </summary>
 		public float Spacing
 		{
@@ -150,7 +164,7 @@ namespace SplineEditor.MeshGenerator
 		}
 
 		/// <summary>
-		/// If true then RightSideCurve is used for sampling width on both sides of the mesh.
+		/// Gets or sets a value indicating whether RightSideCurve is used for sampling width on both sides of the mesh.
 		/// If false RightSideCurve is used for sampling width on right side of the mesh and LeftSideCurve for left side of the mesh.
 		/// </summary>
 		public bool UseAsymetricWidthCurve
@@ -169,7 +183,7 @@ namespace SplineEditor.MeshGenerator
 		}
 
 		/// <summary>
-		/// Curve used for sampling width of the right side of the mesh.
+		/// Gets or sets a curve used for sampling width of the right side of the mesh.
 		/// If UseAsymetricWidthCurve is set to false then it's also used for sampling width of the left side as well.
 		/// </summary>
 		public CustomAnimationCurve RightSideCurve
@@ -188,7 +202,7 @@ namespace SplineEditor.MeshGenerator
 		}
 
 		/// <summary>
-		/// Curve used for sampling width of the left side of the mesh.
+		/// Gets or sets a curve used for sampling width of the left side of the mesh.
 		/// Used only if UseAsymetricWidthCurve is set to true.
 		/// </summary>
 		public CustomAnimationCurve LeftSideCurve
@@ -206,7 +220,7 @@ namespace SplineEditor.MeshGenerator
 		}
 
 		/// <summary>
-		/// Determins if Points Scale from BezierCurve is used as multiplier for sampling width of the mesh
+		/// Gets or sets a value indicating whether points scales from BezierCurve component are used as multiplier for sampling width curve of the mesh.
 		/// </summary>
 		public bool UsePointsScale
 		{
@@ -223,7 +237,7 @@ namespace SplineEditor.MeshGenerator
 		}
 
 		/// <summary>
-		/// Mode used for generating UV on the mesh.
+		/// Gets or sets mode used for generating UV on the mesh.
 		/// </summary>
 		public UVMode UvMode
 		{
@@ -239,8 +253,8 @@ namespace SplineEditor.MeshGenerator
 		}
 
 		/// <summary>
-		/// If set to true then UV is being mirrored on both axis.
-		/// For mirroring UV the original value is being substracted from one (1 - UV)
+		/// Gets or sets a value indicating whether UV is being mirrored on both axis.
+		/// For mirroring UV the original value is being substracted from one (1 - UV).
 		/// </summary>
 		public bool MirrorUV
 		{
@@ -256,100 +270,22 @@ namespace SplineEditor.MeshGenerator
 		}
 
 		/// <summary>
-		/// MeshFilter attached to the SplineMesh component.
+		/// Gets MeshFilter attached to the SplineMesh component.
 		/// </summary>
 		public MeshFilter MeshFilter => meshFilter;
 
 		/// <summary>
-		/// MeshRenderer attached to the SplineMesh component.
+		/// Gets MeshRenderer attached to the SplineMesh component.
 		/// </summary>
 		public MeshRenderer MeshRenderer => meshRenderer;
 
-		/// BezierSpline attached to the SplineMesh component.
+		/// <summary>
+		/// Gets BezierSpline attached to the SplineMesh component.
+		/// </summary>
 		public BezierSpline BezierSpline => bezierSpline;
 
-		private void OnValidate()
-		{
-			updateMesh = true;
-
-			if (meshFilter == null)
-			{
-				meshFilter = GetComponent<MeshFilter>();
-			}
-
-			if (meshRenderer == null)
-			{
-				meshRenderer = GetComponent<MeshRenderer>();
-			}
-
-			if (bezierSpline == null)
-			{
-				bezierSpline = GetComponent<BezierSpline>();
-			}
-
-		}
-
-		private void Awake()
-		{
-			if (meshFilter == null)
-			{
-				meshFilter = GetComponent<MeshFilter>();
-			}
-
-			if (meshRenderer == null)
-			{
-				meshRenderer = GetComponent<MeshRenderer>();
-			}
-
-			if (bezierSpline == null)
-			{
-				bezierSpline = GetComponent<BezierSpline>();
-			}
-
-			Assert.IsNotNull(meshFilter);
-			Assert.IsNotNull(meshRenderer);
-			Assert.IsNotNull(bezierSpline);
-		}
-
-
-		private void OnEnable()
-		{
-			bezierSpline.OnSplineChanged += GenerateMesh;
-		}
-
-		private void OnDisable()
-		{
-			bezierSpline.OnSplineChanged -= GenerateMesh;
-		}
-
-
-		private void LateUpdate()
-		{
-			if (!updateMesh)
-			{
-				return;
-			}
-
-#if UNITY_EDITOR
-
-			if (useEditorDelay && editorLateUpdateCounter < EditorLateUpdateFramesDelay)
-			{
-				editorLateUpdateCounter++;
-				return;
-			}
-			else
-			{
-				editorLateUpdateCounter = 0;
-				useEditorDelay = false;
-			}
-#endif
-
-			GenerateMesh();
-			updateMesh = false;
-		}
-
 		/// <summary>
-		/// Constructs and assigned mesh based on the spline. 
+		/// Constructs and assigned mesh based on the spline.
 		/// </summary>
 		[ContextMenu("Generate Mesh")]
 		public void GenerateMesh()
@@ -359,9 +295,6 @@ namespace SplineEditor.MeshGenerator
 				return;
 			}
 
-			var splineLength = bezierSpline.GetLinearLength(precision: LengthCalculationPrecision, useWorldScale: false);
-			var curvesCount = bezierSpline.CurvesCount;
-
 			ConstructMesh();
 			meshFilter.sharedMesh = cachedMesh;
 		}
@@ -369,7 +302,7 @@ namespace SplineEditor.MeshGenerator
 		/// <summary>
 		/// Constructs mesh based on the spline.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Constructed mesh based on BezierSpline component.</returns>
 		public Mesh ConstructMesh()
 		{
 			int[] triangleMap = { 0, 2, 1, 1, 2, 3 };
@@ -386,7 +319,7 @@ namespace SplineEditor.MeshGenerator
 			var verts = new Vector3[Points.Length * 2];
 			var normals = new Vector3[Points.Length * 2];
 			var uvs = new Vector2[verts.Length];
-			var numTris = 2 * (Points.Length - 1) + (isLoop ? 2 : 1);
+			var numTris = (2 * (Points.Length - 1)) + (isLoop ? 2 : 1);
 			var tris = new int[numTris * 3];
 			var vertIndex = 0;
 			var triIndex = 0;
@@ -398,8 +331,8 @@ namespace SplineEditor.MeshGenerator
 				var rightScaledWidth = Width * (UsePointsScale ? Scale[i].x : 1f) * RightSideCurve.Evaluate(ParametersT[i]);
 				var leftScaledWidth = Width * (UsePointsScale ? Scale[i].x : 1f) * LeftSideCurve.Evaluate(ParametersT[i]);
 
-				verts[vertIndex] = Points[i] - right * (UseAsymetricWidthCurve ? leftScaledWidth : rightScaledWidth);
-				verts[vertIndex + 1] = Points[i] + right * rightScaledWidth;
+				verts[vertIndex] = Points[i] - (right * (UseAsymetricWidthCurve ? leftScaledWidth : rightScaledWidth));
+				verts[vertIndex + 1] = Points[i] + (right * rightScaledWidth);
 
 				normals[vertIndex] = normalVector;
 				normals[vertIndex + 1] = normalVector;
@@ -440,7 +373,7 @@ namespace SplineEditor.MeshGenerator
 			switch (UvMode)
 			{
 				case UVMode.PingPong:
-					uv = 1 - Mathf.Abs(2 * uv - 1);
+					uv = 1 - Mathf.Abs((2 * uv) - 1);
 					break;
 				case UVMode.Linear:
 				default:
@@ -450,6 +383,81 @@ namespace SplineEditor.MeshGenerator
 			return MirrorUV ? 1 - uv : uv;
 		}
 
-	}
+		private void OnValidate()
+		{
+			updateMesh = true;
 
+			if (meshFilter == null)
+			{
+				meshFilter = GetComponent<MeshFilter>();
+			}
+
+			if (meshRenderer == null)
+			{
+				meshRenderer = GetComponent<MeshRenderer>();
+			}
+
+			if (bezierSpline == null)
+			{
+				bezierSpline = GetComponent<BezierSpline>();
+			}
+		}
+
+		private void Awake()
+		{
+			if (meshFilter == null)
+			{
+				meshFilter = GetComponent<MeshFilter>();
+			}
+
+			if (meshRenderer == null)
+			{
+				meshRenderer = GetComponent<MeshRenderer>();
+			}
+
+			if (bezierSpline == null)
+			{
+				bezierSpline = GetComponent<BezierSpline>();
+			}
+
+			Assert.IsNotNull(meshFilter);
+			Assert.IsNotNull(meshRenderer);
+			Assert.IsNotNull(bezierSpline);
+		}
+
+		private void OnEnable()
+		{
+			bezierSpline.OnSplineChanged += GenerateMesh;
+		}
+
+		private void OnDisable()
+		{
+			bezierSpline.OnSplineChanged -= GenerateMesh;
+		}
+
+		private void LateUpdate()
+		{
+			if (!updateMesh)
+			{
+				return;
+			}
+
+#if UNITY_EDITOR
+
+			if (useEditorDelay && editorLateUpdateCounter < EditorLateUpdateFramesDelay)
+			{
+				editorLateUpdateCounter++;
+				return;
+			}
+			else
+			{
+				editorLateUpdateCounter = 0;
+				useEditorDelay = false;
+			}
+#endif
+
+			GenerateMesh();
+			updateMesh = false;
+		}
+	}
 }

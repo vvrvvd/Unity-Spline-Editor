@@ -1,14 +1,10 @@
 {
-    "name": "SplineEditor.Samples.MeshGenerator.Editor",
+    "name": "SplineEditor.Samples.LineRenderer",
     "rootNamespace": "",
     "references": [
-        "GUID:08bff4c7283eee24999c67b8ee6a1dbd",
-        "GUID:c6d1954ea35079e41978b6cff8ef8220",
-        "GUID:1fa868759a16d954bb6461d6e784a61b"
+        "GUID:08bff4c7283eee24999c67b8ee6a1dbd"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

@@ -67,7 +67,7 @@ namespace SplineEditor.MeshGenerator.Editor
 		private void DrawRightSideCurveField()
 		{
 			GUILayout.BeginHorizontal();
-			EditorGUILayout.CurveField(CurveOptionsRightWidthCurveContent, splineMesh.RightSideCurve.animationCurve);
+			EditorGUILayout.CurveField(CurveOptionsRightWidthCurveContent, splineMesh.RightSideCurve.AnimationCurve);
 			if (splineMesh.RightSideCurve.CheckWasCurveModified())
 			{
 				Undo.RecordObject(splineMesh, "Change mirrored width curve");
@@ -82,7 +82,7 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.BeginHorizontal();
 
 			EditorGUI.BeginChangeCheck();
-			EditorGUILayout.CurveField(CurveOptionsLeftWidthCurveContent, splineMesh.LeftSideCurve.animationCurve);
+			EditorGUILayout.CurveField(CurveOptionsLeftWidthCurveContent, splineMesh.LeftSideCurve.AnimationCurve);
 			if (splineMesh.LeftSideCurve.CheckWasCurveModified())
 			{
 				Undo.RecordObject(splineMesh, "Change mirrored width curve");
@@ -95,7 +95,7 @@ namespace SplineEditor.MeshGenerator.Editor
 		private void DrawAsymetricCurveToggle()
 		{
 			GUILayout.BeginHorizontal();
-			EditorGUILayout.CurveField(CurveOptionsWidthCurveContent, splineMesh.RightSideCurve.animationCurve);
+			EditorGUILayout.CurveField(CurveOptionsWidthCurveContent, splineMesh.RightSideCurve.AnimationCurve);
 			if (splineMesh.RightSideCurve.CheckWasCurveModified())
 			{
 				Undo.RecordObject(splineMesh, "Change mirrored width curve");
