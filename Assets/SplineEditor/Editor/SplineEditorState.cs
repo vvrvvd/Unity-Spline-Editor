@@ -1,9 +1,17 @@
+// <copyright file="SplineEditorState.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using System;
 using UnityEditor;
 using UnityEngine;
 
 namespace SplineEditor.Editor
 {
+	/// <summary>
+	/// Class providing serializable state for custom BezierSpline editor.
+	/// </summary>
 	[FilePath("SplineEditor/SplineEditorState.conf", FilePathAttribute.Location.ProjectFolder)]
 	public partial class SplineEditorState : ScriptableSingleton<SplineEditorState>
 	{

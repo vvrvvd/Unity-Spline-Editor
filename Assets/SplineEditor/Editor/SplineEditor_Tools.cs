@@ -7,7 +7,7 @@ namespace SplineEditor.Editor
 
 		private void InitializeTools()
 		{
-			if (editorState.CurrentSpline == null || editorState.ShowTransformHandle)
+			if (EditorState.CurrentSpline == null || EditorState.ShowTransformHandle)
 			{
 				ShowTools();
 			}
@@ -20,7 +20,7 @@ namespace SplineEditor.Editor
 
 		private void ReleaseTools()
 		{
-			if(editorState.CurrentSpline ==null || editorState.ShowTransformHandle)
+			if(EditorState.CurrentSpline ==null || EditorState.ShowTransformHandle)
 			{
 				ShowTools();
 			}
@@ -32,38 +32,38 @@ namespace SplineEditor.Editor
 
 		private void UpdateTools()
 		{
-			if (editorState.CurrentEditor == null || editorState.CurrentSpline == null)
+			if (EditorState.CurrentEditor == null || EditorState.CurrentSpline == null)
 			{
 				return;
 			}
 
-			if(editorState.ShowTransformHandle && Tools.current == Tool.None && editorState.savedTool != Tool.None)
+			if(EditorState.ShowTransformHandle && Tools.current == Tool.None && EditorState.savedTool != Tool.None)
 			{
 				ShowTools();
 			}
-			else if (!editorState.ShowTransformHandle && Tools.current != Tool.None)
+			else if (!EditorState.ShowTransformHandle && Tools.current != Tool.None)
 			{
 				HideTools();
-			} else if(editorState.ShowTransformHandle && Tools.current != editorState.savedTool)
+			} else if(EditorState.ShowTransformHandle && Tools.current != EditorState.savedTool)
 			{
-				editorState.savedTool = Tools.current;
+				EditorState.savedTool = Tools.current;
 			}
 
 		}
 
 		public static void ShowTools()
 		{
-			if (editorState.savedTool == Tool.None)
+			if (EditorState.savedTool == Tool.None)
 			{
-				editorState.savedTool = Tool.Move;
+				EditorState.savedTool = Tool.Move;
 			}
 
-			Tools.current = editorState.savedTool;
+			Tools.current = EditorState.savedTool;
 		}
 
 		public static void HideTools()
 		{
-			editorState.savedTool = Tools.current;
+			EditorState.savedTool = Tools.current;
 			Tools.current = Tool.None;
 		}
 

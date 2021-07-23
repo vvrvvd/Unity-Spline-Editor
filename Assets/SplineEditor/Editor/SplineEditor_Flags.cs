@@ -77,7 +77,7 @@ namespace SplineEditor.Editor
 		{
 			drawSplineModeFlag = !drawSplineModeFlag;
 		}
-		
+
 		internal static void ToggleNormalsEditorMode()
 		{
 			normalsEditorModeFlag = !normalsEditorModeFlag;
@@ -101,13 +101,13 @@ namespace SplineEditor.Editor
 		{
 			if (normalsEditorModeFlag)
 			{
-				ToggleNormalsEditorMode(!editorState.IsNormalsEditorMode);
+				ToggleNormalsEditorMode(!EditorState.IsNormalsEditorMode);
 				normalsEditorModeFlag = false;
 			}
 
 			if (drawSplineModeFlag)
 			{
-				ToggleDrawCurveMode(!editorState.IsDrawerMode);
+				ToggleDrawCurveMode(!EditorState.IsDrawerMode);
 				drawSplineModeFlag = false;
 			}
 
@@ -153,7 +153,7 @@ namespace SplineEditor.Editor
 				castSplineToCameraFlag = false;
 			}
 
-			if (!editorState.IsDrawerMode)
+			if (!EditorState.IsDrawerMode)
 			{
 				if (addCurveFlag)
 				{

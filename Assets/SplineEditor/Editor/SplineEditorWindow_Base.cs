@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace SplineEditor.Editor
 {
-
 	public partial class SplineEditorWindow : EditorWindow
 	{
         private static SplineEditorState editorState => SplineEditorState.instance;
@@ -147,17 +146,5 @@ namespace SplineEditor.Editor
 
 			GUILayout.EndHorizontal();
         }
-
-        public static void DrawUILine(Color color, int thickness = 2, int padding = 10)
-        {
-            Rect r = EditorGUILayout.GetControlRect(GUILayout.Height(padding + thickness));
-            r.height = thickness;
-            r.y += padding / 2;
-            r.x -= 2;
-            r.width += 6;
-            EditorGUI.DrawRect(r, color);
-        }
-
     }
-
 }

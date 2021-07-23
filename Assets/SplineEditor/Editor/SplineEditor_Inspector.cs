@@ -25,7 +25,7 @@ namespace SplineEditor.Editor
 			var prevEnabled = GUI.enabled;
 			GUI.enabled = false;
 
-			EditorGUILayout.FloatField("Length", editorState.CurrentSpline.GetLinearLength(precision: 0.001f, useWorldScale: true));
+			EditorGUILayout.FloatField("Length", EditorState.CurrentSpline.GetLinearLength(precision: 0.001f, useWorldScale: true));
 
 			GUI.enabled = prevEnabled;
 		}
