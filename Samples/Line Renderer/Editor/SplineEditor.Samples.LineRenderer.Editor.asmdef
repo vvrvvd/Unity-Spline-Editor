@@ -1,10 +1,12 @@
 {
-    "name": "SplineEditor.Samples",
+    "name": "SplineEditor.Samples.LineRenderer.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:08bff4c7283eee24999c67b8ee6a1dbd"
+        "GUID:f5dfa6e57832bad41b99e9410c186e64"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

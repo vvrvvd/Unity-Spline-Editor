@@ -1,8 +1,15 @@
+// <copyright file="LineRendererSpline.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using UnityEngine;
 
 namespace SplineEditor
 {
-
+	/// <summary>
+	/// Component for visualizing BezierSpline using LineRenderer component.
+	/// </summary>
 	[ExecuteAlways]
 	[RequireComponent(typeof(BezierSpline))]
 	[RequireComponent(typeof(LineRenderer))]
@@ -22,6 +29,9 @@ namespace SplineEditor
 		private LineRenderer lineRenderer;
 		private SplinePath cachedSplinePath;
 
+		/// <summary>
+		/// Gets or sets number of segments on spline when UseEvenlySpacedPoints property is set to false.
+		/// </summary>
 		public int SegmentsCount
 		{
 			get => segmentsCount;
@@ -43,6 +53,9 @@ namespace SplineEditor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets spacing between segment points on spline when  UseEvenlySpacedPoints property is set to true.
+		/// </summary>
 		public float PointsSpacing
 		{
 			get => pointsSpacing;
@@ -64,6 +77,9 @@ namespace SplineEditor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether line renderer points should be evenly generated on spline based on PointsSpacing property or generated from segments based on SegmentsCount property.
+		/// </summary>
 		public bool UseEvenlySpacedPoints
 		{
 			get => useEvenlySpacedPoints;
@@ -79,44 +95,19 @@ namespace SplineEditor
 			}
 		}
 
+		/// <summary>
+		/// Gets BezierSpline component to visualize.
+		/// </summary>
 		public BezierSpline BezierSpline => bezierSpline;
+
+		/// <summary>
+		/// Gets LineRenderer component used for visualization of BezierSpline component.
+		/// </summary>
 		public LineRenderer LineRenderer => lineRenderer;
 
-		private void OnValidate()
-		{
-			if (bezierSpline == null)
-			{
-				bezierSpline = GetComponent<BezierSpline>();
-			}
-
-			if (lineRenderer == null)
-			{
-				lineRenderer = GetComponent<LineRenderer>();
-			}
-
-		}
-
-		private void OnEnable()
-		{
-			if (bezierSpline == null)
-			{
-				bezierSpline = GetComponent<BezierSpline>();
-			}
-
-			if (lineRenderer == null)
-			{
-				lineRenderer = GetComponent<LineRenderer>();
-			}
-
-			bezierSpline.OnSplineChanged += UpdateLinePoints;
-			UpdateLinePoints();
-		}
-
-		private void OnDisable()
-		{
-			bezierSpline.OnSplineChanged -= UpdateLinePoints;
-		}
-
+		/// <summary>
+		/// Generates points based on BezierSpline and assigns them to LineRenderer components.
+		/// </summary>
 		[ContextMenu("Update Line Points")]
 		public void UpdateLinePoints()
 		{
@@ -143,16 +134,50 @@ namespace SplineEditor
 			}
 		}
 
+		private void OnValidate()
+		{
+			if (bezierSpline == null)
+			{
+				bezierSpline = GetComponent<BezierSpline>();
+			}
+
+			if (lineRenderer == null)
+			{
+				lineRenderer = GetComponent<LineRenderer>();
+			}
+		}
+
+		private void OnEnable()
+		{
+			if (bezierSpline == null)
+			{
+				bezierSpline = GetComponent<BezierSpline>();
+			}
+
+			if (lineRenderer == null)
+			{
+				lineRenderer = GetComponent<LineRenderer>();
+			}
+
+			bezierSpline.OnSplineChanged += UpdateLinePoints;
+			UpdateLinePoints();
+		}
+
+		private void OnDisable()
+		{
+			bezierSpline.OnSplineChanged -= UpdateLinePoints;
+		}
+
 		private void UpdateLinePointsWithEvenlySpacedPoints()
 		{
-			if(cachedSplinePath == null)
+			if (cachedSplinePath == null)
 			{
 				cachedSplinePath = new SplinePath();
 			}
 
 			bezierSpline.GetEvenlySpacedPoints(pointsSpacing, cachedSplinePath, useWorldSpace: false);
 
-			var generatedPoints = cachedSplinePath.points;
+			var generatedPoints = cachedSplinePath.Points;
 			var generatedPointsLength = generatedPoints.Length;
 
 			lineRenderer.positionCount = generatedPointsLength;
@@ -175,9 +200,6 @@ namespace SplineEditor
 				var position = bezierSpline.GetPoint(t, false);
 				lineRenderer.SetPosition(i, position);
 			}
-
 		}
-
 	}
-
 }

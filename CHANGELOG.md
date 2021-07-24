@@ -1,3 +1,12 @@
+## v2.1.1 [25.07.2021]
+- Applying StyleCop to all scripts.
+- Removing ugly centered UI from editors and custom editors windows.
+- Changing default editor state scriptables location to UserSettings folder.
+
+## v1.0.2 [19.07.2021]
+- Fix for LineRendererSplineSample GUID being the same as SampleScene.
+- Changing default GUI to display both Images and Texts on buttons.
+
 ## v1.0.0 [18.07.2021]
 - Adding Normals editor
 - Adding Mesh Generator tool for generating meshes from splines

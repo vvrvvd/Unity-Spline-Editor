@@ -1,136 +1,145 @@
+// <copyright file="SplineEditorWindow_Base.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using System;
 using UnityEditor;
 using UnityEngine;
 
 namespace SplineEditor.Editor
 {
-
+	/// <summary>
+	/// Class providing custom editor window to SplineEditor.
+	/// </summary>
 	public partial class SplineEditorWindow : EditorWindow
 	{
-        private static SplineEditorState editorState => SplineEditorState.instance;
-        private static SplineEditorWindowState editorWindowState => SplineEditorWindowState.instance;
-        private static SplineEditorConfiguration editorSettings => SplineEditorConfiguration.instance;
+		private int buttonsLayoutIndex = 2;
 
+		private bool repaintScene = false;
+		private bool initializeStyles = false;
 
-        private int buttonsLayoutIndex = 2;
+		private Vector2 scrollPos = Vector2.zero;
 
-        private bool repaintScene = false;
-        private bool initializeStyles = false;
+		private static SplineEditorState EditorState => SplineEditorState.instance;
 
-        private Vector2 scrollPos = Vector2.zero;
+		private static SplineEditorWindowState EditorWindowState => SplineEditorWindowState.instance;
 
-        private bool IsSplineEditorEnabled => editorState.CurrentSpline != null;
-        private bool IsCurveEditorEnabled => IsSplineEditorEnabled && editorState.IsAnyPointSelected;
+		private static SplineEditorConfiguration EditorSettings => SplineEditorConfiguration.Instance;
 
+		private bool IsCurveEditorEnabled => IsSplineEditorEnabled && EditorState.IsAnyPointSelected;
 
-        [MenuItem("Window/Spline Editor")]
-        public static void Initialize()
-        {
-            var inspectorType = Type.GetType("UnityEditor.InspectorWindow,UnityEditor.dll");
-            var window = GetWindow<SplineEditorWindow>(WindowTitle, false, inspectorType);
-            window.initializeStyles = true;
-            window.autoRepaintOnSceneChange = true;
-            window.Show();
-        }
+		private bool IsSplineEditorEnabled => EditorState.CurrentSpline != null;
 
-        private void OnEnable()
+		/// <summary>
+		/// Creates new SplineEditor Window if it's not found in the Unity view, otherwise just shows it.
+		/// </summary>
+		[MenuItem("Window/Spline Editor")]
+		public static void Initialize()
 		{
-            editorState.OnSplineModified += OnSplineModified;
-            editorState.OnSelectedSplineChanged += OnSelectedSplineChanged;
-            editorState.OnSelectedPointChanged += OnSelectedCurveChanged;
-        }
-
-        private void OnDisable()
-		{
-            editorState.OnSplineModified -= OnSplineModified;
-            editorState.OnSelectedSplineChanged -= OnSelectedSplineChanged;
-            editorState.OnSelectedPointChanged -= OnSelectedCurveChanged;
-        }
-
-        private void OnSplineModified()
-		{
-            editorState.IsDrawerMode = editorState.CurrentEditor != null && editorState.IsDrawerMode;
-            editorState.IsNormalsEditorMode = editorState.CurrentEditor != null && editorState.IsNormalsEditorMode;
-            Repaint();
+			var inspectorType = Type.GetType("UnityEditor.InspectorWindow,UnityEditor.dll");
+			var window = GetWindow<SplineEditorWindow>(WindowTitle, false, inspectorType);
+			window.initializeStyles = true;
+			window.autoRepaintOnSceneChange = true;
+			window.Show();
 		}
 
-        private void OnSelectedSplineChanged()
+		private void OnEnable()
 		{
-            editorState.IsDrawerMode = editorState.CurrentEditor != null && editorState.IsDrawerMode;
-            editorState.IsNormalsEditorMode = editorState.CurrentEditor != null && editorState.IsNormalsEditorMode;
-            OnSelectedCurveChanged();
-        }
+			EditorState.OnSplineModified += OnSplineModified;
+			EditorState.OnSelectedSplineChanged += OnSelectedSplineChanged;
+			EditorState.OnSelectedPointChanged += OnSelectedCurveChanged;
+		}
 
-        private void OnSelectedCurveChanged()
-        {
-            Repaint();
-        }
+		private void OnDisable()
+		{
+			EditorState.OnSplineModified -= OnSplineModified;
+			EditorState.OnSelectedSplineChanged -= OnSelectedSplineChanged;
+			EditorState.OnSelectedPointChanged -= OnSelectedCurveChanged;
+		}
 
+		private void OnSplineModified()
+		{
+			EditorState.IsDrawerMode = EditorState.CurrentEditor != null && EditorState.IsDrawerMode;
+			EditorState.IsNormalsEditorMode = EditorState.CurrentEditor != null && EditorState.IsNormalsEditorMode;
+			Repaint();
+		}
 
-        private void OnGUI()
-        {
-            repaintScene = false;
+		private void OnSelectedSplineChanged()
+		{
+			EditorState.IsDrawerMode = EditorState.CurrentEditor != null && EditorState.IsDrawerMode;
+			EditorState.IsNormalsEditorMode = EditorState.CurrentEditor != null && EditorState.IsNormalsEditorMode;
+			OnSelectedCurveChanged();
+		}
 
-            //Hack for getting hover mouse visuals before showing tooltip when using custom GUI.skin pt.1
-            wantsMouseMove = true;
+		private void OnSelectedCurveChanged()
+		{
+			Repaint();
+		}
 
-            if(initializeStyles)
+		private void OnGUI()
+		{
+			repaintScene = false;
+
+			// Hack for getting hover mouse visuals before showing tooltip when using custom GUI.skin pt.1
+			wantsMouseMove = true;
+
+			if (initializeStyles)
 			{
-                InitializeStyles();
-                initializeStyles = false;
-            }
+				InitializeStyles();
+				initializeStyles = false;
+			}
 
-            editorState.UpdateSplineStates();
+			EditorState.UpdateSplineStates();
 
-            scrollPos = GUILayout.BeginScrollView(scrollPos, GUILayout.ExpandHeight(true));
-            EditorGUILayout.BeginVertical();
-            GUILayout.Space(10);
+			scrollPos = GUILayout.BeginScrollView(scrollPos, GUILayout.ExpandHeight(true));
+			EditorGUILayout.BeginVertical();
+			GUILayout.Space(10);
 			DrawHeader();
-            GUILayout.Space(10);
-            DrawSettingsButton();
+			GUILayout.Space(10);
+			DrawSettingsButton();
 			DrawLayoutsToolbar();
 
-            UpdateStyles();
+			UpdateStyles();
 
-            DrawPointGroup();
-            GUILayout.Space(3);
-            DrawCurveOptions();
-            GUILayout.Space(3);
-            DrawSplineGroup();
-            GUILayout.Space(3);
-            DrawNormalsEditorOptions();
-            GUILayout.Space(3);
-            DrawDrawerToolOptions();
-            EditorGUILayout.EndVertical();
-            EditorGUILayout.EndScrollView();
+			DrawPointGroup();
+			GUILayout.Space(3);
+			DrawCurveOptions();
+			GUILayout.Space(3);
+			DrawSplineGroup();
+			GUILayout.Space(3);
+			DrawNormalsEditorOptions();
+			GUILayout.Space(3);
+			DrawDrawerToolOptions();
+			EditorGUILayout.EndVertical();
+			EditorGUILayout.EndScrollView();
 
-            //Hack for getting hover mouse visuals before showing tooltip when using custom GUI.skin pt.2
-            if (Event.current.type == EventType.MouseMove)
-            {
-                Repaint();
-            }
-        
-            if(repaintScene)
+			// Hack for getting hover mouse visuals before showing tooltip when using custom GUI.skin pt.2
+			if (Event.current.type == EventType.MouseMove)
 			{
-                SceneView.RepaintAll();
-            }
+				Repaint();
+			}
 
-        }
+			if (repaintScene)
+			{
+				SceneView.RepaintAll();
+			}
+		}
 
-        private void DrawHeader()
+		private void DrawHeader()
 		{
-            var headerContent = new GUIContent(HeaderTitle);
-            GUILayout.Label(headerContent, headerLabelStyle);
-        }
+			var headerContent = new GUIContent(HeaderTitle);
+			GUILayout.Label(headerContent, headerLabelStyle);
+		}
 
-        private void DrawLayoutsToolbar()
+		private void DrawLayoutsToolbar()
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 
 			buttonsLayoutIndex = GUILayout.Toolbar(buttonsLayoutIndex, layoutsButtonsContent, ToolsHeaderToolbarWidth, ToolsHeaderToolbarHeight);
-			
-            GUILayout.FlexibleSpace();
+
+			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
 
@@ -142,22 +151,10 @@ namespace SplineEditor.Editor
 
 			if (GUILayout.Button(settingsButtonContent, settingsButtonStyle, ToolsSettingsButtonWidth, ToolsSettingsButtonHeight))
 			{
-                SettingsService.OpenProjectSettings("Project/Spline Editor");
-            }
+				SettingsService.OpenProjectSettings("Project/Spline Editor");
+			}
 
 			GUILayout.EndHorizontal();
-        }
-
-        public static void DrawUILine(Color color, int thickness = 2, int padding = 10)
-        {
-            Rect r = EditorGUILayout.GetControlRect(GUILayout.Height(padding + thickness));
-            r.height = thickness;
-            r.y += padding / 2;
-            r.x -= 2;
-            r.width += 6;
-            EditorGUI.DrawRect(r, color);
-        }
-
-    }
-
+		}
+	}
 }
