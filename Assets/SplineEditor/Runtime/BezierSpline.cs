@@ -20,6 +20,8 @@ namespace SplineEditor
 		private const float InsertCurveFirstPointT = 0.4f;
 		private const float AutoSetControlPointInterpolationValue = 0.5f;
 
+		private readonly List<float> normalsOffsetCopyList = new List<float>();
+
 		[SerializeField]
 		private bool isLoop = default;
 
@@ -48,7 +50,6 @@ namespace SplineEditor
 		private List<float> normalsAngularOffsets = default;
 
 		private bool invokeEvents = true;
-		private List<float> normalsOffsetCopyList = new List<float>();
 
 		/// <summary>
 		/// Event invoked when spline properties were modified in any way.

@@ -61,12 +61,24 @@ namespace SplineEditor.Editor
 		private Vector3 lastScale;
 		private Quaternion lastRotation;
 
+		/// <summary>
+		/// Invoked when current spline is modified.
+		/// </summary>
 		public event Action OnSplineModified;
 
+		/// <summary>
+		/// Invoked when selected point is changed on scene GUI.
+		/// </summary>
 		public event Action OnSelectedPointChanged;
 
+		/// <summary>
+		/// Invoked when selected spline is changed on scene GUI.
+		/// </summary>
 		public event Action OnSelectedSplineChanged;
 
+		/// <summary>
+		/// Gets or sets a BezierSpline currently selected in hierarchy.
+		/// </summary>
 		public BezierSpline CurrentSpline
 		{
 			get => currentSpline;
@@ -82,6 +94,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets splineEditor for BezierSpline currently selected in hierarchy.
+		/// </summary>
 		public SplineEditor CurrentEditor
 		{
 			get => currentEditor;
@@ -97,6 +112,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets control point index currently selected on scene GUI.
+		/// </summary>
 		public int SelectedPointIndex
 		{
 			get => selectedPointIndex;
@@ -114,6 +132,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets curve index currently selected on scene GUI.
+		/// </summary>
 		public int SelectedCurveIndex
 		{
 			get => selectedCurveIndex;
@@ -124,6 +145,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether any control point is selected on scene GUI.
+		/// </summary>
 		public bool IsAnyPointSelected
 		{
 			get => isAnyPointSelected;
@@ -138,6 +162,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether selected curve may be removed from CurrentSpline.
+		/// </summary>
 		public bool CanSelectedCurveBeRemoved
 		{
 			get => canSelectedCurveBeRemoved;
@@ -153,6 +180,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether a new curve may be added to CurrentSpline.
+		/// </summary>
 		public bool CanNewCurveBeAdded
 		{
 			get => canNewCurveBeAdded;
@@ -168,6 +198,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether CurrentSpline is looped.
+		/// </summary>
 		public bool IsSplineLooped
 		{
 			get => isSplineLooped;
@@ -183,6 +216,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether CurrentSpline can be looped.
+		/// </summary>
 		public bool CanSplineBeLooped
 		{
 			get => canSplineBeLooped;
@@ -198,6 +234,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether CurrentSpline can be simplified.
+		/// </summary>
 		public bool CanSplineBeSimplified
 		{
 			get => canSplineBeSimplified;
@@ -213,6 +252,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether Draw Curve Mode is enabled.
+		/// </summary>
 		public bool IsDrawerMode
 		{
 			get => isDrawerMode;
@@ -229,6 +271,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether Normals Editor Mode is enabled.
+		/// </summary>
 		public bool IsNormalsEditorMode
 		{
 			get => isNormalsEditorMode;
@@ -245,6 +290,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether angles should be smoothed when generating curves in Draw Curve Mode.
+		/// </summary>
 		public bool DrawCurveSmoothAcuteAngles
 		{
 			get => drawCurveSmoothAcuteAngles;
@@ -260,6 +308,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a new curve length when generating curves in Draw Curve Mode.
+		/// </summary>
 		public float DrawCurveSegmentLength
 		{
 			get => drawCurveSegmentLength;
@@ -275,6 +326,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the first point hook (parameter t) when generating curves in Draw Curve Mode.
+		/// </summary>
 		public float DrawCurveFirstPointHook
 		{
 			get => drawCurveFirstPointHook;
@@ -290,6 +344,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the second point hook (parameter t) when generating curves in Draw Curve Mode.
+		/// </summary>
 		public float DrawCurveSecondPointHook
 		{
 			get => drawCurveSecondPointHook;
@@ -305,6 +362,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether control points should be drawn on scene GUI.
+		/// </summary>
 		public bool DrawPoints
 		{
 			get => drawPoints;
@@ -320,6 +380,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether splines should be drawn on scene GUI.
+		/// </summary>
 		public bool DrawSpline
 		{
 			get => drawSpline;
@@ -335,6 +398,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether normal vectors should be drawn on scene GUI.
+		/// </summary>
 		public bool DrawNormals
 		{
 			get => drawNormals;
@@ -350,6 +416,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether spline Transform handle should be visible on scene GUI.
+		/// </summary>
 		public bool ShowTransformHandle
 		{
 			get => showTransformHandle;
@@ -365,6 +434,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether spline should be drawn on scene GUI even if not selected.
+		/// </summary>
 		public bool AlwaysDrawSplineOnScene
 		{
 			get => alwaysDrawSplineOnScene;
@@ -380,42 +452,63 @@ namespace SplineEditor.Editor
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a tool saved when hiding Unity tools handle.
+		/// </summary>
 		public Tool SavedTool
 		{
 			get => savedTool;
 			set => savedTool = value;
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether CurrentSpline was modified in the current frame.
+		/// </summary>
 		public bool WasSplineModified
 		{
 			get => wasSplineModified;
 			set => wasSplineModified = value;
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether selected control point or normal vector (when Normals Editor Mode is enabled) handle is rotated on scene GUI in the current frame.
+		/// </summary>
 		public bool IsRotating
 		{
 			get => isRotating;
 			set => isRotating = value;
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether selected control point scale handle is modified on scene GUI in the current frame.
+		/// </summary>
 		public bool IsScaling
 		{
 			get => isScaling;
 			set => isScaling = value;
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether selected control point position handle is modified on scene GUI in the current frame.
+		/// </summary>
 		public bool IsDraggingPoint
 		{
 			get => isDraggingPoint;
 			set => isDraggingPoint = value;
 		}
 
+		/// <summary>
+		/// Gets or sets selected control point last scale on scene GUI when modyfing point scale handle.
+		/// </summary>
 		public Vector3 LastScale
 		{
 			get => lastScale;
 			set => lastScale = value;
 		}
 
+		/// <summary>
+		/// Gets or sets selected control point last rotation on scene GUI when modyfing point rotation handle.
+		/// </summary>
 		public Quaternion LastRotation
 		{
 			get => lastRotation;
