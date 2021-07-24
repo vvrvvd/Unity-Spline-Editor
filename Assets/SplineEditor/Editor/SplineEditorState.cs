@@ -1,18 +1,84 @@
+// <copyright file="SplineEditorState.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using System;
 using UnityEditor;
 using UnityEngine;
 
 namespace SplineEditor.Editor
 {
+	/// <summary>
+	/// Class providing serializable state for custom BezierSpline editor.
+	/// </summary>
 	[FilePath("SplineEditor/SplineEditorState.conf", FilePathAttribute.Location.ProjectFolder)]
 	public partial class SplineEditorState : ScriptableSingleton<SplineEditorState>
 	{
+		private int selectedPointIndex = -1;
+		private int selectedCurveIndex = -1;
 
-		public event Action OnSplineModified;
-		public event Action OnSelectedPointChanged;
-		public event Action OnSelectedSplineChanged;
+		private bool isAnyPointSelected;
+		private bool canSelectedCurveBeRemoved;
+		private bool canNewCurveBeAdded;
+		private bool isSplineLooped;
+		private bool canSplineBeLooped;
+		private bool canSplineBeSimplified;
+
+		[SerializeField]
+		private bool isDrawerMode;
+		[SerializeField]
+		private bool isNormalsEditorMode;
+		[SerializeField]
+		private bool drawCurveSmoothAcuteAngles = true;
+		[SerializeField]
+		private float drawCurveSegmentLength = 5f;
+		[SerializeField]
+		private float drawCurveFirstPointHook = 0.33f;
+		[SerializeField]
+		private float drawCurveSecondPointHook = 0.66f;
+		[SerializeField]
+		private bool drawPoints = true;
+		[SerializeField]
+		private bool drawSpline = true;
+		[SerializeField]
+		private bool drawNormals = false;
+		[SerializeField]
+		private bool showTransformHandle = true;
+		[SerializeField]
+		private bool alwaysDrawSplineOnScene = true;
 
 		private BezierSpline currentSpline;
+		private SplineEditor currentEditor;
+
+		private Tool savedTool = Tool.None;
+		private bool wasSplineModified = false;
+
+		private bool isRotating;
+		private bool isScaling;
+		private bool isDraggingPoint;
+
+		private Vector3 lastScale;
+		private Quaternion lastRotation;
+
+		/// <summary>
+		/// Invoked when current spline is modified.
+		/// </summary>
+		public event Action OnSplineModified;
+
+		/// <summary>
+		/// Invoked when selected point is changed on scene GUI.
+		/// </summary>
+		public event Action OnSelectedPointChanged;
+
+		/// <summary>
+		/// Invoked when selected spline is changed on scene GUI.
+		/// </summary>
+		public event Action OnSelectedSplineChanged;
+
+		/// <summary>
+		/// Gets or sets a BezierSpline currently selected in hierarchy.
+		/// </summary>
 		public BezierSpline CurrentSpline
 		{
 			get => currentSpline;
@@ -28,13 +94,15 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private SplineEditor currentEditor;
+		/// <summary>
+		/// Gets or sets splineEditor for BezierSpline currently selected in hierarchy.
+		/// </summary>
 		public SplineEditor CurrentEditor
 		{
 			get => currentEditor;
 			set
 			{
-				if (currentEditor!=null && value == currentEditor)
+				if (currentEditor != null && value == currentEditor)
 				{
 					return;
 				}
@@ -44,7 +112,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private int selectedPointIndex = -1;
+		/// <summary>
+		/// Gets or sets control point index currently selected on scene GUI.
+		/// </summary>
 		public int SelectedPointIndex
 		{
 			get => selectedPointIndex;
@@ -62,7 +132,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private int selectedCurveIndex = -1;
+		/// <summary>
+		/// Gets or sets curve index currently selected on scene GUI.
+		/// </summary>
 		public int SelectedCurveIndex
 		{
 			get => selectedCurveIndex;
@@ -73,7 +145,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private bool isAnyPointSelected;
+		/// <summary>
+		/// Gets or sets a value indicating whether any control point is selected on scene GUI.
+		/// </summary>
 		public bool IsAnyPointSelected
 		{
 			get => isAnyPointSelected;
@@ -88,7 +162,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private bool canSelectedCurveBeRemoved;
+		/// <summary>
+		/// Gets or sets a value indicating whether selected curve may be removed from CurrentSpline.
+		/// </summary>
 		public bool CanSelectedCurveBeRemoved
 		{
 			get => canSelectedCurveBeRemoved;
@@ -104,7 +180,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private bool canNewCurveBeAdded;
+		/// <summary>
+		/// Gets or sets a value indicating whether a new curve may be added to CurrentSpline.
+		/// </summary>
 		public bool CanNewCurveBeAdded
 		{
 			get => canNewCurveBeAdded;
@@ -120,7 +198,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private bool isSplineLooped;
+		/// <summary>
+		/// Gets or sets a value indicating whether CurrentSpline is looped.
+		/// </summary>
 		public bool IsSplineLooped
 		{
 			get => isSplineLooped;
@@ -136,7 +216,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private bool canSplineBeLooped;
+		/// <summary>
+		/// Gets or sets a value indicating whether CurrentSpline can be looped.
+		/// </summary>
 		public bool CanSplineBeLooped
 		{
 			get => canSplineBeLooped;
@@ -152,7 +234,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		private bool canSplineBeSimplified;
+		/// <summary>
+		/// Gets or sets a value indicating whether CurrentSpline can be simplified.
+		/// </summary>
 		public bool CanSplineBeSimplified
 		{
 			get => canSplineBeSimplified;
@@ -168,8 +252,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		[SerializeField]
-		private bool isDrawerMode;
+		/// <summary>
+		/// Gets or sets a value indicating whether Draw Curve Mode is enabled.
+		/// </summary>
 		public bool IsDrawerMode
 		{
 			get => isDrawerMode;
@@ -186,8 +271,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		[SerializeField]
-		private bool isNormalsEditorMode;
+		/// <summary>
+		/// Gets or sets a value indicating whether Normals Editor Mode is enabled.
+		/// </summary>
 		public bool IsNormalsEditorMode
 		{
 			get => isNormalsEditorMode;
@@ -204,139 +290,157 @@ namespace SplineEditor.Editor
 			}
 		}
 
-		[SerializeField]
-		private bool drawCurveSmoothAcuteAngles = true;
-		public bool DrawCurveSmoothAcuteAngles { 
-			get => drawCurveSmoothAcuteAngles; 
-			set 
-			{ 
-				if(drawCurveSmoothAcuteAngles == value)
+		/// <summary>
+		/// Gets or sets a value indicating whether angles should be smoothed when generating curves in Draw Curve Mode.
+		/// </summary>
+		public bool DrawCurveSmoothAcuteAngles
+		{
+			get => drawCurveSmoothAcuteAngles;
+			set
+			{
+				if (drawCurveSmoothAcuteAngles == value)
 				{
 					return;
 				}
 
-				drawCurveSmoothAcuteAngles = value; 
+				drawCurveSmoothAcuteAngles = value;
 				Save(true);
 			}
 		}
 
-		[SerializeField]
-		private float drawCurveSegmentLength = 5f;
-		public float DrawCurveSegmentLength { 
-			get => drawCurveSegmentLength; 
-			set 
+		/// <summary>
+		/// Gets or sets a new curve length when generating curves in Draw Curve Mode.
+		/// </summary>
+		public float DrawCurveSegmentLength
+		{
+			get => drawCurveSegmentLength;
+			set
 			{
 				if (drawCurveSegmentLength == value)
 				{
 					return;
 				}
 
-				drawCurveSegmentLength = value; 
+				drawCurveSegmentLength = value;
 				Save(true);
 			}
 		}
 
-		[SerializeField]
-		private float drawCurveFirstPointHook = 0.33f;
-		public float DrawCurveFirstPointHook { 
-			get => drawCurveFirstPointHook; 
-			set 
+		/// <summary>
+		/// Gets or sets the first point hook (parameter t) when generating curves in Draw Curve Mode.
+		/// </summary>
+		public float DrawCurveFirstPointHook
+		{
+			get => drawCurveFirstPointHook;
+			set
 			{
 				if (drawCurveFirstPointHook == value)
 				{
 					return;
 				}
 
-				drawCurveFirstPointHook = value; 
+				drawCurveFirstPointHook = value;
 				Save(true);
 			}
 		}
 
-		[SerializeField]
-		private float drawCurveSecondPointHook = 0.66f;
-		public float DrawCurveSecondPointHook { 
-			get => drawCurveSecondPointHook; 
-			set 
+		/// <summary>
+		/// Gets or sets the second point hook (parameter t) when generating curves in Draw Curve Mode.
+		/// </summary>
+		public float DrawCurveSecondPointHook
+		{
+			get => drawCurveSecondPointHook;
+			set
 			{
 				if (drawCurveSecondPointHook == value)
 				{
 					return;
 				}
 
-				drawCurveSecondPointHook = value; 
+				drawCurveSecondPointHook = value;
 				Save(true);
 			}
 		}
 
-		[SerializeField]
-		private bool drawPoints = true;
-		public bool DrawPoints { 
-			get => drawPoints; 
-			set 
+		/// <summary>
+		/// Gets or sets a value indicating whether control points should be drawn on scene GUI.
+		/// </summary>
+		public bool DrawPoints
+		{
+			get => drawPoints;
+			set
 			{
 				if (drawPoints == value)
 				{
 					return;
 				}
 
-				drawPoints = value; 
+				drawPoints = value;
 				Save(true);
 			}
 		}
 
-		[SerializeField]
-		private bool drawSpline = true;
-		public bool DrawSpline { 
-			get => drawSpline; 
-			set 
+		/// <summary>
+		/// Gets or sets a value indicating whether splines should be drawn on scene GUI.
+		/// </summary>
+		public bool DrawSpline
+		{
+			get => drawSpline;
+			set
 			{
 				if (drawSpline == value)
 				{
 					return;
 				}
 
-				drawSpline = value; 
+				drawSpline = value;
 				Save(true);
 			}
 		}
 
-		[SerializeField]
-		private bool drawNormals = false;
-		public bool DrawNormals { 
-			get => drawNormals; 
-			set 
+		/// <summary>
+		/// Gets or sets a value indicating whether normal vectors should be drawn on scene GUI.
+		/// </summary>
+		public bool DrawNormals
+		{
+			get => drawNormals;
+			set
 			{
 				if (drawNormals == value)
 				{
 					return;
 				}
 
-				drawNormals = value; 
+				drawNormals = value;
 				Save(true);
 			}
 		}
 
-		[SerializeField]
-		private bool showTransformHandle = true;
-		public bool ShowTransformHandle { 
-			get => showTransformHandle; 
-			set 
+		/// <summary>
+		/// Gets or sets a value indicating whether spline Transform handle should be visible on scene GUI.
+		/// </summary>
+		public bool ShowTransformHandle
+		{
+			get => showTransformHandle;
+			set
 			{
 				if (showTransformHandle == value)
 				{
 					return;
 				}
 
-				showTransformHandle = value; 
+				showTransformHandle = value;
 				Save(true);
 			}
 		}
 
-		[SerializeField]
-		private bool alwaysDrawSplineOnScene = true;
-		public bool AlwaysDrawSplineOnScene { 
-			get => alwaysDrawSplineOnScene; 
-			set 
+		/// <summary>
+		/// Gets or sets a value indicating whether spline should be drawn on scene GUI even if not selected.
+		/// </summary>
+		public bool AlwaysDrawSplineOnScene
+		{
+			get => alwaysDrawSplineOnScene;
+			set
 			{
 				if (alwaysDrawSplineOnScene == value)
 				{
@@ -345,26 +449,75 @@ namespace SplineEditor.Editor
 
 				alwaysDrawSplineOnScene = value;
 				Save(true);
-			} 
+			}
 		}
 
-		[NonSerialized]
-		public Tool savedTool = Tool.None;
-		[NonSerialized]
-		public bool wasSplineModified = false;
+		/// <summary>
+		/// Gets or sets a tool saved when hiding Unity tools handle.
+		/// </summary>
+		public Tool SavedTool
+		{
+			get => savedTool;
+			set => savedTool = value;
+		}
 
-		[NonSerialized]
-		public bool isRotating;
-		[NonSerialized]
-		public bool isScaling;
-		[NonSerialized]
-		public bool isDraggingPoint;
+		/// <summary>
+		/// Gets or sets a value indicating whether CurrentSpline was modified in the current frame.
+		/// </summary>
+		public bool WasSplineModified
+		{
+			get => wasSplineModified;
+			set => wasSplineModified = value;
+		}
 
-		[NonSerialized]
-		public Vector3 lastScale;
-		[NonSerialized]
-		public Quaternion lastRotation;
+		/// <summary>
+		/// Gets or sets a value indicating whether selected control point or normal vector (when Normals Editor Mode is enabled) handle is rotated on scene GUI in the current frame.
+		/// </summary>
+		public bool IsRotating
+		{
+			get => isRotating;
+			set => isRotating = value;
+		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether selected control point scale handle is modified on scene GUI in the current frame.
+		/// </summary>
+		public bool IsScaling
+		{
+			get => isScaling;
+			set => isScaling = value;
+		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether selected control point position handle is modified on scene GUI in the current frame.
+		/// </summary>
+		public bool IsDraggingPoint
+		{
+			get => isDraggingPoint;
+			set => isDraggingPoint = value;
+		}
+
+		/// <summary>
+		/// Gets or sets selected control point last scale on scene GUI when modyfing point scale handle.
+		/// </summary>
+		public Vector3 LastScale
+		{
+			get => lastScale;
+			set => lastScale = value;
+		}
+
+		/// <summary>
+		/// Gets or sets selected control point last rotation on scene GUI when modyfing point rotation handle.
+		/// </summary>
+		public Quaternion LastRotation
+		{
+			get => lastRotation;
+			set => lastRotation = value;
+		}
+
+		/// <summary>
+		/// Updates state properties in regard to currently selected spline.
+		/// </summary>
 		public void UpdateSplineStates()
 		{
 			IsSplineLooped = CurrentSpline != null && CurrentSpline.IsLoop;
@@ -380,9 +533,6 @@ namespace SplineEditor.Editor
 				OnSplineModified?.Invoke();
 				wasSplineModified = false;
 			}
-
 		}
-
 	}
-
 }

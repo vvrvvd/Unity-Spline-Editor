@@ -1,30 +1,58 @@
+// <copyright file="SplineEditor_Base.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using UnityEditor;
 using UnityEngine;
 
 namespace SplineEditor.Editor
 {
+	/// <summary>
+	/// Class providing custom editor to BezierSpline component.
+	/// </summary>
 	[CustomEditor(typeof(BezierSpline))]
 	public partial class SplineEditor : UnityEditor.Editor
 	{
-
-		public const string SplineEditorSettingsName = "SplineEditorSettings";
-
-		private static SplineEditorState editorState => SplineEditorState.instance;
-		private static SplineEditorConfiguration editorSettings => SplineEditorConfiguration.instance;
-
 		private Event currentEvent;
 		private Transform handleTransform;
 		private Quaternion handleRotation;
-		
+
+		private static SplineEditorState EditorState => SplineEditorState.instance;
+
+		private static SplineEditorConfiguration EditorSettings => SplineEditorConfiguration.Instance;
+
+		/// <summary>
+		/// Draws custom inspector GUI for BezierSpline.
+		/// </summary>
+		public override void OnInspectorGUI()
+		{
+			var prevEditor = EditorState.CurrentEditor;
+			var prevSpline = EditorState.CurrentSpline;
+
+			EditorState.CurrentEditor = this;
+			EditorState.CurrentSpline = target as BezierSpline;
+
+			if (EditorState.CurrentEditor == null || EditorState.CurrentSpline == null)
+			{
+				return;
+			}
+
+			DrawInspectorGUI();
+
+			EditorState.CurrentEditor = prevEditor;
+			EditorState.CurrentSpline = prevSpline;
+		}
+
 		private void OnEnable()
 		{
-			if (SplineEditorConfiguration.instance.OpenSplineEditorWithSpline && !EditorWindow.HasOpenInstances<SplineEditorWindow>())
+			if (SplineEditorConfiguration.Instance.OpenSplineEditorWithSpline && !EditorWindow.HasOpenInstances<SplineEditorWindow>())
 			{
 				SplineEditorWindow.Initialize();
 			}
 
-			editorState.CurrentEditor = this;
-			editorState.CurrentSpline = target as BezierSpline;
+			EditorState.CurrentEditor = this;
+			EditorState.CurrentSpline = target as BezierSpline;
 
 			InitializeTools();
 			InitializeSceneGUI();
@@ -35,77 +63,62 @@ namespace SplineEditor.Editor
 
 		private void OnDisable()
 		{
-			if (editorState.CurrentEditor == null || editorState.CurrentEditor.target != target || editorState.CurrentSpline == null)
+			if (EditorState.CurrentEditor == null || EditorState.CurrentEditor.target != target || EditorState.CurrentSpline == null)
 			{
 				return;
 			}
 
-			editorState.CurrentSpline = null;
-			editorState.CurrentEditor = null;
+			EditorState.CurrentSpline = null;
+			EditorState.CurrentEditor = null;
 			ReleaseTools();
 		}
 
 		private void OnSceneGUI()
 		{
-			if (editorState.CurrentEditor == null || editorState.CurrentEditor.target != target || editorState.CurrentSpline == null)
+			if (EditorState.CurrentEditor == null || EditorState.CurrentEditor.target != target || EditorState.CurrentSpline == null)
 			{
 				return;
 			}
 
 			currentEvent = Event.current;
-			handleTransform = editorState.CurrentSpline.transform;
+			handleTransform = EditorState.CurrentSpline.transform;
 			handleRotation = Tools.pivotRotation == PivotRotation.Local ? handleTransform.rotation : Quaternion.identity;
 
 			if (currentEvent.type == EventType.ValidateCommand)
 			{
-				editorState.wasSplineModified = true;
-				var lastPoint = editorState.CurrentSpline.Points[editorState.CurrentSpline.PointsCount - 1];
-				curveDrawerPosition = lastPoint.position;
-				editorState.CurrentSpline?.OnSplineChanged?.Invoke();
+				EditorState.WasSplineModified = true;
+				var lastPoint = EditorState.CurrentSpline.Points[EditorState.CurrentSpline.PointsCount - 1];
+				curveDrawerPosition = lastPoint.Position;
+				if (EditorState.CurrentSpline != null)
+				{
+					EditorState.CurrentSpline.UpdateSpline();
+				}
 			}
 
-			if (editorState.SelectedPointIndex >= editorState.CurrentSpline.PointsCount)
+			if (EditorState.SelectedPointIndex >= EditorState.CurrentSpline.PointsCount)
 			{
-				SelectIndex(editorState.CurrentSpline.PointsCount - 1);
-			} else if(editorState.SelectedCurveIndex >= editorState.CurrentSpline.CurvesCount)
+				SelectIndex(EditorState.CurrentSpline.PointsCount - 1);
+			}
+			else if (EditorState.SelectedCurveIndex >= EditorState.CurrentSpline.CurvesCount)
 			{
-				editorState.SelectedCurveIndex = editorState.CurrentSpline.CurvesCount - 1;
+				EditorState.SelectedCurveIndex = EditorState.CurrentSpline.CurvesCount - 1;
 			}
 
 			InvokeScheduledActions();
 			DrawSceneGUI();
 			UpdateTools();
 
-			editorState.UpdateSplineStates();
+			EditorState.UpdateSplineStates();
 
-			if (editorState.CurrentEditor != null && editorState.IsSplineLooped && editorState.IsDrawerMode)
+			if (EditorState.IsSplineLooped && EditorState.IsDrawerMode)
 			{
-				editorState.CurrentEditor.ToggleDrawCurveMode(false);
+				ToggleDrawCurveMode(false);
 			}
-		}
-
-		public override void OnInspectorGUI()
-		{
-			var prevEditor = editorState.CurrentEditor;
-			var prevSpline = editorState.CurrentSpline;
-
-			editorState.CurrentEditor = this;
-			editorState.CurrentSpline = target as BezierSpline;
-
-			if(editorState.CurrentEditor ==null || editorState.CurrentSpline ==null)
-			{
-				return;
-			}
-
-			DrawInspectorGUI();
-
-			editorState.CurrentEditor = prevEditor;
-			editorState.CurrentSpline = prevSpline;
 		}
 
 		private void SelectIndex(int pointIndex)
 		{
-			if (pointIndex == -1 && editorState.SelectedPointIndex == -1)
+			if (pointIndex == -1 && EditorState.SelectedPointIndex == -1)
 			{
 				return;
 			}
@@ -116,8 +129,8 @@ namespace SplineEditor.Editor
 
 		private void UpdateSelectedIndex(int pointIndex)
 		{
-			editorState.SelectedPointIndex = pointIndex;
-			editorState.lastRotation = handleRotation;
+			EditorState.SelectedPointIndex = pointIndex;
+			EditorState.LastRotation = handleRotation;
 
 			if (pointIndex != -1)
 			{
@@ -129,14 +142,14 @@ namespace SplineEditor.Editor
 
 		private void AddCurve(float curveLength)
 		{
-			if(!editorState.CanNewCurveBeAdded)
+			if (!EditorState.CanNewCurveBeAdded)
 			{
 				return;
 			}
 
-			Undo.RecordObject(editorState.CurrentSpline, "Add Curve");
+			Undo.RecordObject(EditorState.CurrentSpline, "Add Curve");
 
-			if(editorState.SelectedCurveIndex == 0 && (editorState.CurrentSpline.CurvesCount != 1 || editorState.SelectedPointIndex <= 1))
+			if (EditorState.SelectedCurveIndex == 0 && (EditorState.CurrentSpline.CurvesCount != 1 || EditorState.SelectedPointIndex <= 1))
 			{
 				AddBeginningCurve(curveLength);
 			}
@@ -148,148 +161,147 @@ namespace SplineEditor.Editor
 
 		private void AddEndingCurve(float curveLength)
 		{
-			var pointsCount = editorState.CurrentSpline.PointsCount;
-			var deltaDir = (editorState.CurrentSpline.Points[pointsCount - 1].position - editorState.CurrentSpline.Points[pointsCount - 2].position).normalized * curveLength / 3;
-			var p1 = editorState.CurrentSpline.Points[pointsCount - 1].position + deltaDir;
+			var pointsCount = EditorState.CurrentSpline.PointsCount;
+			var deltaDir = (EditorState.CurrentSpline.Points[pointsCount - 1].Position - EditorState.CurrentSpline.Points[pointsCount - 2].Position).normalized * curveLength / 3;
+			var p1 = EditorState.CurrentSpline.Points[pointsCount - 1].Position + deltaDir;
 			var p2 = p1 + deltaDir;
 			var p3 = p2 + deltaDir;
 
-			var prevMode = editorState.CurrentSpline.GetControlPointMode(editorState.SelectedPointIndex);
+			var prevMode = EditorState.CurrentSpline.GetControlPointMode(EditorState.SelectedPointIndex);
 
-			editorState.CurrentSpline.AppendCurve(p1, p2, p3, prevMode, false);
-			UpdateSelectedIndex(editorState.CurrentSpline.PointsCount - 1);
+			EditorState.CurrentSpline.AppendCurve(p1, p2, p3, prevMode, false);
+			UpdateSelectedIndex(EditorState.CurrentSpline.PointsCount - 1);
 		}
 
 		private void AddBeginningCurve(float curveLength)
 		{
-			var deltaDir = (editorState.CurrentSpline.Points[1].position - editorState.CurrentSpline.Points[0].position).normalized * curveLength / 3;
-			var p1 = editorState.CurrentSpline.Points[0].position - deltaDir;
+			var deltaDir = (EditorState.CurrentSpline.Points[1].Position - EditorState.CurrentSpline.Points[0].Position).normalized * curveLength / 3;
+			var p1 = EditorState.CurrentSpline.Points[0].Position - deltaDir;
 			var p2 = p1 - deltaDir;
 			var p3 = p2 - deltaDir;
 
-			var prevMode = editorState.CurrentSpline.GetControlPointMode(editorState.SelectedPointIndex);
+			var prevMode = EditorState.CurrentSpline.GetControlPointMode(EditorState.SelectedPointIndex);
 
-			editorState.CurrentSpline.AppendCurve(p1, p2, p3, prevMode, true);
+			EditorState.CurrentSpline.AppendCurve(p1, p2, p3, prevMode, true);
 			UpdateSelectedIndex(0);
 		}
 
 		private void SplitCurve(float splitPointValue)
 		{
-			if (!editorState.IsAnyPointSelected)
+			if (!EditorState.IsAnyPointSelected)
 			{
 				return;
 			}
 
-			Undo.RecordObject(editorState.CurrentSpline, "Add Mid Curve");
-			var wasLastPoint = editorState.SelectedPointIndex == editorState.CurrentSpline.PointsCount - 1;
-			editorState.CurrentSpline.InsertCurve(editorState.SelectedCurveIndex, splitPointValue);
+			Undo.RecordObject(EditorState.CurrentSpline, "Add Mid Curve");
+			var wasLastPoint = EditorState.SelectedPointIndex == EditorState.CurrentSpline.PointsCount - 1;
+			EditorState.CurrentSpline.InsertCurve(EditorState.SelectedCurveIndex, splitPointValue);
 
-			if (wasLastPoint && !editorState.CurrentSpline.IsLoop)
+			if (wasLastPoint && !EditorState.CurrentSpline.IsLoop)
 			{
-				editorState.CurrentEditor.SelectIndex(editorState.CurrentSpline.PointsCount - 4);
+				EditorState.CurrentEditor.SelectIndex(EditorState.CurrentSpline.PointsCount - 4);
 			}
-			else if (editorState.SelectedPointIndex != 0 && !(wasLastPoint && editorState.CurrentSpline.IsLoop))
+			else if (EditorState.SelectedPointIndex != 0 && !(wasLastPoint && EditorState.CurrentSpline.IsLoop))
 			{
-				editorState.CurrentEditor.SelectIndex(editorState.SelectedPointIndex + 3);
+				EditorState.CurrentEditor.SelectIndex(EditorState.SelectedPointIndex + 3);
 			}
 			else
 			{
-				editorState.CurrentEditor.SelectIndex(3);
+				EditorState.CurrentEditor.SelectIndex(3);
 			}
 
-			editorState.wasSplineModified = true;
+			EditorState.WasSplineModified = true;
 		}
 
 		private void RemoveSelectedCurve()
 		{
-			if (!editorState.CanSelectedCurveBeRemoved)
+			if (!EditorState.CanSelectedCurveBeRemoved)
 			{
 				return;
 			}
 
-			Undo.RecordObject(editorState.CurrentSpline, "Remove Curve");
-			var curveToRemove = editorState.SelectedCurveIndex;
-			var removeFirstPoint = (editorState.SelectedPointIndex - curveToRemove * 3) < 2;
-			editorState.CurrentSpline.RemoveCurve(curveToRemove, removeFirstPoint);
-			var nextSelectedIndex = Mathf.Min(editorState.SelectedPointIndex, editorState.CurrentSpline.PointsCount - 1);
+			Undo.RecordObject(EditorState.CurrentSpline, "Remove Curve");
+			var curveToRemove = EditorState.SelectedCurveIndex;
+			EditorState.CurrentSpline.RemoveCurve(curveToRemove);
+			var nextSelectedIndex = Mathf.Min(EditorState.SelectedPointIndex, EditorState.CurrentSpline.PointsCount - 1);
 			UpdateSelectedIndex(nextSelectedIndex);
 
-			editorState.wasSplineModified = true;
+			EditorState.WasSplineModified = true;
 		}
 
 		private void CastSpline(Vector3 direction)
 		{
-			Undo.RecordObject(editorState.CurrentSpline, "Cast Curve Points");
-			var pointsCount = editorState.CurrentSpline.PointsCount;
-			editorState.CurrentSpline.SetAllControlPointsMode(BezierSpline.BezierControlPointMode.Free);
+			Undo.RecordObject(EditorState.CurrentSpline, "Cast Curve Points");
+			var pointsCount = EditorState.CurrentSpline.PointsCount;
+			EditorState.CurrentSpline.SetAllControlPointsMode(BezierSpline.BezierControlPointMode.Free);
 
 			var newPointsPositions = new Vector3[pointsCount];
 			for (var i = 0; i < pointsCount; i++)
 			{
-				var worldPosition = handleTransform.TransformPoint(editorState.CurrentSpline.Points[i].position);
+				var worldPosition = handleTransform.TransformPoint(EditorState.CurrentSpline.Points[i].Position);
 				PhysicsUtils.TryCastPoint(worldPosition, direction, out newPointsPositions[i]);
 				newPointsPositions[i] = handleTransform.InverseTransformPoint(newPointsPositions[i]);
 			}
 
 			for (var i = 0; i < pointsCount; i += 3)
 			{
-				var prevPoint = i > 0 ? editorState.CurrentSpline.Points[i - 1].position : Vector3.zero;
-				var nextPoint = i < pointsCount - 1 ? editorState.CurrentSpline.Points[i + 1].position : Vector3.zero;
+				var prevPoint = i > 0 ? EditorState.CurrentSpline.Points[i - 1].Position : Vector3.zero;
+				var nextPoint = i < pointsCount - 1 ? EditorState.CurrentSpline.Points[i + 1].Position : Vector3.zero;
 
-				editorState.CurrentSpline.UpdatePoint(i, newPointsPositions[i], false, true);
+				EditorState.CurrentSpline.SetPoint(i, newPointsPositions[i], false, true);
 
 				var isPreviousPointCasted = i > 0 && newPointsPositions[i - 1] != prevPoint;
 				if (isPreviousPointCasted)
 				{
-					editorState.CurrentSpline.UpdatePoint(i - 1, newPointsPositions[i - 1], false, false);
+					EditorState.CurrentSpline.SetPoint(i - 1, newPointsPositions[i - 1], false, false);
 				}
 
 				var isNextPointCasted = i < pointsCount - 1 && newPointsPositions[i + 1] != nextPoint;
 				if (isNextPointCasted)
 				{
-					editorState.CurrentSpline.UpdatePoint(i + 1, newPointsPositions[i + 1], false, false);
+					EditorState.CurrentSpline.SetPoint(i + 1, newPointsPositions[i + 1], false, false);
 				}
 			}
 
-			editorState.wasSplineModified = true;
+			EditorState.WasSplineModified = true;
 		}
 
 		private void ToggleCloseLoop()
 		{
-			Undo.RecordObject(editorState.CurrentSpline, "Toggle Close Loop");
-			editorState.CurrentSpline.ToggleCloseLoop();
-			editorState.CurrentEditor.SelectIndex(0);
+			Undo.RecordObject(EditorState.CurrentSpline, "Toggle Close Loop");
+			EditorState.CurrentSpline.ToggleClosingLoopCurve();
+			EditorState.CurrentEditor.SelectIndex(0);
 
-			editorState.wasSplineModified = true;
+			EditorState.WasSplineModified = true;
 		}
 
 		private void FactorCurve()
 		{
-			Undo.RecordObject(editorState.CurrentSpline, "Factor Curve");
-			editorState.CurrentSpline.FactorSpline();
-			if (editorState.SelectedPointIndex != -1)
+			Undo.RecordObject(EditorState.CurrentSpline, "Factor Curve");
+			EditorState.CurrentSpline.FactorSpline();
+			if (EditorState.SelectedPointIndex != -1)
 			{
-				editorState.CurrentEditor.SelectIndex(editorState.SelectedPointIndex * 2);
+				EditorState.CurrentEditor.SelectIndex(EditorState.SelectedPointIndex * 2);
 			}
 
-			editorState.wasSplineModified = true;
+			EditorState.WasSplineModified = true;
 		}
 
 		private void SimplifySpline()
 		{
-			if (!editorState.CanSplineBeSimplified)
+			if (!EditorState.CanSplineBeSimplified)
 			{
 				return;
 			}
 
-			Undo.RecordObject(editorState.CurrentSpline, "Simplify Curve");
-			editorState.CurrentSpline.SimplifySpline();
-			if (editorState.SelectedPointIndex != -1)
+			Undo.RecordObject(EditorState.CurrentSpline, "Simplify Curve");
+			EditorState.CurrentSpline.SimplifySpline();
+			if (EditorState.SelectedPointIndex != -1)
 			{
-				editorState.CurrentEditor.SelectIndex(editorState.SelectedPointIndex / 2);
+				EditorState.CurrentEditor.SelectIndex(EditorState.SelectedPointIndex / 2);
 			}
 
-			editorState.wasSplineModified = true;
+			EditorState.WasSplineModified = true;
 		}
 
 		private bool TryCastMousePoint(out Vector3 castedPoint)
@@ -309,9 +321,5 @@ namespace SplineEditor.Editor
 
 			return isCorrectPosition;
 		}
-
-        
-
-    }
-
+	}
 }

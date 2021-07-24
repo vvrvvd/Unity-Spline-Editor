@@ -1,61 +1,70 @@
+// <copyright file="SplineMeshSettingsProvider.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using System.Collections.Generic;
-using System.IO;
 using UnityEditor;
-using UnityEngine;
 
 namespace SplineEditor.MeshGenerator.Editor
 {
-
-    public class SplineMeshSettingsProvider : SettingsProvider
-    {
+	/// <summary>
+	/// Component providing a neat Unity settings window.
+	/// Accessible through "Edit/Project Settings.../Spline Editor/Mesh Generator".
+	/// </summary>
+	public class SplineMeshSettingsProvider : SettingsProvider
+	{
 		private const string SettingsPath = "Project/Spline Editor/Mesh Generator";
 		private const string SettingsLabel = "Mesh Generator";
 
 		private static UnityEditor.Editor cachedEditor;
 
-        public SplineMeshSettingsProvider(string path, SettingsScope scope)
-            : base(path, scope) { }
-
-        public static bool IsSettingsAvailable()
-        {
-			return true;
+		/// <summary>
+		/// Initializes a new instance of the <see cref="SplineMeshSettingsProvider"/> class.
+		/// </summary>
+		/// <param name="path">Settings path.</param>
+		/// <param name="scope">Settings scope.</param>
+		public SplineMeshSettingsProvider(string path, SettingsScope scope) : base(path, scope)
+		{
 		}
 
-        [SettingsProvider]
-        public static SettingsProvider CreateMyCustomSettingsProvider()
-        {
-			var settingsScriptable = SplineMeshEditorConfiguration.instance;
+		/// <summary>
+		/// Creates settings provider for SplineMesh editor configuration.
+		/// </summary>
+		/// <returns>Instance of settings provider for SplineMesh editor configuration.</returns>
+		[SettingsProvider]
+		public static SettingsProvider CreateMyCustomSettingsProvider()
+		{
+			var settingsScriptable = SplineMeshEditorConfiguration.Instance;
 
-            if(cachedEditor==null)
+			if (cachedEditor == null)
 			{
-                UnityEditor.Editor.CreateCachedEditor(settingsScriptable, null, ref cachedEditor);
+				UnityEditor.Editor.CreateCachedEditor(settingsScriptable, null, ref cachedEditor);
 			}
 
-            var provider = new SettingsProvider(SettingsPath, SettingsScope.Project)
-            {
-                label = SettingsLabel,
-                guiHandler = (searchContext) =>
-                {
-                    var prevLabelWidth = EditorGUIUtility.labelWidth;
-                    EditorGUIUtility.labelWidth = 250;
-                    EditorGUI.indentLevel++;
-                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                    EditorGUILayout.Space(10);
-                    cachedEditor.OnInspectorGUI();
-                    EditorGUILayout.Space(10);
-                    EditorGUILayout.EndVertical();
-                    EditorGUILayout.Space(20);
-                    EditorGUI.indentLevel--;
-                    EditorGUIUtility.labelWidth = prevLabelWidth;
-                },
+			var provider = new SettingsProvider(SettingsPath, SettingsScope.Project)
+			{
+				label = SettingsLabel,
+				guiHandler = (searchContext) =>
+				{
+					var prevLabelWidth = EditorGUIUtility.labelWidth;
+					EditorGUIUtility.labelWidth = 250;
+					EditorGUI.indentLevel++;
+					EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+					EditorGUILayout.Space(10);
+					cachedEditor.OnInspectorGUI();
+					EditorGUILayout.Space(10);
+					EditorGUILayout.EndVertical();
+					EditorGUILayout.Space(20);
+					EditorGUI.indentLevel--;
+					EditorGUIUtility.labelWidth = prevLabelWidth;
+				},
 
-                // Populate the search keywords to enable smart search filtering and label highlighting:
-                keywords = new HashSet<string>(new[] { "Spline", "Editor", "Bezier", "Curve", "Mesh", "Generator" })
-            };
+				// Populate the search keywords to enable smart search filtering and label highlighting:
+				keywords = new HashSet<string>(new[] { "Spline", "Editor", "Bezier", "Curve", "Mesh", "Generator" })
+			};
 
-            return provider;
-        }
-
-    }
-
+			return provider;
+		}
+	}
 }

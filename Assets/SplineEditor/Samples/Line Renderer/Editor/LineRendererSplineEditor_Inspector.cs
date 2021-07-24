@@ -1,9 +1,16 @@
+// <copyright file="LineRendererSplineEditor_Inspector.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using UnityEditor;
 using UnityEngine;
 
 namespace SplineEditor.Editor
 {
-
+	/// <summary>
+	/// Partial class of LineRendererSplinEditor for LineRendererSpline custom inspector GUI.
+	/// </summary>
 	[CustomEditor(typeof(LineRendererSpline))]
 	public partial class LineRendererSplineEditor : UnityEditor.Editor
 	{
@@ -11,11 +18,9 @@ namespace SplineEditor.Editor
 
 		private LineRendererSpline lineRendererSpline;
 
-		private void OnEnable()
-		{
-			lineRendererSpline = target as LineRendererSpline;
-		}
-
+		/// <summary>
+		/// Draws custom inspector GUI.
+		/// </summary>
 		public override void OnInspectorGUI()
 		{
 			var prevEnabled = GUI.enabled;
@@ -78,7 +83,9 @@ namespace SplineEditor.Editor
 			}
 		}
 
-
+		private void OnEnable()
+		{
+			lineRendererSpline = target as LineRendererSpline;
+		}
 	}
-
 }

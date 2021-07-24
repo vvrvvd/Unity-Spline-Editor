@@ -1,30 +1,33 @@
+// <copyright file="SplineMeshEditor_Base.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using UnityEditor;
-using UnityEngine;
 
 namespace SplineEditor.MeshGenerator.Editor
 {
-
+	/// <summary>
+	/// Class providing custom editor to SplineMesh component.
+	/// </summary>
 	[CustomEditor(typeof(SplineMesh))]
 	public partial class SplineMeshEditor : UnityEditor.Editor
 	{
-
-		private static SplineMeshEditorState meshEditorState => SplineMeshEditorState.instance;
-		private static SplineMeshEditorConfiguration meshEditorConfiguration => SplineMeshEditorConfiguration.instance;
-
 		private SplineMesh splineMesh;
+
+		private static SplineMeshEditorState MeshEditorState => SplineMeshEditorState.instance;
+
+		private static SplineMeshEditorConfiguration MeshEditorConfiguration => SplineMeshEditorConfiguration.Instance;
 
 		private void OnEnable()
 		{
 			splineMesh = target as SplineMesh;
 			initializeStyles = true;
 
-			if(meshEditorState.IsAnyDebugModeViewVisible() && !meshEditorState.IsDebugModeView(splineMesh))
+			if (MeshEditorState.IsAnyDebugModeViewVisible() && !MeshEditorState.IsDebugModeView(splineMesh))
 			{
-				meshEditorState.RestoreSavedDebugMaterial();
+				MeshEditorState.RestoreSavedDebugMaterial();
 			}
-
 		}
-
 	}
-
 }

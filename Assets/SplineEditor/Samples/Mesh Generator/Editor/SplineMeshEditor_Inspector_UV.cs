@@ -1,29 +1,37 @@
+// <copyright file="SplineMeshEditor_Inspector_UV.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
 using UnityEditor;
 using UnityEngine;
 
 namespace SplineEditor.MeshGenerator.Editor
 {
-
+	/// <summary>
+	/// Class providing custom editor to SplineMesh component.
+	/// Partial class providing UV options for custom inspector to SplineMesh component.
+	/// </summary>
 	public partial class SplineMeshEditor : UnityEditor.Editor
 	{
-
-
 		private void DrawUvOptions()
 		{
 			var prevEnabled = GUI.enabled;
 
-			meshEditorState.IsUvSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(meshEditorState.IsUvSectionFolded, UvOptionsGroupTitle);
+			MeshEditorState.IsUvSectionFolded = EditorGUILayout.BeginFoldoutHeaderGroup(MeshEditorState.IsUvSectionFolded, UvOptionsGroupTitle);
 			GUI.enabled = true;
-			if (meshEditorState.IsUvSectionFolded)
+			if (MeshEditorState.IsUvSectionFolded)
 			{
 				GUILayout.BeginVertical(groupsStyle);
 				GUILayout.Space(10);
+				EditorGUI.indentLevel++;
 
 				DrawMirrorUvToggle();
 				DrawUvModeDropdown();
 				GUILayout.Space(10);
 				DrawShowUvButton();
 
+				EditorGUI.indentLevel--;
 				GUILayout.Space(10);
 				GUILayout.EndVertical();
 			}
@@ -35,11 +43,8 @@ namespace SplineEditor.MeshGenerator.Editor
 		private void DrawMirrorUvToggle()
 		{
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
 
-			GUILayout.Label(UvOptionsMirrorUvToggleContent);
-			GUILayout.Space(10);
-			var toggleState = GUILayout.Toggle(splineMesh.MirrorUV, string.Empty);
+			var toggleState = EditorGUILayout.Toggle(UvOptionsMirrorUvToggleContent, splineMesh.MirrorUV);
 			if (toggleState != splineMesh.MirrorUV)
 			{
 				Undo.RecordObject(splineMesh, "Toggle mirror mesh UV ");
@@ -47,17 +52,14 @@ namespace SplineEditor.MeshGenerator.Editor
 				EditorUtility.SetDirty(splineMesh);
 			}
 
-			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
 
 		private void DrawUvModeDropdown()
 		{
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
 
-			GUILayout.Label(UvOptionsUvModeDropdownContent);
-			var modeState = (SplineMesh.UVMode)EditorGUILayout.EnumPopup(string.Empty, splineMesh.UvMode, MaxDropdownWidth);
+			var modeState = (SplineMesh.UVMode)EditorGUILayout.EnumPopup(UvOptionsUvModeDropdownContent, splineMesh.UvMode);
 			if (modeState != splineMesh.UvMode)
 			{
 				Undo.RecordObject(splineMesh, "Change mesh UV Mode");
@@ -65,28 +67,23 @@ namespace SplineEditor.MeshGenerator.Editor
 				EditorUtility.SetDirty(splineMesh);
 			}
 
-			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
 
 		private void DrawShowUvButton()
 		{
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
+			GUILayout.Space(20);
 
-			var isDebugModeView = meshEditorState.IsDebugModeView(splineMesh);
+			var isDebugModeView = MeshEditorState.IsDebugModeView(splineMesh);
 			var uvButtonContent = isDebugModeView ? UvOptionsHideDebugViewButtonContent : UvOptionsShowDebugViewButtonContent;
-			if (GUILayout.Button(uvButtonContent, buttonStyle, ButtonMaxWidth, ButtonHeight))
+			if (GUILayout.Button(uvButtonContent, buttonStyle, ButtonHeight))
 			{
-				meshEditorState.SetDebugModeView(splineMesh, !isDebugModeView);
+				MeshEditorState.SetDebugModeView(splineMesh, !isDebugModeView);
 			}
 
-			GUILayout.FlexibleSpace();
+			GUILayout.Space(20);
 			GUILayout.EndHorizontal();
 		}
-
-
-
 	}
-
 }
