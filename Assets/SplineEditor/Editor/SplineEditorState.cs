@@ -12,7 +12,7 @@ namespace SplineEditor.Editor
 	/// <summary>
 	/// Class providing serializable state for custom BezierSpline editor.
 	/// </summary>
-	[FilePath("SplineEditor/SplineEditorState.conf", FilePathAttribute.Location.ProjectFolder)]
+	[FilePath("UserSettings/SplineEditor/SplineEditorState.asset", FilePathAttribute.Location.ProjectFolder)]
 	public partial class SplineEditorState : ScriptableSingleton<SplineEditorState>
 	{
 		private int selectedPointIndex = -1;

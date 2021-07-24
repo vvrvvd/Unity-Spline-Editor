@@ -12,7 +12,7 @@ namespace SplineEditor.Editor
 	/// <summary>
 	/// Class providing serializable state for SplineEditor.
 	/// </summary>
-	[FilePath("SplineEditor/SplineEditorWindowState.conf", FilePathAttribute.Location.ProjectFolder)]
+	[FilePath("UserSettings/SplineEditor/SplineEditorWindowState.asset", FilePathAttribute.Location.ProjectFolder)]
 	public partial class SplineEditorWindowState : ScriptableSingleton<SplineEditorWindowState>
 	{
 		// GUI

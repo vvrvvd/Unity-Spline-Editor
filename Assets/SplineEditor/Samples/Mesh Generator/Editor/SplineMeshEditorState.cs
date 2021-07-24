@@ -11,7 +11,7 @@ namespace SplineEditor.MeshGenerator.Editor
 	/// <summary>
 	/// Class providing serializable state for custom SplineMesh editor.
 	/// </summary>
-	[FilePath("SplineEditor/MeshGenerator/SplineMeshEditorState.conf", FilePathAttribute.Location.ProjectFolder)]
+	[FilePath("UserSettings/SplineEditor/MeshGenerator/SplineMeshEditorState.asset", FilePathAttribute.Location.ProjectFolder)]
 	public class SplineMeshEditorState : ScriptableSingleton<SplineMeshEditorState>
 	{
 		private Material savedDebugViewMeshMaterial;
