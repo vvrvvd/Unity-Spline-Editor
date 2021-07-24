@@ -125,7 +125,7 @@ namespace SplineEditor.Editor
 			{
 				if (instance == null)
 				{
-					var loadedInstances = Resources.LoadAll<SplineEditorConfiguration>("");
+					var loadedInstances = Resources.LoadAll<SplineEditorConfiguration>(string.Empty);
 
 					if (loadedInstances.Length == 0)
 					{

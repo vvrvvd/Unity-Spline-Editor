@@ -632,11 +632,21 @@ namespace SplineEditor
 			}
 			else if (normals.Count != curvesCount + 1)
 			{
+				// Expand the lists if CurvesCount + 1 bigger than the lists count.
 				for (var i = normals.Count; i < curvesCount + 1; i++)
 				{
 					normals.Add(Vector3.zero);
 					tangents.Add(Vector3.zero);
 					normalsAngularOffsets.Add(0);
+				}
+
+				// Shrink the lists elements if CurvesCount + 1 smaller than the lists count.
+				for (var i = normals.Count; i > curvesCount + 1; i--)
+				{
+					var lastElementIndex = normals.Count - 1;
+					normals.RemoveAt(lastElementIndex);
+					tangents.RemoveAt(lastElementIndex);
+					normalsAngularOffsets.RemoveAt(lastElementIndex);
 				}
 			}
 
