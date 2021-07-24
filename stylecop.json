@@ -19,7 +19,7 @@
 			"useTabs": true
 		},
 		"orderingRules": {
-			"usingDirectivesPlacement": "outsideNamespace",
+			"usingDirectivesPlacement": "outsideNamespace"
 		}
 	}
 }
