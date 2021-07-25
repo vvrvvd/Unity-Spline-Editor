@@ -1087,7 +1087,10 @@ namespace SplineEditor
 		{
 			modes = new List<BezierControlPointMode>(2);
 			points = new List<SplinePoint>(4);
+			normals = new List<Vector3>(2);
+			tangents = new List<Vector3>(2);
 			pointsScales = new List<Vector3>(2);
+			normalsAngularOffsets = new List<float>(2);
 
 			var p0 = new Vector3(1f, 0f, 0f);
 			var p1 = new Vector3(1.5f, 0f, 0f);
@@ -1102,8 +1105,17 @@ namespace SplineEditor
 			modes.Add(BezierControlPointMode.Free);
 			modes.Add(BezierControlPointMode.Free);
 
+			normals.Add(Vector3.one);
+			normals.Add(Vector3.one);
+
+			tangents.Add(Vector3.one);
+			tangents.Add(Vector3.one);
+
 			pointsScales.Add(Vector3.one);
 			pointsScales.Add(Vector3.one);
+
+			normalsAngularOffsets.Add(0f);
+			normalsAngularOffsets.Add(0f);
 
 			RecalculateNormals();
 		}
