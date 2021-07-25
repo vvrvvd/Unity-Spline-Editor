@@ -1,3 +1,7 @@
+## v2.1.3 [26.07.2021]
+- Fix for index out of bounds error when creating new bezier spline.
+- Getting rid of EditorUtility.SetDirty invokes which will soon become deprecated.
+
 ## v2.1.1 [25.07.2021]
 - Applying StyleCop to all scripts.
 - Removing ugly centered UI from editors and custom editors windows.
