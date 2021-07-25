@@ -1,5 +1,5 @@
 # Unity Spline Editor
-[![Unity 2019.4+](https://img.shields.io/badge/unity-2019.4%2B-blue.svg)](https://unity3d.com/get-unity/download) [![openupm](https://img.shields.io/npm/v/com.vvrvvd.spline-editor?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.vvrvvd.spline-editor/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Unity 2020.1+](https://img.shields.io/badge/unity-2020.1%2B-blue.svg)](https://unity3d.com/get-unity/download) [![openupm](https://img.shields.io/npm/v/com.vvrvvd.spline-editor?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.vvrvvd.spline-editor/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Table Of Contents
 
@@ -41,7 +41,7 @@ The tool was written to bring cubic bezier splines to Unity. The tool let you do
 
 ## System Requirements <a name="system-requirements"></a>
 
-Unity 2019.4 or newer.
+Unity 2020.1 or newer.
 
 ## Installation <a name="installation"></a>
 
