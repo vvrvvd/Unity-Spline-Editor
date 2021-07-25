@@ -52,7 +52,6 @@ namespace SplineEditor.MeshGenerator.Editor
 			{
 				Undo.RecordObject(splineMesh, "Toggle use points scale");
 				splineMesh.UsePointsScale = toggleState;
-				EditorUtility.SetDirty(splineMesh);
 			}
 
 			GUILayout.EndHorizontal();
@@ -67,7 +66,6 @@ namespace SplineEditor.MeshGenerator.Editor
 			{
 				Undo.RecordObject(splineMesh, "Change spline mesh spacing");
 				splineMesh.Spacing = nextMeshSpacing;
-				EditorUtility.SetDirty(splineMesh);
 			}
 
 			GUILayout.EndHorizontal();
@@ -82,7 +80,6 @@ namespace SplineEditor.MeshGenerator.Editor
 			{
 				Undo.RecordObject(splineMesh, "Change spline mesh width");
 				splineMesh.Width = nextMeshWidth;
-				EditorUtility.SetDirty(splineMesh);
 			}
 
 			GUILayout.EndHorizontal();

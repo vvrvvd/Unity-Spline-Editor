@@ -49,7 +49,6 @@ namespace SplineEditor.MeshGenerator.Editor
 			{
 				Undo.RecordObject(MeshEditorState, "Toggle Draw Points");
 				MeshEditorState.DrawPoints = toggleState;
-				EditorUtility.SetDirty(splineMesh);
 			}
 
 			GUILayout.EndHorizontal();
@@ -64,7 +63,6 @@ namespace SplineEditor.MeshGenerator.Editor
 			{
 				Undo.RecordObject(MeshEditorState, "Toggle Draw Normals");
 				MeshEditorState.DrawNormals = toggleState;
-				EditorUtility.SetDirty(splineMesh);
 			}
 
 			GUILayout.EndHorizontal();

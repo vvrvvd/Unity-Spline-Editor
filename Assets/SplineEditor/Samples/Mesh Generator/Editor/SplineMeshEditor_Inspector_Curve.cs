@@ -65,7 +65,6 @@ namespace SplineEditor.MeshGenerator.Editor
 			{
 				Undo.RecordObject(splineMesh, "Toggle asymetric spline width curve");
 				splineMesh.UseAsymetricWidthCurve = toggleState;
-				EditorUtility.SetDirty(splineMesh);
 			}
 
 			GUILayout.EndHorizontal();
@@ -79,7 +78,6 @@ namespace SplineEditor.MeshGenerator.Editor
 			{
 				Undo.RecordObject(splineMesh, "Change mirrored width curve");
 				splineMesh.RightSideCurve = splineMesh.RightSideCurve;
-				EditorUtility.SetDirty(splineMesh);
 			}
 
 			GUILayout.EndHorizontal();
@@ -95,7 +93,6 @@ namespace SplineEditor.MeshGenerator.Editor
 			{
 				Undo.RecordObject(splineMesh, "Change mirrored width curve");
 				splineMesh.LeftSideCurve = splineMesh.LeftSideCurve;
-				EditorUtility.SetDirty(splineMesh);
 			}
 
 			GUILayout.EndHorizontal();
@@ -109,7 +106,6 @@ namespace SplineEditor.MeshGenerator.Editor
 			{
 				Undo.RecordObject(splineMesh, "Change mirrored width curve");
 				splineMesh.RightSideCurve = splineMesh.RightSideCurve;
-				EditorUtility.SetDirty(splineMesh);
 			}
 
 			GUILayout.EndHorizontal();

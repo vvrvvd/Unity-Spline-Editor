@@ -49,7 +49,6 @@ namespace SplineEditor.MeshGenerator.Editor
 			{
 				Undo.RecordObject(splineMesh, "Toggle mirror mesh UV ");
 				splineMesh.MirrorUV = toggleState;
-				EditorUtility.SetDirty(splineMesh);
 			}
 
 			GUILayout.EndHorizontal();
@@ -64,7 +63,6 @@ namespace SplineEditor.MeshGenerator.Editor
 			{
 				Undo.RecordObject(splineMesh, "Change mesh UV Mode");
 				splineMesh.UvMode = modeState;
-				EditorUtility.SetDirty(splineMesh);
 			}
 
 			GUILayout.EndHorizontal();

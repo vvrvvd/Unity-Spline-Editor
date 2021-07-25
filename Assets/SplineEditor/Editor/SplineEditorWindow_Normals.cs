@@ -68,7 +68,6 @@ namespace SplineEditor.Editor
 			{
 				Undo.RecordObject(EditorState.CurrentSpline, "Toggle Flip Normals");
 				EditorState.CurrentSpline.FlipNormals = nextFlipNormals;
-				EditorUtility.SetDirty(EditorState.CurrentSpline);
 				repaintScene = true;
 			}
 
@@ -92,7 +91,6 @@ namespace SplineEditor.Editor
 			{
 				Undo.RecordObject(EditorState.CurrentSpline, "Change Normal Local Rotation");
 				currentSpline.SetNormalAngularOffset(normalIndex, nextNormalsRotation);
-				EditorUtility.SetDirty(EditorState.CurrentSpline);
 				repaintScene = true;
 			}
 
@@ -112,8 +110,6 @@ namespace SplineEditor.Editor
 			{
 				Undo.RecordObject(EditorState.CurrentSpline, "Change Normals Global Rotation");
 				EditorState.CurrentSpline.GlobalNormalsRotation = nextNormalsRotation;
-
-				EditorUtility.SetDirty(EditorState.CurrentSpline);
 				repaintScene = true;
 			}
 
