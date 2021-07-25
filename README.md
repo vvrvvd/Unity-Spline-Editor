@@ -70,7 +70,7 @@ Spline points have normals that can be rotated along spline tangents. There is a
 
 **Drawer tool** lets you freely draw spline in the scene view. Use additional parameters like **smoothing acute angles** or **segment length** to adjust the tool to your needs.
 
- <img src="https://i.imgur.com/sSQlFne.gif">
+ <img src="https://i.imgur.com/yDwkB6f.gif">
 
 ### Settings <a name="settings"></a>
 
