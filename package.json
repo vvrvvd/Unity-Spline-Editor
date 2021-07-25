@@ -2,7 +2,7 @@
   "name": "com.vvrvvd.spline-editor",
   "version": "2.1.1",
   "displayName": "Spline Editor",
-  "description": "Unity Spline Editor is an open-source tool for creating and managing cubic bezier curves in Unity Editor. The tool let you do the basic operations like adding, removing or splitting curves but also provides you with option to factor, simplify, editor normals, draw or cast splines to camera view. You can also adjust how splines are displayed in the editor through settings window.",
+  "description": "Unity Spline Editor is an open-source tool for creating and managing cubic bezier curves in Unity Editor. The tool let you do the basic operations like adding, removing or splitting curves but also provides you with option to factor, simplify, edit normals, draw or cast splines to camera view. You can also adjust how splines are displayed in the editor through settings window.",
   "keywords": [ "spline", "curve", "bezier", "editor" ],
   "unity": "2019.4",
   "author": {
