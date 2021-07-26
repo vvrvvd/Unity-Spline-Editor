@@ -32,7 +32,7 @@ namespace SplineEditor.MeshGenerator.Editor
 
 		private void DrawPoints()
 		{
-			for (var i = 0; i < splineMesh.Points.Length; i++)
+			for (var i = 0; i < splineMesh.Points.Count; i++)
 			{
 				DrawPoint(i);
 			}

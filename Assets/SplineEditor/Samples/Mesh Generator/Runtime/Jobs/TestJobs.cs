@@ -36,6 +36,10 @@ public static class TestJobs
 		public NativeArray<Vector3> tangents;
 		[ReadOnly]
 		public NativeArray<Vector3> positions;
+		[ReadOnly]
+		public NativeArray<float> leftScales;
+		[ReadOnly]
+		public NativeArray<float> rightScales;
 
 		[NativeDisableParallelForRestriction]
 		public NativeArray<int> trisResult;
@@ -46,7 +50,8 @@ public static class TestJobs
 		[NativeDisableParallelForRestriction]
 		public NativeArray<Vector3> normalsResult;
 
-		public void Execute(int i) {
+		public void Execute(int i)
+		{
 			var vertIndex = i * 2;
 			var trisIndex = i * 6;
 
@@ -56,8 +61,8 @@ public static class TestJobs
 
 			//Vertices
 			var right = Vector3.Cross(normals[i], tangents[i]).normalized;
-			var rightScaledWidth = width * (usePointsScale ? scales[i].x : 1);
-			var leftScaledWidth = width * (usePointsScale ? scales[i].x : 1);
+			var rightScaledWidth = width * (usePointsScale ? scales[i].x : 1) * rightScales[i];
+			var leftScaledWidth = width * (usePointsScale ? scales[i].x : 1) * leftScales[i];
 			vertsResult[vertIndex] = positions[i] - (right * (useAsymetricWidthCurve ? leftScaledWidth : rightScaledWidth));
 			vertsResult[vertIndex + 1] = positions[i] + (right * rightScaledWidth);
 
@@ -67,17 +72,21 @@ public static class TestJobs
 			uvsResult[vertIndex + 1] = new Vector2(1, uv);
 
 			//Triangles
-			if (i < positions.Length - 1 || isLoop) {
-				for (int j = 0; j < triangleMap.Length; j++) {
+			if (i < positions.Length - 1 || isLoop)
+			{
+				for (int j = 0; j < triangleMap.Length; j++)
+				{
 					trisResult[trisIndex + j] = (vertIndex + triangleMap[j]) % vertsResult.Length;
 				}
 			}
 
 		}
 
-		private float GetUV(int pointIndex) {
+		private float GetUV(int pointIndex)
+		{
 			var uv = pointIndex / (float)(positions.Length - 1);
-			switch (uvMode) {
+			switch (uvMode)
+			{
 				case 1: //PingPong
 					uv = 1 - Mathf.Abs((2 * uv) - 1);
 					break;
@@ -91,30 +100,69 @@ public static class TestJobs
 
 	}
 
-	private static bool isJobScheduled = false;
+	public static bool isJobScheduled = false;
 	private static bool scheduleNextJob = false;
-	
-	public static void GenerateMesh(SplineMesh splineMesh, SplinePath splinePath, Mesh mesh) {
-		if (isJobScheduled) {
+
+	private static EditorCoroutine generateMeshCoroutine;
+
+	public static void GenerateMesh(SplineMesh splineMesh, SplinePath splinePath, Mesh mesh, bool immediate, Action<Mesh> onMeshGenerated)
+	{
+		if (isJobScheduled)
+		{
 			scheduleNextJob = true;
 			return;
 		}
 
+		splineMesh.BezierSpline.GetEvenlySpacedPoints(splineMesh.Spacing, splinePath, 0.001f, false);
+
 		isJobScheduled = true;
+		scheduleNextJob = false;
 		var generateMeshJob = PrepareGenerateMeshJob(splineMesh, splinePath);
 		var jobHandle = generateMeshJob.Schedule(generateMeshJob.positions.Length, 64);
 
-		EditorCoroutineUtility.StartCoroutine(WaitForJobToFinish(jobHandle, splineMesh, () => OnJobCompleted(ref generateMeshJob, mesh)), splineMesh);
+		if (generateMeshCoroutine != null)
+		{
+			EditorCoroutineUtility.StopCoroutine(generateMeshCoroutine);
+		}
+
+		if (immediate)
+		{
+			jobHandle.Complete();
+			isJobScheduled = false;
+			OnJobCompleted(ref generateMeshJob, mesh);
+		}
+		else
+		{
+			generateMeshCoroutine = EditorCoroutineUtility.StartCoroutine(
+				WaitForJobToFinish(jobHandle, splineMesh, () =>
+				{
+					OnJobCompleted(ref generateMeshJob, mesh);
+					onMeshGenerated?.Invoke(mesh);
+				})
+			, splineMesh);
+		}
 	}
 
-	private static GenerateMeshJob PrepareGenerateMeshJob(SplineMesh splineMesh, SplinePath splinePath) {
+	private static GenerateMeshJob PrepareGenerateMeshJob(SplineMesh splineMesh, SplinePath splinePath)
+	{
 		var bezierSpline = splineMesh.BezierSpline;
 
+		var leftCurveScales = new float[splinePath.Points.Count];
+		var rightCurveScales = new float[splinePath.Points.Count];
+		for (var i = 0; i < leftCurveScales.Length; i++)
+		{
+			var t = splinePath.ParametersT[i];
+			leftCurveScales[i] = splineMesh.LeftSideCurve.Evaluate(t);
+			rightCurveScales[i] = splineMesh.RightSideCurve.Evaluate(t);
+		}
+
 		var width = splineMesh.Width;
-		var scales = new NativeArray<Vector3>(splinePath.Scales, Allocator.TempJob);
-		var normals = new NativeArray<Vector3>(splinePath.Normals, Allocator.TempJob);
-		var tangents = new NativeArray<Vector3>(splinePath.Tangents, Allocator.TempJob);
-		var positions = new NativeArray<Vector3>(splinePath.Points, Allocator.TempJob);
+		var scales = new NativeArray<Vector3>(splinePath.Scales.ToArray(), Allocator.TempJob);
+		var normals = new NativeArray<Vector3>(splinePath.Normals.ToArray(), Allocator.TempJob);
+		var tangents = new NativeArray<Vector3>(splinePath.Tangents.ToArray(), Allocator.TempJob);
+		var positions = new NativeArray<Vector3>(splinePath.Points.ToArray(), Allocator.TempJob);
+		var leftScale = new NativeArray<float>(leftCurveScales, Allocator.TempJob);
+		var rightScale = new NativeArray<float>(rightCurveScales, Allocator.TempJob);
 
 		var numTris = (2 * (positions.Length - 1)) + (bezierSpline.IsLoop ? 2 : 1);
 		var trisResult = new NativeArray<int>(numTris * 3, Allocator.TempJob);
@@ -122,7 +170,8 @@ public static class TestJobs
 		var vertsResult = new NativeArray<Vector3>(positions.Length * 2, Allocator.TempJob);
 		var normalsResult = new NativeArray<Vector3>(positions.Length * 2, Allocator.TempJob);
 
-		GenerateMeshJob generateMeshJob = new GenerateMeshJob() {
+		GenerateMeshJob generateMeshJob = new GenerateMeshJob()
+		{
 			//Input data
 			width = width,
 			usePointsScale = splineMesh.UsePointsScale,
@@ -134,6 +183,8 @@ public static class TestJobs
 			normals = normals,
 			tangents = tangents,
 			positions = positions,
+			leftScales = leftScale,
+			rightScales = rightScale,
 
 			//Output data
 			trisResult = trisResult,
@@ -145,24 +196,22 @@ public static class TestJobs
 		return generateMeshJob;
 	}
 
-	private static IEnumerator WaitForJobToFinish(JobHandle jobHandle, SplineMesh splineMesh, Action onJobFinished) {
-		var framesCounter = 0;
-		while (!jobHandle.IsCompleted) {
-			yield return null;
-			framesCounter++;
-		}
+	private static IEnumerator WaitForJobToFinish(JobHandle jobHandle, SplineMesh splineMesh, Action onJobFinished)
+	{
+		yield return new WaitWhile(() => !jobHandle.IsCompleted);
 
 		jobHandle.Complete();
 		isJobScheduled = false;
 		onJobFinished?.Invoke();
 
-		if (scheduleNextJob) {
+		if (scheduleNextJob)
+		{
 			splineMesh.GenerateMesh();
-			scheduleNextJob = false;
 		}
 	}
 
-	private static void OnJobCompleted(ref GenerateMeshJob generateMeshJob, Mesh mesh) {
+	private static void OnJobCompleted(ref GenerateMeshJob generateMeshJob, Mesh mesh)
+	{
 		mesh.Clear();
 		mesh.vertices = generateMeshJob.vertsResult.ToArray();
 		mesh.normals = generateMeshJob.normalsResult.ToArray();
@@ -172,18 +221,19 @@ public static class TestJobs
 		CleanUp(ref generateMeshJob);
 	}
 
-	private static void CleanUp(ref GenerateMeshJob generateMeshJob) {
-
+	private static void CleanUp(ref GenerateMeshJob generateMeshJob)
+	{
 		// Free the memory allocated by the arrays
 		generateMeshJob.scales.Dispose();
 		generateMeshJob.normals.Dispose();
 		generateMeshJob.tangents.Dispose();
 		generateMeshJob.positions.Dispose();
+		generateMeshJob.leftScales.Dispose();
+		generateMeshJob.rightScales.Dispose();
 
 		generateMeshJob.trisResult.Dispose();
 		generateMeshJob.uvsResult.Dispose();
 		generateMeshJob.vertsResult.Dispose();
 		generateMeshJob.normalsResult.Dispose();
 	}
-
 }

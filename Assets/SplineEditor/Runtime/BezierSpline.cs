@@ -688,7 +688,7 @@ namespace SplineEditor
 			var targetDistance = GetLinearLength(targetT: currentTargetT, precision: 0.00001f, useWorldScale: false);
 			normals[0] = normalsPath.Normals[0];
 			Tangents[0] = normalsPath.Tangents[0];
-			for (var i = 1; i < normalsPath.Points.Length; i++)
+			for (var i = 1; i < normalsPath.Points.Count; i++)
 			{
 				distance += Vector3.Distance(normalsPath.Points[i - 1], normalsPath.Points[i]);
 				if (distance >= targetDistance)
@@ -715,8 +715,8 @@ namespace SplineEditor
 			}
 			else
 			{
-				normals[normals.Count - 1] = normalsPath.Normals[normalsPath.Normals.Length - 1];
-				Tangents[Tangents.Count - 1] = normalsPath.Tangents[normalsPath.Tangents.Length - 1];
+				normals[normals.Count - 1] = normalsPath.Normals[normalsPath.Normals.Count - 1];
+				Tangents[Tangents.Count - 1] = normalsPath.Tangents[normalsPath.Tangents.Count - 1];
 			}
 
 			globalNormalsRotation = globalAngleCopy;
@@ -736,11 +736,12 @@ namespace SplineEditor
 		/// <param name="useWorldSpace">Transform points from local space to world space.</param>
 		public void GetEvenlySpacedPoints(float spacing, SplinePath bezierPath, float precision = 0.001f, bool useWorldSpace = true)
 		{
-			var scales = new List<Vector3>();
-			var normals = new List<Vector3>();
-			var tangents = new List<Vector3>();
-			var parametersT = new List<float>();
-			var spacedPoints = new List<Vector3>();
+			bezierPath.Reset();
+			var scales = bezierPath.Scales;
+			var normals = bezierPath.Normals;
+			var tangents = bezierPath.Tangents;
+			var parametersT = bezierPath.ParametersT;
+			var spacedPoints = bezierPath.Points;
 
 			var splineLength = GetLinearLength(precision: 0.0001f, useWorldScale: false);
 			var segmentsCount = Mathf.RoundToInt(splineLength / spacing) + 1;
@@ -814,15 +815,9 @@ namespace SplineEditor
 				}
 			}
 
-			bezierPath.Scales = scales.ToArray();
-			bezierPath.Points = spacedPoints.ToArray();
-			bezierPath.Normals = normals.ToArray();
-			bezierPath.Tangents = tangents.ToArray();
-			bezierPath.ParametersT = parametersT.ToArray();
-
 			if (useWorldSpace)
 			{
-				for (var i = 0; i < bezierPath.Points.Length; i++)
+				for (var i = 0; i < bezierPath.Points.Count; i++)
 				{
 					bezierPath.Points[i] = transform.TransformPoint(bezierPath.Points[i]);
 				}
