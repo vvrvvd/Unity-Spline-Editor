@@ -7,12 +7,13 @@ using Unity.Collections;
 using Unity.EditorCoroutines.Editor;
 using Unity.Jobs;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public static class TestJobs
 {
 
 	[BurstCompile]
-	public struct GenerateMeshJob : IJobParallelFor
+	public struct GenerateMeshJob : IDisposableJobParallelFor
 	{
 		private static readonly int[] triangleMap = { 0, 2, 1, 1, 2, 3 };
 
@@ -49,6 +50,21 @@ public static class TestJobs
 		public NativeArray<Vector3> vertsResult;
 		[NativeDisableParallelForRestriction]
 		public NativeArray<Vector3> normalsResult;
+
+		public void Dispose()
+		{
+			scales.Dispose();
+			normals.Dispose();
+			tangents.Dispose();
+			positions.Dispose();
+			leftScales.Dispose();
+			rightScales.Dispose();
+
+			trisResult.Dispose();
+			uvsResult.Dispose();
+			vertsResult.Dispose();
+			normalsResult.Dispose();
+		}
 
 		public void Execute(int i)
 		{
@@ -102,7 +118,7 @@ public static class TestJobs
 
 	public static bool isJobScheduled = false;
 	private static bool scheduleNextJob = false;
-
+	private const int JobBatchSize = 64;
 	private static EditorCoroutine generateMeshCoroutine;
 
 	public static void GenerateMesh(SplineMesh splineMesh, SplinePath splinePath, Mesh mesh, bool immediate, Action<Mesh> onMeshGenerated)
@@ -118,7 +134,6 @@ public static class TestJobs
 		isJobScheduled = true;
 		scheduleNextJob = false;
 		var generateMeshJob = PrepareGenerateMeshJob(splineMesh, splinePath);
-		var jobHandle = generateMeshJob.Schedule(generateMeshJob.positions.Length, 64);
 
 		if (generateMeshCoroutine != null)
 		{
@@ -127,19 +142,27 @@ public static class TestJobs
 
 		if (immediate)
 		{
-			jobHandle.Complete();
-			isJobScheduled = false;
-			OnJobCompleted(ref generateMeshJob, mesh);
+			generateMeshJob.Schedule(generateMeshJob.positions.Length, JobBatchSize, (generateMeshJob) =>
+			{
+				OnJobCompleted(ref generateMeshJob, mesh);
+				onMeshGenerated?.Invoke(mesh);
+				isJobScheduled = false;
+			});
 		}
 		else
 		{
-			generateMeshCoroutine = EditorCoroutineUtility.StartCoroutine(
-				WaitForJobToFinish(jobHandle, splineMesh, () =>
+			generateMeshCoroutine = generateMeshJob.ScheduleEditorAsync(generateMeshJob.positions.Length, JobBatchSize, splineMesh as Object,
+			(generateMeshJob) =>
+			{
+				OnJobCompleted(ref generateMeshJob, mesh);
+				onMeshGenerated?.Invoke(mesh);
+				isJobScheduled = false;
+
+				if (scheduleNextJob)
 				{
-					OnJobCompleted(ref generateMeshJob, mesh);
-					onMeshGenerated?.Invoke(mesh);
-				})
-			, splineMesh);
+					splineMesh.GenerateMesh();
+				}
+			});
 		}
 	}
 
@@ -196,20 +219,6 @@ public static class TestJobs
 		return generateMeshJob;
 	}
 
-	private static IEnumerator WaitForJobToFinish(JobHandle jobHandle, SplineMesh splineMesh, Action onJobFinished)
-	{
-		yield return new WaitWhile(() => !jobHandle.IsCompleted);
-
-		jobHandle.Complete();
-		isJobScheduled = false;
-		onJobFinished?.Invoke();
-
-		if (scheduleNextJob)
-		{
-			splineMesh.GenerateMesh();
-		}
-	}
-
 	private static void OnJobCompleted(ref GenerateMeshJob generateMeshJob, Mesh mesh)
 	{
 		mesh.Clear();
@@ -217,23 +226,6 @@ public static class TestJobs
 		mesh.normals = generateMeshJob.normalsResult.ToArray();
 		mesh.triangles = generateMeshJob.trisResult.ToArray();
 		mesh.uv = generateMeshJob.uvsResult.ToArray();
-
-		CleanUp(ref generateMeshJob);
 	}
 
-	private static void CleanUp(ref GenerateMeshJob generateMeshJob)
-	{
-		// Free the memory allocated by the arrays
-		generateMeshJob.scales.Dispose();
-		generateMeshJob.normals.Dispose();
-		generateMeshJob.tangents.Dispose();
-		generateMeshJob.positions.Dispose();
-		generateMeshJob.leftScales.Dispose();
-		generateMeshJob.rightScales.Dispose();
-
-		generateMeshJob.trisResult.Dispose();
-		generateMeshJob.uvsResult.Dispose();
-		generateMeshJob.vertsResult.Dispose();
-		generateMeshJob.normalsResult.Dispose();
-	}
 }
