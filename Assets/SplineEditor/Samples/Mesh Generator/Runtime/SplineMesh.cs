@@ -57,11 +57,6 @@ namespace SplineEditor.MeshGenerator
 
 		private Mesh cachedMesh;
 
-#if UNITY_EDITOR
-		private int editorLateUpdateCounter = 0;
-		private bool useEditorDelay = false;
-#endif
-
 		private bool updateMesh = false;
 
 		/// <summary>
@@ -138,10 +133,6 @@ namespace SplineEditor.MeshGenerator
 				var newValue = Mathf.Max(MinWidthValue, value);
 				width = newValue;
 				updateMesh = true;
-
-#if UNITY_EDITOR
-				useEditorDelay = false;
-#endif
 			}
 		}
 
@@ -156,10 +147,6 @@ namespace SplineEditor.MeshGenerator
 				var newValue = Mathf.Max(MinSpacingValue, value);
 				spacing = newValue;
 				updateMesh = true;
-
-#if UNITY_EDITOR
-				useEditorDelay = false;
-#endif
 			}
 		}
 
@@ -175,10 +162,6 @@ namespace SplineEditor.MeshGenerator
 				useAsymetricWidthCurve = value;
 				updateMesh = true;
 
-#if UNITY_EDITOR
-				useEditorDelay = false;
-#endif
-
 			}
 		}
 
@@ -193,11 +176,6 @@ namespace SplineEditor.MeshGenerator
 			{
 				rightSideCurve = value;
 				updateMesh = true;
-
-#if UNITY_EDITOR
-				useEditorDelay = true;
-#endif
-
 			}
 		}
 
@@ -212,10 +190,6 @@ namespace SplineEditor.MeshGenerator
 			{
 				leftSideCurve = value;
 				updateMesh = true;
-
-#if UNITY_EDITOR
-				useEditorDelay = true;
-#endif
 			}
 		}
 
@@ -229,10 +203,6 @@ namespace SplineEditor.MeshGenerator
 			{
 				usePointsScale = value;
 				updateMesh = true;
-
-#if UNITY_EDITOR
-				useEditorDelay = false;
-#endif
 			}
 		}
 
@@ -245,10 +215,6 @@ namespace SplineEditor.MeshGenerator
 			{
 				uvMode = value;
 				updateMesh = true;
-
-#if UNITY_EDITOR
-				useEditorDelay = false;
-#endif
 			}
 		}
 
@@ -262,10 +228,6 @@ namespace SplineEditor.MeshGenerator
 			{
 				mirrorUV = value;
 				updateMesh = true;
-
-#if UNITY_EDITOR
-				useEditorDelay = false;
-#endif
 			}
 		}
 
@@ -295,7 +257,19 @@ namespace SplineEditor.MeshGenerator
 				return;
 			}
 
-			ConstructMesh();
+			if(cachedMesh == null) 
+			{
+				cachedMesh = new Mesh();
+			}
+
+			if (splinePath == null) 
+			{
+				splinePath = new SplinePath();
+			}
+
+			bezierSpline.GetEvenlySpacedPoints(Spacing, splinePath, 0.0001f, false);
+
+			TestJobs.GenerateMesh(this, splinePath, cachedMesh);
 			meshFilter.sharedMesh = cachedMesh;
 		}
 
@@ -441,20 +415,6 @@ namespace SplineEditor.MeshGenerator
 			{
 				return;
 			}
-
-#if UNITY_EDITOR
-
-			if (useEditorDelay && editorLateUpdateCounter < EditorLateUpdateFramesDelay)
-			{
-				editorLateUpdateCounter++;
-				return;
-			}
-			else
-			{
-				editorLateUpdateCounter = 0;
-				useEditorDelay = false;
-			}
-#endif
 
 			GenerateMesh();
 			updateMesh = false;

@@ -23,6 +23,9 @@ namespace SplineEditor
 		private readonly List<float> normalsOffsetCopyList = new List<float>();
 
 		[SerializeField]
+		public int curvesCount = 0;
+
+		[SerializeField]
 		private bool isLoop = default;
 
 		[SerializeField]
@@ -86,7 +89,19 @@ namespace SplineEditor
 		/// <summary>
 		/// Gets number of curves in the splines.
 		/// </summary>
-		public int CurvesCount => Mathf.Max(0, (PointsCount - 1) / 3);
+		public int CurvesCount 
+		{
+			get 
+			{
+				if (curvesCount == 0) 
+				{
+					curvesCount = Mathf.Max(0, (PointsCount - 1) / 3);
+				}
+
+				return curvesCount;
+			}
+			private set => curvesCount = value;
+		}
 
 		/// <summary>
 		/// Gets number of points in the spline.
@@ -1137,11 +1152,14 @@ namespace SplineEditor
 			{
 				Points.Add(linePoint);
 			}
+
+			CurvesCount = Mathf.Max(0, (PointsCount - 1) / 3);
 		}
 
 		private void RemovePoint(int pointIndex)
 		{
 			Points.RemoveAt(pointIndex);
+			CurvesCount = Mathf.Max(0, (PointsCount - 1) / 3);
 		}
 
 		private void ApplyContraints(int pointIndex)

@@ -2,20 +2,24 @@ using SplineEditor;
 using SplineEditor.MeshGenerator;
 using System;
 using System.Collections;
+using Unity.Burst;
 using Unity.Collections;
+using Unity.EditorCoroutines.Editor;
 using Unity.Jobs;
-using UnityEditor;
 using UnityEngine;
 
 public static class TestJobs
 {
 
-	public struct GenerateMeshJob : IJobParallelFor 
+	[BurstCompile]
+	public struct GenerateMeshJob : IJobParallelFor
 	{
 		private static readonly int[] triangleMap = { 0, 2, 1, 1, 2, 3 };
 
 		[ReadOnly]
 		public float width;
+		[ReadOnly]
+		public bool usePointsScale;
 		[ReadOnly]
 		public bool useAsymetricWidthCurve;
 		[ReadOnly]
@@ -52,8 +56,8 @@ public static class TestJobs
 
 			//Vertices
 			var right = Vector3.Cross(normals[i], tangents[i]).normalized;
-			var rightScaledWidth = width * scales[i].x;
-			var leftScaledWidth = width * scales[i].x;
+			var rightScaledWidth = width * (usePointsScale ? scales[i].x : 1);
+			var leftScaledWidth = width * (usePointsScale ? scales[i].x : 1);
 			vertsResult[vertIndex] = positions[i] - (right * (useAsymetricWidthCurve ? leftScaledWidth : rightScaledWidth));
 			vertsResult[vertIndex + 1] = positions[i] + (right * rightScaledWidth);
 
@@ -87,14 +91,24 @@ public static class TestJobs
 
 	}
 
-	[MenuItem("Jobs/Test Job")]
-	private static void TestJob() {
-		var splineMesh = UnityEngine.Object.FindObjectOfType<SplineMesh>();
-		var splinePath = new SplinePath();
-		var bezierSpline = splineMesh.BezierSpline;
+	private static bool isJobScheduled = false;
+	private static bool scheduleNextJob = false;
+	
+	public static void GenerateMesh(SplineMesh splineMesh, SplinePath splinePath, Mesh mesh) {
+		if (isJobScheduled) {
+			scheduleNextJob = true;
+			return;
+		}
 
-		bezierSpline.RecalculateNormals();
-		bezierSpline.GetEvenlySpacedPoints(splineMesh.Spacing, splinePath, 0.0001f, false);
+		isJobScheduled = true;
+		var generateMeshJob = PrepareGenerateMeshJob(splineMesh, splinePath);
+		var jobHandle = generateMeshJob.Schedule(generateMeshJob.positions.Length, 64);
+
+		EditorCoroutineUtility.StartCoroutine(WaitForJobToFinish(jobHandle, splineMesh, () => OnJobCompleted(ref generateMeshJob, mesh)), splineMesh);
+	}
+
+	private static GenerateMeshJob PrepareGenerateMeshJob(SplineMesh splineMesh, SplinePath splinePath) {
+		var bezierSpline = splineMesh.BezierSpline;
 
 		var width = splineMesh.Width;
 		var scales = new NativeArray<Vector3>(splinePath.Scales, Allocator.TempJob);
@@ -108,65 +122,68 @@ public static class TestJobs
 		var vertsResult = new NativeArray<Vector3>(positions.Length * 2, Allocator.TempJob);
 		var normalsResult = new NativeArray<Vector3>(positions.Length * 2, Allocator.TempJob);
 
-		GenerateMeshJob generateMeshJob = new GenerateMeshJob();
-		
-		//Input data
-		generateMeshJob.width = width;
-		generateMeshJob.useAsymetricWidthCurve = splineMesh.UseAsymetricWidthCurve;
-		generateMeshJob.uvMode = (int)splineMesh.UvMode;
-		generateMeshJob.mirrorUv = splineMesh.MirrorUV;
-		generateMeshJob.isLoop = bezierSpline.IsLoop;
-		generateMeshJob.scales = scales;
-		generateMeshJob.normals = normals;
-		generateMeshJob.tangents = tangents;
-		generateMeshJob.positions = positions;
+		GenerateMeshJob generateMeshJob = new GenerateMeshJob() {
+			//Input data
+			width = width,
+			usePointsScale = splineMesh.UsePointsScale,
+			useAsymetricWidthCurve = splineMesh.UseAsymetricWidthCurve,
+			uvMode = (int)splineMesh.UvMode,
+			mirrorUv = splineMesh.MirrorUV,
+			isLoop = bezierSpline.IsLoop,
+			scales = scales,
+			normals = normals,
+			tangents = tangents,
+			positions = positions,
 
-		//Output data
-		generateMeshJob.trisResult = trisResult;
-		generateMeshJob.uvsResult = uvsResult;
-		generateMeshJob.vertsResult = vertsResult;
-		generateMeshJob.normalsResult = normalsResult;
+			//Output data
+			trisResult = trisResult,
+			uvsResult = uvsResult,
+			vertsResult = vertsResult,
+			normalsResult = normalsResult,
+		};
 
-		// Schedule the job with one Execute per index in the results array and only 1 item per processing batch
-		JobHandle generateMeshJobHandle = generateMeshJob.Schedule(positions.Length, 32);
-
-		var sharedMesh = splineMesh.MeshFilter.sharedMesh;
-
-		if (sharedMesh == null) {
-			sharedMesh = new Mesh();
-		}
-
-		sharedMesh.Clear();
-		splineMesh.MeshFilter.sharedMesh = sharedMesh;
-
-		// Wait for the job to complete
-		generateMeshJobHandle.Complete();
-
-		splineMesh.MeshFilter.sharedMesh.vertices = generateMeshJob.vertsResult.ToArray();
-		splineMesh.MeshFilter.sharedMesh.normals = generateMeshJob.normalsResult.ToArray();
-		splineMesh.MeshFilter.sharedMesh.triangles = generateMeshJob.trisResult.ToArray();
-		splineMesh.MeshFilter.sharedMesh.uv = generateMeshJob.uvsResult.ToArray();
-
-		// Free the memory allocated by the arrays
-		scales.Dispose();
-		normals.Dispose();
-		tangents.Dispose();
-		positions.Dispose();
-
-		trisResult.Dispose();
-		uvsResult.Dispose();
-		vertsResult.Dispose();
-		normalsResult.Dispose();
+		return generateMeshJob;
 	}
 
-	private static IEnumerator WaitForJobToFinish(JobHandle jobHandle, Action onJobFinished) {
-		var startTime = Time.realtimeSinceStartup;
-		yield return new WaitWhile(() => !jobHandle.IsCompleted);
+	private static IEnumerator WaitForJobToFinish(JobHandle jobHandle, SplineMesh splineMesh, Action onJobFinished) {
+		var framesCounter = 0;
+		while (!jobHandle.IsCompleted) {
+			yield return null;
+			framesCounter++;
+		}
 
 		jobHandle.Complete();
+		isJobScheduled = false;
 		onJobFinished?.Invoke();
-		var deltaTime = Time.realtimeSinceStartup - startTime;
-		Debug.Log("Finished in: " + deltaTime);
+
+		if (scheduleNextJob) {
+			splineMesh.GenerateMesh();
+			scheduleNextJob = false;
+		}
+	}
+
+	private static void OnJobCompleted(ref GenerateMeshJob generateMeshJob, Mesh mesh) {
+		mesh.Clear();
+		mesh.vertices = generateMeshJob.vertsResult.ToArray();
+		mesh.normals = generateMeshJob.normalsResult.ToArray();
+		mesh.triangles = generateMeshJob.trisResult.ToArray();
+		mesh.uv = generateMeshJob.uvsResult.ToArray();
+
+		CleanUp(ref generateMeshJob);
+	}
+
+	private static void CleanUp(ref GenerateMeshJob generateMeshJob) {
+
+		// Free the memory allocated by the arrays
+		generateMeshJob.scales.Dispose();
+		generateMeshJob.normals.Dispose();
+		generateMeshJob.tangents.Dispose();
+		generateMeshJob.positions.Dispose();
+
+		generateMeshJob.trisResult.Dispose();
+		generateMeshJob.uvsResult.Dispose();
+		generateMeshJob.vertsResult.Dispose();
+		generateMeshJob.normalsResult.Dispose();
 	}
 
 }
