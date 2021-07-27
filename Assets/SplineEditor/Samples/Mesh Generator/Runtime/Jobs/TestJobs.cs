@@ -7,6 +7,7 @@ using Unity.Collections;
 using Unity.EditorCoroutines.Editor;
 using Unity.Jobs;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 
 public static class TestJobs
@@ -15,7 +16,7 @@ public static class TestJobs
 	[BurstCompile]
 	public struct GenerateMeshJob : IDisposableJobParallelFor
 	{
-		private static readonly int[] triangleMap = { 0, 2, 1, 1, 2, 3 };
+		private static readonly int[] indicesMap = { 0, 2, 1, 1, 2, 3 };
 
 		[ReadOnly]
 		public float width;
@@ -43,7 +44,7 @@ public static class TestJobs
 		public NativeArray<float> rightScales;
 
 		[NativeDisableParallelForRestriction]
-		public NativeArray<int> trisResult;
+		public NativeArray<int> indicesResult;
 		[NativeDisableParallelForRestriction]
 		public NativeArray<Vector2> uvsResult;
 		[NativeDisableParallelForRestriction]
@@ -60,7 +61,7 @@ public static class TestJobs
 			leftScales.Dispose();
 			rightScales.Dispose();
 
-			trisResult.Dispose();
+			indicesResult.Dispose();
 			uvsResult.Dispose();
 			vertsResult.Dispose();
 			normalsResult.Dispose();
@@ -90,9 +91,9 @@ public static class TestJobs
 			//Triangles
 			if (i < positions.Length - 1 || isLoop)
 			{
-				for (int j = 0; j < triangleMap.Length; j++)
+				for (int j = 0; j < indicesMap.Length; j++)
 				{
-					trisResult[trisIndex + j] = (vertIndex + triangleMap[j]) % vertsResult.Length;
+					indicesResult[trisIndex + j] = (vertIndex + indicesMap[j]) % vertsResult.Length;
 				}
 			}
 
@@ -188,7 +189,7 @@ public static class TestJobs
 		var rightScale = new NativeArray<float>(rightCurveScales, Allocator.TempJob);
 
 		var numTris = (2 * (positions.Length - 1)) + (bezierSpline.IsLoop ? 2 : 1);
-		var trisResult = new NativeArray<int>(numTris * 3, Allocator.TempJob);
+		var indicesResult = new NativeArray<int>(numTris * 3, Allocator.TempJob);
 		var uvsResult = new NativeArray<Vector2>(positions.Length * 2, Allocator.TempJob);
 		var vertsResult = new NativeArray<Vector3>(positions.Length * 2, Allocator.TempJob);
 		var normalsResult = new NativeArray<Vector3>(positions.Length * 2, Allocator.TempJob);
@@ -210,7 +211,7 @@ public static class TestJobs
 			rightScales = rightScale,
 
 			//Output data
-			trisResult = trisResult,
+			indicesResult = indicesResult,
 			uvsResult = uvsResult,
 			vertsResult = vertsResult,
 			normalsResult = normalsResult,
@@ -222,10 +223,10 @@ public static class TestJobs
 	private static void OnJobCompleted(ref GenerateMeshJob generateMeshJob, Mesh mesh)
 	{
 		mesh.Clear();
-		mesh.vertices = generateMeshJob.vertsResult.ToArray();
-		mesh.normals = generateMeshJob.normalsResult.ToArray();
-		mesh.triangles = generateMeshJob.trisResult.ToArray();
-		mesh.uv = generateMeshJob.uvsResult.ToArray();
+		mesh.SetVertices(generateMeshJob.vertsResult);
+		mesh.SetNormals(generateMeshJob.normalsResult);
+		mesh.SetUVs(0, generateMeshJob.uvsResult);
+		mesh.SetTriangles(generateMeshJob.indicesResult.ToArray(), 0);
 	}
 
 }
