@@ -1,19 +1,16 @@
 using SplineEditor;
 using SplineEditor.MeshGenerator;
 using System;
-using System.Collections;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.EditorCoroutines.Editor;
-using Unity.Jobs;
 using UnityEngine;
-using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 
 public static class TestJobs
 {
 
-	[BurstCompile]
+	[BurstCompile(CompileSynchronously = true)]
 	public struct GenerateMeshJob : IDisposableJobParallelFor
 	{
 		private static readonly int[] indicesMap = { 0, 2, 1, 1, 2, 3 };
@@ -43,13 +40,13 @@ public static class TestJobs
 		[ReadOnly]
 		public NativeArray<float> rightScales;
 
-		[NativeDisableParallelForRestriction]
+		[WriteOnly, NativeDisableParallelForRestriction]
 		public NativeArray<int> indicesResult;
-		[NativeDisableParallelForRestriction]
+		[WriteOnly, NativeDisableParallelForRestriction]
 		public NativeArray<Vector2> uvsResult;
-		[NativeDisableParallelForRestriction]
+		[WriteOnly, NativeDisableParallelForRestriction]
 		public NativeArray<Vector3> vertsResult;
-		[NativeDisableParallelForRestriction]
+		[WriteOnly, NativeDisableParallelForRestriction]
 		public NativeArray<Vector3> normalsResult;
 
 		public void Dispose()
