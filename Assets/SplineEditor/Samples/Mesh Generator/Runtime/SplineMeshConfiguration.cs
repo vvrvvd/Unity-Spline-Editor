@@ -8,14 +8,20 @@ using UnityEngine;
 namespace SplineEditor.MeshGenerator
 {
 	/// <summary>
-	/// Scriptable object containing SplineMesh editor configuration.
+	/// Scriptable object containing SplineMesh configuration.
 	/// </summary>
-	[CreateAssetMenu(fileName = "SplineMeshEditorConfiguration", menuName = "Spline Editor/Mesh Generator/Mesh Generator Configuration", order = 1)]
-	public class SplineMeshEditorConfiguration : ScriptableObject
+	[CreateAssetMenu(fileName = "SplineMeshConfiguration", menuName = "Spline Editor/Mesh Generator/Mesh Generator Configuration", order = 1)]
+	public class SplineMeshConfiguration : ScriptableObject
 	{
-		private static SplineMeshEditorConfiguration instance;
+		private static SplineMeshConfiguration instance;
 
 		[Header("General")]
+		[SerializeField]
+		[Tooltip("Should mesh jobs be used with coroutines that awaits for them to complete instead of forcing mesh generation in the same frame. Decreases the main thread overload.")]
+		private bool useJobsWithCoroutines = default;
+
+		[Space]
+
 		[SerializeField]
 		private Material uvMaterial = default;
 		[SerializeField]
@@ -33,13 +39,13 @@ namespace SplineEditor.MeshGenerator
 		/// Gets the first SplineMesh editor configuration object found in the resources.
 		/// Caches the result so it's loaded from resources only once.
 		/// </summary>
-		public static SplineMeshEditorConfiguration Instance
+		public static SplineMeshConfiguration Instance
 		{
 			get
 			{
 				if (instance == null)
 				{
-					var loadedInstances = Resources.LoadAll<SplineMeshEditorConfiguration>(string.Empty);
+					var loadedInstances = Resources.LoadAll<SplineMeshConfiguration>(string.Empty);
 
 					if (loadedInstances.Length == 0)
 					{
@@ -53,6 +59,13 @@ namespace SplineEditor.MeshGenerator
 				return instance;
 			}
 		}
+
+		/// <summary>
+		/// Should Async Jobs be used for mesh generation.
+		/// If set to true then a Coroutine that waits for job to be finish is created every time job is used for mesh generation.
+		/// Is serialized.
+		/// </summary>
+		public bool UseJobsWithCorotuines { get => useJobsWithCoroutines; set => useJobsWithCoroutines = value; }
 
 		/// <summary>
 		/// Gets or sets material used for visualizing mesh UV in editor.

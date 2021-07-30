@@ -46,7 +46,7 @@ namespace SplineEditor.MeshGenerator.Editor
 			if (MeshEditorState.DrawPoints)
 			{
 				var handleSize = 0.025f;
-				Handles.color = SplineMeshEditorConfiguration.Instance.PointsColor;
+				Handles.color = SplineMeshConfiguration.Instance.PointsColor;
 				Handles.Button(point, Quaternion.identity, size * handleSize, size * handleSize, Handles.DotHandleCap);
 			}
 
@@ -59,8 +59,8 @@ namespace SplineEditor.MeshGenerator.Editor
 		private void DrawNormal(Vector3 point, int index)
 		{
 			var normal = splineMesh.Normals[index];
-			var normalLength = SplineMeshEditorConfiguration.Instance.NormalVectorLength;
-			Handles.color = SplineMeshEditorConfiguration.Instance.NormalsColor;
+			var normalLength = SplineMeshConfiguration.Instance.NormalVectorLength;
+			Handles.color = SplineMeshConfiguration.Instance.NormalsColor;
 			Handles.DrawLine(point, point + splineMesh.transform.TransformDirection(normal * normalLength));
 		}
 	}

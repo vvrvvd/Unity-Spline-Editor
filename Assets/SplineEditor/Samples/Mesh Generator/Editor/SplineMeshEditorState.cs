@@ -168,7 +168,7 @@ namespace SplineEditor.MeshGenerator.Editor
 		/// <param name="splineMesh">SplineMesh component to have UV material set.</param>
 		public void SetDebugModeMaterial(SplineMesh splineMesh)
 		{
-			var settingsScriptable = SplineMeshEditorConfiguration.Instance;
+			var settingsScriptable = SplineMeshConfiguration.Instance;
 
 			var prevMaterial = splineMesh.MeshRenderer.sharedMaterial;
 			var newMaterial = settingsScriptable.UvMaterial;

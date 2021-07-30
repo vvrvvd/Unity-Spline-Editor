@@ -54,6 +54,7 @@ namespace SplineEditor.MeshGenerator
 		private SplinePath splinePath;
 
 		private Mesh cachedMesh;
+		private GenerateMeshJobExecutor generateMeshJobExecutor;
 
 		/// <summary>
 		/// UV generation mode type.
@@ -242,18 +243,29 @@ namespace SplineEditor.MeshGenerator
 		public BezierSpline BezierSpline => bezierSpline;
 
 		/// <summary>
-		/// Constructs and assignes mesh based on the spline using Unity Jobs system.
+		/// Constructs and updates spline mesh using Unity Jobs.
 		/// </summary>
 		[ContextMenu("Generate Mesh")]
-		public void GenerateMesh()
+		public void GenerateMesh() {
+			var config = SplineMeshConfiguration.Instance;
+			GenerateMesh(!config.UseJobsWithCorotuines);
+		}
+
+		[ContextMenu("Generate Mesh Sync")]
+		public void GenerateMeshSync()
 		{
+			GenerateMesh(true);
+		}
+
+		[ContextMenu("Generate Mesh Async")]
+		public void GenerateMeshAsync() {
 			GenerateMesh(false);
 		}
 
 		/// <summary>
 		/// Constructs and assignes mesh based on the spline using Unity Jobs system.
 		/// </summary>
-		/// <param name="immediate">Should mesh be generated immediately.</param>
+		/// <param name="immediate">Should mesh be generated in the same frame.</param>
 		/// <param name="onMeshGenerated">Action invoked when mesh is generated.</param>
 		public void GenerateMesh(bool immediate = false, Action<Mesh> onMeshGenerated = null)
 		{
@@ -272,7 +284,12 @@ namespace SplineEditor.MeshGenerator
 				splinePath = new SplinePath();
 			}
 
-			TestJobs.GenerateMesh(this, splinePath, cachedMesh, immediate, onMeshGenerated);
+			if(generateMeshJobExecutor == null) 
+			{
+				generateMeshJobExecutor = new GenerateMeshJobExecutor(this, splinePath);
+			}
+
+			generateMeshJobExecutor.GenerateMesh(cachedMesh, onMeshGenerated, immediate);
 			meshFilter.sharedMesh = cachedMesh;
 		}
 
@@ -377,6 +394,16 @@ namespace SplineEditor.MeshGenerator
 			{
 				bezierSpline = GetComponent<BezierSpline>();
 			}
+
+			if (splinePath == null) 
+			{ 
+				splinePath = new SplinePath();
+			}
+
+#if UNITY_EDITOR
+			bezierSpline.OnSplineChanged -= GenerateMesh;
+			bezierSpline.OnSplineChanged += GenerateMesh;
+#endif
 		}
 
 		private void Awake()
@@ -396,18 +423,38 @@ namespace SplineEditor.MeshGenerator
 				bezierSpline = GetComponent<BezierSpline>();
 			}
 
+			if (splinePath == null) 
+			{
+				splinePath = new SplinePath();
+			}
+
 			Assert.IsNotNull(meshFilter);
 			Assert.IsNotNull(meshRenderer);
 			Assert.IsNotNull(bezierSpline);
+
+#if UNITY_EDITOR
+			bezierSpline.OnSplineChanged -= GenerateMesh;
+			bezierSpline.OnSplineChanged += GenerateMesh;
+#endif
 		}
 
 		private void OnEnable()
 		{
+			if (bezierSpline == null)
+			{
+				return;
+			}
+
 			bezierSpline.OnSplineChanged += GenerateMesh;
 		}
 
 		private void OnDisable()
 		{
+			if (bezierSpline == null) 
+			{
+				return;
+			}
+
 			bezierSpline.OnSplineChanged -= GenerateMesh;
 		}
 	}
