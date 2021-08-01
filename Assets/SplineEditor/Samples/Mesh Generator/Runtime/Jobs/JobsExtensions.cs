@@ -1,13 +1,9 @@
 using System;
 using System.Collections;
-#if UNITY_EDITOR
-using Unity.EditorCoroutines.Editor;
-#endif
 using Unity.Jobs;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
-public static class JobsUtility
+public static class JobsExtensions
 {
 	public static void ScheduleAndComplete<T>(this T job, int arrayLength, int interloopBatchCount, Action<T> OnJobCompleted = null, JobHandle dependsOn = default) where T : struct, IDisposableJobParallelFor
 	{
@@ -25,16 +21,6 @@ public static class JobsUtility
 
 		return coroutine;
 	}
-
-#if UNITY_EDITOR
-	public static EditorCoroutine ScheduleAndCompleteEditorAsync<T>(this T job, int arrayLength, int interloopBatchCount, Object context, Action<T> OnJobCompleted = null, JobHandle dependsOn = default) where T : struct, IDisposableJobParallelFor
-	{
-		var handle = job.Schedule(arrayLength, interloopBatchCount, dependsOn);
-		var coroutine = EditorCoroutineUtility.StartCoroutine(WaitForJobToFinish(handle, job, OnJobCompleted), context);
-
-		return coroutine;
-	}
-#endif
 
 	private static IEnumerator WaitForJobToFinish<T>(JobHandle jobHandle, T job, Action<T> onJobFinished) where T : struct, IDisposableJobParallelFor
 	{

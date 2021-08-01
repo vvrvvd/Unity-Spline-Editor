@@ -3,10 +3,9 @@ using SplineEditor.MeshGenerator;
 using System;
 using Unity.Burst;
 using Unity.Collections;
-using Unity.EditorCoroutines.Editor;
 using UnityEngine;
 
-public class GenerateMeshJobExecutor
+public class MeshJobExecutor
 {
 
 	private const int JobBatchSize = 64;
@@ -15,17 +14,13 @@ public class GenerateMeshJobExecutor
 	public bool isJobScheduled = false;
 	private bool scheduleNextJob = false;
 
-#if UNITY_EDITOR
-	private EditorCoroutine generateMeshCoroutine;
-#else
 	private Coroutine generateMeshCoroutine;
 	private MonoBehaviour coroutineContext;
-#endif
 
 	private SplineMesh splineMesh;
 	private SplinePath splinePath;
 
-	public GenerateMeshJobExecutor(SplineMesh splineMesh, SplinePath splinePath) 
+	public MeshJobExecutor(SplineMesh splineMesh, SplinePath splinePath) 
 	{
 		this.splineMesh = splineMesh;
 		this.splinePath = splinePath;
@@ -47,16 +42,12 @@ public class GenerateMeshJobExecutor
 	}
 
 	private void StopJobCoroutine() {
-		if (generateMeshCoroutine == null) 
+		if (coroutineContext==null || generateMeshCoroutine == null) 
 		{
 			return;
 		}
 
-#if UNITY_EDITOR
-			EditorCoroutineUtility.StopCoroutine(generateMeshCoroutine);
-#else
-			coroutineContext.StopCoroutine(generateMeshCoroutine);
-#endif
+		coroutineContext.StopCoroutine(generateMeshCoroutine);
 	}
 
 	private GenerateMeshJob PrepareGenerateMeshJob()
@@ -131,19 +122,6 @@ public class GenerateMeshJobExecutor
 
 	private void StartJobCoroutine(GenerateMeshJob generateMeshJob, SplineMesh splineMesh, Mesh mesh, Action<Mesh> onMeshGenerated) 
 	{
-#if UNITY_EDITOR
-		generateMeshCoroutine = generateMeshJob.ScheduleAndCompleteEditorAsync(generateMeshJob.positions.Length, JobBatchSize, splineMesh,
-			(generateMeshJob) =>
-			{
-				OnJobCompleted(ref generateMeshJob, mesh);
-				onMeshGenerated?.Invoke(mesh);
-				isJobScheduled = false;
-
-				if (scheduleNextJob) {
-					splineMesh.GenerateMesh();
-				}
-			});
-#else
 		generateMeshCoroutine = generateMeshJob.ScheduleAndCompleteAsync(generateMeshJob.positions.Length, JobBatchSize, splineMesh,
 			(generateMeshJob) =>
 			{
@@ -155,7 +133,6 @@ public class GenerateMeshJobExecutor
 					splineMesh.GenerateMesh();
 				}
 			});
-#endif
 	}
 
 	private void OnJobCompleted(ref GenerateMeshJob generateMeshJob, Mesh mesh)
@@ -165,107 +142,5 @@ public class GenerateMeshJobExecutor
 		mesh.SetNormals(generateMeshJob.normalsResult);
 		mesh.SetUVs(0, generateMeshJob.uvsResult);
 		mesh.SetTriangles(generateMeshJob.indicesResult.ToArray(), 0);
-	}
-
-	[BurstCompile(CompileSynchronously = true)]
-	public struct GenerateMeshJob : IDisposableJobParallelFor
-	{
-		private static readonly int[] indicesMap = { 0, 2, 1, 1, 2, 3 };
-
-		[ReadOnly]
-		public float width;
-		[ReadOnly]
-		public bool usePointsScale;
-		[ReadOnly]
-		public bool useAsymetricWidthCurve;
-		[ReadOnly]
-		public int uvMode; // 0 - Linear, 1 - PingPong
-		[ReadOnly]
-		public bool mirrorUv;
-		[ReadOnly]
-		public bool isLoop;
-		[ReadOnly]
-		public NativeArray<Vector3> scales;
-		[ReadOnly]
-		public NativeArray<Vector3> normals;
-		[ReadOnly]
-		public NativeArray<Vector3> tangents;
-		[ReadOnly]
-		public NativeArray<Vector3> positions;
-		[ReadOnly]
-		public NativeArray<float> leftScales;
-		[ReadOnly]
-		public NativeArray<float> rightScales;
-
-		[WriteOnly, NativeDisableParallelForRestriction]
-		public NativeArray<int> indicesResult;
-		[WriteOnly, NativeDisableParallelForRestriction]
-		public NativeArray<Vector2> uvsResult;
-		[WriteOnly, NativeDisableParallelForRestriction]
-		public NativeArray<Vector3> vertsResult;
-		[WriteOnly, NativeDisableParallelForRestriction]
-		public NativeArray<Vector3> normalsResult;
-
-		public void Dispose()
-		{
-			scales.Dispose();
-			normals.Dispose();
-			tangents.Dispose();
-			positions.Dispose();
-			leftScales.Dispose();
-			rightScales.Dispose();
-
-			indicesResult.Dispose();
-			uvsResult.Dispose();
-			vertsResult.Dispose();
-			normalsResult.Dispose();
-		}
-
-		public void Execute(int i) 
-		{
-			var vertIndex = i * 2;
-			var trisIndex = i * 6;
-
-			//Normals
-			normalsResult[vertIndex] = normals[i];
-			normalsResult[vertIndex + 1] = normals[i];
-
-			//Vertices
-			var right = Vector3.Cross(normals[i], tangents[i]).normalized;
-			var rightScaledWidth = width * (usePointsScale ? scales[i].x : 1) * rightScales[i];
-			var leftScaledWidth = width * (usePointsScale ? scales[i].x : 1) * leftScales[i];
-			vertsResult[vertIndex] = positions[i] - (right * (useAsymetricWidthCurve ? leftScaledWidth : rightScaledWidth));
-			vertsResult[vertIndex + 1] = positions[i] + (right * rightScaledWidth);
-
-			//UV
-			var uv = GetUV(i);
-			uvsResult[vertIndex] = new Vector2(0, uv);
-			uvsResult[vertIndex + 1] = new Vector2(1, uv);
-
-			//Triangles
-			if (i < positions.Length - 1 || isLoop) 
-			{
-				for (int j = 0; j < indicesMap.Length; j++) 
-				{
-					indicesResult[trisIndex + j] = (vertIndex + indicesMap[j]) % vertsResult.Length;
-				}
-			}
-		}
-
-		private float GetUV(int pointIndex) 
-		{
-			var uv = pointIndex / (float)(positions.Length - 1);
-			switch (uvMode) 
-			{
-				case 1: //PingPong
-					uv = 1 - Mathf.Abs((2 * uv) - 1);
-					break;
-				case 0: //Linear
-				default:
-					break;
-			}
-
-			return mirrorUv ? 1 - uv : uv;
-		}
 	}
 }

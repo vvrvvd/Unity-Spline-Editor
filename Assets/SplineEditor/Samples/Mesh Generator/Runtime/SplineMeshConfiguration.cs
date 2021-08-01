@@ -18,7 +18,7 @@ namespace SplineEditor.MeshGenerator
 		[Header("General")]
 		[SerializeField]
 		[Tooltip("Should mesh jobs be used with coroutines that awaits for them to complete instead of forcing mesh generation in the same frame. Decreases the main thread overload.")]
-		private bool useJobsWithCoroutines = default;
+		private bool useJobsWithCoroutines = true;
 
 		[Space]
 

@@ -7,13 +7,13 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using System.Collections.Generic;
 using System;
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 namespace SplineEditor.MeshGenerator
 {
+
 	/// <summary>
 	/// Component for generating flat mesh based on a bezier spline.
 	/// </summary>
@@ -24,7 +24,6 @@ namespace SplineEditor.MeshGenerator
 	[ExecuteAlways]
 	public class SplineMesh : MonoBehaviour
 	{
-		private const float Precision = 0.001f;
 		private const float MinSpacingValue = 0.1f;
 		private const float MinWidthValue = 0.001f;
 
@@ -54,7 +53,7 @@ namespace SplineEditor.MeshGenerator
 		private SplinePath splinePath;
 
 		private Mesh cachedMesh;
-		private GenerateMeshJobExecutor generateMeshJobExecutor;
+		private MeshJobExecutor generateMeshJobExecutor;
 
 		/// <summary>
 		/// UV generation mode type.
@@ -286,96 +285,11 @@ namespace SplineEditor.MeshGenerator
 
 			if(generateMeshJobExecutor == null) 
 			{
-				generateMeshJobExecutor = new GenerateMeshJobExecutor(this, splinePath);
+				generateMeshJobExecutor = new MeshJobExecutor(this, splinePath);
 			}
 
 			generateMeshJobExecutor.GenerateMesh(cachedMesh, onMeshGenerated, immediate);
 			meshFilter.sharedMesh = cachedMesh;
-		}
-
-		/// <summary>
-		/// Constructs mesh based on the spline.
-		/// </summary>
-		/// <returns>Constructed mesh based on BezierSpline component.</returns>
-		public Mesh ConstructMesh()
-		{
-			//TODO: remove
-			int[] triangleMap = { 0, 2, 1, 1, 2, 3 };
-
-			if (splinePath == null)
-			{
-				splinePath = new SplinePath();
-			}
-
-			BezierSpline.RecalculateNormals();
-			BezierSpline.GetEvenlySpacedPoints(Spacing, splinePath, Precision, false);
-
-			var isLoop = BezierSpline.IsLoop;
-			var verts = new Vector3[Points.Count * 2];
-			var normals = new Vector3[Points.Count * 2];
-			var uvs = new Vector2[verts.Length];
-			var numTris = (2 * (Points.Count - 1)) + (isLoop ? 2 : 1);
-			var tris = new int[numTris * 3];
-			var vertIndex = 0;
-			var triIndex = 0;
-
-			for (int i = 0; i < Points.Count; i++)
-			{
-				var normalVector = Normals[i];
-				var right = Vector3.Cross(normalVector, Tangents[i]).normalized;
-				var rightScaledWidth = Width * (UsePointsScale ? Scale[i].x : 1f) * RightSideCurve.Evaluate(ParametersT[i]);
-				var leftScaledWidth = Width * (UsePointsScale ? Scale[i].x : 1f) * LeftSideCurve.Evaluate(ParametersT[i]);
-
-				verts[vertIndex] = Points[i] - (right * (UseAsymetricWidthCurve ? leftScaledWidth : rightScaledWidth));
-				verts[vertIndex + 1] = Points[i] + (right * rightScaledWidth);
-
-				normals[vertIndex] = normalVector;
-				normals[vertIndex + 1] = normalVector;
-
-				var v = GetUV(i);
-				uvs[vertIndex] = new Vector2(0, v);
-				uvs[vertIndex + 1] = new Vector2(1, v);
-
-				if (i < Points.Count - 1 || isLoop)
-				{
-					for (int j = 0; j < triangleMap.Length; j++)
-					{
-						tris[triIndex + j] = (vertIndex + triangleMap[j]) % verts.Length;
-					}
-				}
-
-				vertIndex += 2;
-				triIndex += 6;
-			}
-
-			if (cachedMesh == null)
-			{
-				cachedMesh = new Mesh();
-			}
-
-			cachedMesh.Clear();
-			cachedMesh.vertices = verts;
-			cachedMesh.normals = normals;
-			cachedMesh.triangles = tris;
-			cachedMesh.uv = uvs;
-
-			return cachedMesh;
-		}
-
-		private float GetUV(int pointIndex)
-		{
-			var uv = pointIndex / (float)(Points.Count - 1);
-			switch (UvMode)
-			{
-				case UVMode.PingPong:
-					uv = 1 - Mathf.Abs((2 * uv) - 1);
-					break;
-				case UVMode.Linear:
-				default:
-					break;
-			}
-
-			return MirrorUV ? 1 - uv : uv;
 		}
 
 		private void OnValidate()

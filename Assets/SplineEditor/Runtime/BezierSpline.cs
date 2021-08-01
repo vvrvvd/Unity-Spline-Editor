@@ -23,7 +23,7 @@ namespace SplineEditor
 		private readonly List<float> normalsOffsetCopyList = new List<float>();
 
 		[SerializeField]
-		public int curvesCount = 0;
+		private int curvesCount = 0;
 
 		[SerializeField]
 		private bool isLoop = default;
@@ -89,11 +89,11 @@ namespace SplineEditor
 		/// <summary>
 		/// Gets number of curves in the splines.
 		/// </summary>
-		public int CurvesCount 
+		public int CurvesCount
 		{
-			get 
+			get
 			{
-				if (curvesCount == 0) 
+				if (curvesCount == 0)
 				{
 					curvesCount = Mathf.Max(0, (PointsCount - 1) / 3);
 				}
@@ -799,7 +799,7 @@ namespace SplineEditor
 			if (isLoop && normals.Count > 1)
 			{
 				// Get angle between first and last normal (if zero, they're already lined up, otherwise we need to correct)
-				float normalsAngleErrorAcrossJoin = Vector3.SignedAngle(normals[normals.Count - 1], normals[0], tangents[0]);
+				var normalsAngleErrorAcrossJoin = Vector3.SignedAngle(normals[normals.Count - 1], normals[0], tangents[0]);
 
 				// Gradually rotate the normals along the path to ensure start and end normals line up correctly
 				if (Mathf.Abs(normalsAngleErrorAcrossJoin) > MinNormalsAnglesDifference) // don't bother correcting if very nearly correct
