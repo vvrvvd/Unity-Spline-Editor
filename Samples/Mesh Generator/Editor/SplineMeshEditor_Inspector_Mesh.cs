@@ -91,7 +91,7 @@ namespace SplineEditor.MeshGenerator.Editor
 			GUILayout.Space(20);
 			if (GUILayout.Button(MeshOptionsBakeMeshButtonContent, buttonStyle, ButtonHeight))
 			{
-				splineMesh.ConstructMesh();
+				splineMesh.GenerateMesh();
 				var path = EditorUtility.SaveFilePanel(MeshOptionsBakeMeshWindowTitle, MeshOptionsBakeMeshWindowFolderPath, MeshOptionsBakeMeshWindowFileName, MeshOptionsBakeMeshWindowFileExtension);
 				if (string.IsNullOrEmpty(path))
 				{

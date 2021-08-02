@@ -17,3 +17,4 @@ MonoBehaviour:
   pointsColor: {r: 0, g: 0, b: 1, a: 1}
   normalsColor: {r: 0, g: 1, b: 0, a: 1}
   normalVectorLength: 2.5
+  useJobsWithCoroutines: 0

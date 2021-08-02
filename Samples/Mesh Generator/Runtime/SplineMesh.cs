@@ -3,9 +3,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -22,13 +23,8 @@ namespace SplineEditor.MeshGenerator
 	[ExecuteAlways]
 	public class SplineMesh : MonoBehaviour
 	{
-		private const float Precision = 0.0001f;
 		private const float MinSpacingValue = 0.1f;
 		private const float MinWidthValue = 0.001f;
-
-#if UNITY_EDITOR
-		private const int EditorLateUpdateFramesDelay = 5;
-#endif
 
 		[SerializeField]
 		private float width = 5f;
@@ -56,13 +52,7 @@ namespace SplineEditor.MeshGenerator
 		private SplinePath splinePath;
 
 		private Mesh cachedMesh;
-
-#if UNITY_EDITOR
-		private int editorLateUpdateCounter = 0;
-		private bool useEditorDelay = false;
-#endif
-
-		private bool updateMesh = false;
+		private MeshJobExecutor generateMeshJobExecutor;
 
 		/// <summary>
 		/// UV generation mode type.
@@ -84,7 +74,7 @@ namespace SplineEditor.MeshGenerator
 		/// <summary>
 		/// Gets or sets points on generated on the spline to create the mesh.
 		/// </summary>
-		public Vector3[] Points
+		public List<Vector3> Points
 		{
 			get => splinePath.Points;
 			set => splinePath.Points = value;
@@ -94,7 +84,7 @@ namespace SplineEditor.MeshGenerator
 		/// Gets or sets normals corresponding to the points on mesh.
 		/// Generated based on Tangents.
 		/// </summary>
-		public Vector3[] Normals
+		public List<Vector3> Normals
 		{
 			get => splinePath.Normals;
 			set => splinePath.Normals = value;
@@ -103,7 +93,7 @@ namespace SplineEditor.MeshGenerator
 		/// <summary>
 		/// Gets or sets tangents of the points on the mesh based on the spline.
 		/// </summary>
-		public Vector3[] Tangents
+		public List<Vector3> Tangents
 		{
 			get => splinePath.Tangents;
 			set => splinePath.Tangents = value;
@@ -112,7 +102,7 @@ namespace SplineEditor.MeshGenerator
 		/// <summary>
 		/// Gets or sets scales of the points on the mesh.
 		/// </summary>
-		public Vector3[] Scale
+		public List<Vector3> Scale
 		{
 			get => splinePath.Scales;
 			set => splinePath.Scales = value;
@@ -121,7 +111,7 @@ namespace SplineEditor.MeshGenerator
 		/// <summary>
 		/// Gets or sets value of parameter T on the points on mesh regarding to spline.
 		/// </summary>
-		public float[] ParametersT
+		public List<float> ParametersT
 		{
 			get => splinePath.ParametersT;
 			set => splinePath.ParametersT = value;
@@ -137,11 +127,7 @@ namespace SplineEditor.MeshGenerator
 			{
 				var newValue = Mathf.Max(MinWidthValue, value);
 				width = newValue;
-				updateMesh = true;
-
-#if UNITY_EDITOR
-				useEditorDelay = false;
-#endif
+				GenerateMesh();
 			}
 		}
 
@@ -155,11 +141,7 @@ namespace SplineEditor.MeshGenerator
 			{
 				var newValue = Mathf.Max(MinSpacingValue, value);
 				spacing = newValue;
-				updateMesh = true;
-
-#if UNITY_EDITOR
-				useEditorDelay = false;
-#endif
+				GenerateMesh();
 			}
 		}
 
@@ -173,12 +155,7 @@ namespace SplineEditor.MeshGenerator
 			set
 			{
 				useAsymetricWidthCurve = value;
-				updateMesh = true;
-
-#if UNITY_EDITOR
-				useEditorDelay = false;
-#endif
-
+				GenerateMesh();
 			}
 		}
 
@@ -192,12 +169,7 @@ namespace SplineEditor.MeshGenerator
 			set
 			{
 				rightSideCurve = value;
-				updateMesh = true;
-
-#if UNITY_EDITOR
-				useEditorDelay = true;
-#endif
-
+				GenerateMesh();
 			}
 		}
 
@@ -211,11 +183,7 @@ namespace SplineEditor.MeshGenerator
 			set
 			{
 				leftSideCurve = value;
-				updateMesh = true;
-
-#if UNITY_EDITOR
-				useEditorDelay = true;
-#endif
+				GenerateMesh();
 			}
 		}
 
@@ -228,11 +196,7 @@ namespace SplineEditor.MeshGenerator
 			set
 			{
 				usePointsScale = value;
-				updateMesh = true;
-
-#if UNITY_EDITOR
-				useEditorDelay = false;
-#endif
+				GenerateMesh();
 			}
 		}
 
@@ -244,11 +208,7 @@ namespace SplineEditor.MeshGenerator
 			get => uvMode; set
 			{
 				uvMode = value;
-				updateMesh = true;
-
-#if UNITY_EDITOR
-				useEditorDelay = false;
-#endif
+				GenerateMesh();
 			}
 		}
 
@@ -261,11 +221,7 @@ namespace SplineEditor.MeshGenerator
 			get => mirrorUV; set
 			{
 				mirrorUV = value;
-				updateMesh = true;
-
-#if UNITY_EDITOR
-				useEditorDelay = false;
-#endif
+				GenerateMesh();
 			}
 		}
 
@@ -285,72 +241,25 @@ namespace SplineEditor.MeshGenerator
 		public BezierSpline BezierSpline => bezierSpline;
 
 		/// <summary>
-		/// Constructs and assigned mesh based on the spline.
+		/// Constructs and updates spline mesh using Unity Jobs.
 		/// </summary>
 		[ContextMenu("Generate Mesh")]
 		public void GenerateMesh()
 		{
-			if (BezierSpline == null || MeshFilter == null)
-			{
-				return;
-			}
-
-			ConstructMesh();
-			meshFilter.sharedMesh = cachedMesh;
+			var config = SplineMeshConfiguration.Instance;
+			GenerateMesh(!config.UseJobsWithCorotuines);
 		}
 
 		/// <summary>
-		/// Constructs mesh based on the spline.
+		/// Constructs and assignes mesh based on the spline using Unity Jobs system.
 		/// </summary>
-		/// <returns>Constructed mesh based on BezierSpline component.</returns>
-		public Mesh ConstructMesh()
+		/// <param name="immediate">Should mesh be generated in the same frame.</param>
+		/// <param name="onMeshGenerated">Action invoked when mesh is generated.</param>
+		public void GenerateMesh(bool immediate = false, Action<Mesh> onMeshGenerated = null)
 		{
-			int[] triangleMap = { 0, 2, 1, 1, 2, 3 };
-
-			if (splinePath == null)
+			if (BezierSpline == null || MeshFilter == null)
 			{
-				splinePath = new SplinePath();
-			}
-
-			BezierSpline.RecalculateNormals();
-			BezierSpline.GetEvenlySpacedPoints(Spacing, splinePath, Precision, false);
-
-			var isLoop = BezierSpline.IsLoop;
-			var verts = new Vector3[Points.Length * 2];
-			var normals = new Vector3[Points.Length * 2];
-			var uvs = new Vector2[verts.Length];
-			var numTris = (2 * (Points.Length - 1)) + (isLoop ? 2 : 1);
-			var tris = new int[numTris * 3];
-			var vertIndex = 0;
-			var triIndex = 0;
-
-			for (int i = 0; i < Points.Length; i++)
-			{
-				var normalVector = Normals[i];
-				var right = Vector3.Cross(normalVector, Tangents[i]).normalized;
-				var rightScaledWidth = Width * (UsePointsScale ? Scale[i].x : 1f) * RightSideCurve.Evaluate(ParametersT[i]);
-				var leftScaledWidth = Width * (UsePointsScale ? Scale[i].x : 1f) * LeftSideCurve.Evaluate(ParametersT[i]);
-
-				verts[vertIndex] = Points[i] - (right * (UseAsymetricWidthCurve ? leftScaledWidth : rightScaledWidth));
-				verts[vertIndex + 1] = Points[i] + (right * rightScaledWidth);
-
-				normals[vertIndex] = normalVector;
-				normals[vertIndex + 1] = normalVector;
-
-				var v = GetUV(i);
-				uvs[vertIndex] = new Vector2(0, v);
-				uvs[vertIndex + 1] = new Vector2(1, v);
-
-				if (i < Points.Length - 1 || isLoop)
-				{
-					for (int j = 0; j < triangleMap.Length; j++)
-					{
-						tris[triIndex + j] = (vertIndex + triangleMap[j]) % verts.Length;
-					}
-				}
-
-				vertIndex += 2;
-				triIndex += 6;
+				return;
 			}
 
 			if (cachedMesh == null)
@@ -358,35 +267,23 @@ namespace SplineEditor.MeshGenerator
 				cachedMesh = new Mesh();
 			}
 
-			cachedMesh.Clear();
-			cachedMesh.vertices = verts;
-			cachedMesh.normals = normals;
-			cachedMesh.triangles = tris;
-			cachedMesh.uv = uvs;
-
-			return cachedMesh;
-		}
-
-		private float GetUV(int pointIndex)
-		{
-			var uv = pointIndex / (float)(Points.Length - 1);
-			switch (UvMode)
+			if (splinePath == null)
 			{
-				case UVMode.PingPong:
-					uv = 1 - Mathf.Abs((2 * uv) - 1);
-					break;
-				case UVMode.Linear:
-				default:
-					break;
+				splinePath = new SplinePath();
 			}
 
-			return MirrorUV ? 1 - uv : uv;
+			if (generateMeshJobExecutor == null)
+			{
+				generateMeshJobExecutor = new MeshJobExecutor(this, splinePath);
+			}
+
+			generateMeshJobExecutor.Setup(this, splinePath);
+			generateMeshJobExecutor.GenerateMesh(cachedMesh, onMeshGenerated, immediate);
+			meshFilter.sharedMesh = cachedMesh;
 		}
 
 		private void OnValidate()
 		{
-			updateMesh = true;
-
 			if (meshFilter == null)
 			{
 				meshFilter = GetComponent<MeshFilter>();
@@ -401,6 +298,16 @@ namespace SplineEditor.MeshGenerator
 			{
 				bezierSpline = GetComponent<BezierSpline>();
 			}
+
+			if (splinePath == null)
+			{
+				splinePath = new SplinePath();
+			}
+
+#if UNITY_EDITOR
+			bezierSpline.OnSplineChanged -= GenerateMesh;
+			bezierSpline.OnSplineChanged += GenerateMesh;
+#endif
 		}
 
 		private void Awake()
@@ -420,44 +327,41 @@ namespace SplineEditor.MeshGenerator
 				bezierSpline = GetComponent<BezierSpline>();
 			}
 
+			if (splinePath == null)
+			{
+				splinePath = new SplinePath();
+			}
+
 			Assert.IsNotNull(meshFilter);
 			Assert.IsNotNull(meshRenderer);
 			Assert.IsNotNull(bezierSpline);
+
+#if UNITY_EDITOR
+			bezierSpline.OnSplineChanged -= GenerateMesh;
+			bezierSpline.OnSplineChanged += GenerateMesh;
+#endif
 		}
 
 		private void OnEnable()
 		{
+			if (bezierSpline == null)
+			{
+				return;
+			}
+
+			bezierSpline.OnSplineChanged -= GenerateMesh;
 			bezierSpline.OnSplineChanged += GenerateMesh;
+			GenerateMesh();
 		}
 
 		private void OnDisable()
 		{
+			if (bezierSpline == null)
+			{
+				return;
+			}
+
 			bezierSpline.OnSplineChanged -= GenerateMesh;
-		}
-
-		private void LateUpdate()
-		{
-			if (!updateMesh)
-			{
-				return;
-			}
-
-#if UNITY_EDITOR
-
-			if (useEditorDelay && editorLateUpdateCounter < EditorLateUpdateFramesDelay)
-			{
-				editorLateUpdateCounter++;
-				return;
-			}
-			else
-			{
-				editorLateUpdateCounter = 0;
-				useEditorDelay = false;
-			}
-#endif
-
-			GenerateMesh();
-			updateMesh = false;
 		}
 	}
 }

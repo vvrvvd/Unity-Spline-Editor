@@ -1,3 +1,6 @@
+## v2.2.3 [02.08.2021]
+- Adding Jobs system for mesh generation.
+
 ## v2.1.3 [26.07.2021]
 - Fix for index out of bounds error when creating new bezier spline.
 - Getting rid of EditorUtility.SetDirty invokes which will soon become deprecated.

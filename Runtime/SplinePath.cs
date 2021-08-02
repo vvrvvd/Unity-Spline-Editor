@@ -4,6 +4,7 @@
 // </copyright>
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SplineEditor
@@ -16,37 +17,37 @@ namespace SplineEditor
 	public class SplinePath
 	{
 		[SerializeField]
-		private Vector3[] scales;
+		private List<Vector3> scales;
 		[SerializeField]
-		private Vector3[] points;
+		private List<Vector3> points;
 		[SerializeField]
-		private Vector3[] normals;
+		private List<Vector3> normals;
 		[SerializeField]
-		private Vector3[] tangents;
+		private List<Vector3> tangents;
 		[SerializeField]
-		private float[] parametersT;
+		private List<float> parametersT;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SplinePath"/> class.
 		/// </summary>
 		public SplinePath()
 		{
-			this.Points = new Vector3[0];
-			this.Normals = new Vector3[0];
-			this.Tangents = new Vector3[0];
-			this.Scales = new Vector3[0];
-			this.ParametersT = new float[0];
+			this.Points = new List<Vector3>();
+			this.Normals = new List<Vector3>();
+			this.Tangents = new List<Vector3>();
+			this.Scales = new List<Vector3>();
+			this.ParametersT = new List<float>();
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SplinePath"/> class.
 		/// </summary>
-		/// <param name="points">Array of points positions on path.</param>
-		/// <param name="tangents">Array of tangents on path.</param>
-		/// <param name="normals">Array of normal vectors on path.</param>
-		/// <param name="scales">Array of scales on path.</param>
-		/// <param name="parametersT">Array of t parameters on path.</param>
-		public SplinePath(Vector3[] points, Vector3[] tangents, Vector3[] normals, Vector3[] scales, float[] parametersT)
+		/// <param name="points">List of points positions on path.</param>
+		/// <param name="tangents">List of tangents on path.</param>
+		/// <param name="normals">List of normal vectors on path.</param>
+		/// <param name="scales">List of scales on path.</param>
+		/// <param name="parametersT">List of t parameters on path.</param>
+		public SplinePath(List<Vector3> points, List<Vector3> tangents, List<Vector3> normals, List<Vector3> scales, List<float> parametersT)
 		{
 			this.Points = points;
 			this.Normals = normals;
@@ -58,7 +59,7 @@ namespace SplineEditor
 		/// <summary>
 		/// Gets or sets scales for path points.
 		/// </summary>
-		public Vector3[] Scales
+		public List<Vector3> Scales
 		{
 			get => scales;
 			set => scales = value;
@@ -67,7 +68,7 @@ namespace SplineEditor
 		/// <summary>
 		/// Gets or sets positions for path points.
 		/// </summary>
-		public Vector3[] Points
+		public List<Vector3> Points
 		{
 			get => points;
 			set => points = value;
@@ -76,7 +77,7 @@ namespace SplineEditor
 		/// <summary>
 		/// Gets or sets normal vectors for path points.
 		/// </summary>
-		public Vector3[] Normals
+		public List<Vector3> Normals
 		{
 			get => normals;
 			set => normals = value;
@@ -85,7 +86,7 @@ namespace SplineEditor
 		/// <summary>
 		/// Gets or sets tangents for path points.
 		/// </summary>
-		public Vector3[] Tangents
+		public List<Vector3> Tangents
 		{
 			get => tangents;
 			set => tangents = value;
@@ -94,10 +95,22 @@ namespace SplineEditor
 		/// <summary>
 		/// Gets or sets t parameters of bezier spline for path points.
 		/// </summary>
-		public float[] ParametersT
+		public List<float> ParametersT
 		{
 			get => parametersT;
 			set => parametersT = value;
+		}
+
+		/// <summary>
+		/// Resets all variables to empty lists.
+		/// </summary>
+		public void Reset()
+		{
+			Scales.Clear();
+			Points.Clear();
+			Normals.Clear();
+			Tangents.Clear();
+			ParametersT.Clear();
 		}
 	}
 }

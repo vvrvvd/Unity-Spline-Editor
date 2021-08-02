@@ -1,4 +1,4 @@
-// <copyright file="SplineMeshEditorConfiguration.cs" company="vvrvvd">
+// <copyright file="SplineMeshConfiguration.cs" company="vvrvvd">
 // Copyright (c) vvrvvd. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
@@ -8,12 +8,12 @@ using UnityEngine;
 namespace SplineEditor.MeshGenerator
 {
 	/// <summary>
-	/// Scriptable object containing SplineMesh editor configuration.
+	/// Scriptable object containing SplineMesh configuration.
 	/// </summary>
-	[CreateAssetMenu(fileName = "SplineMeshEditorConfiguration", menuName = "Spline Editor/Mesh Generator/Mesh Generator Configuration", order = 1)]
-	public class SplineMeshEditorConfiguration : ScriptableObject
+	[CreateAssetMenu(fileName = "SplineMeshConfiguration", menuName = "Spline Editor/Mesh Generator/Mesh Generator Configuration", order = 1)]
+	public class SplineMeshConfiguration : ScriptableObject
 	{
-		private static SplineMeshEditorConfiguration instance;
+		private static SplineMeshConfiguration instance;
 
 		[Header("General")]
 		[SerializeField]
@@ -29,17 +29,22 @@ namespace SplineEditor.MeshGenerator
 		[SerializeField]
 		private float normalVectorLength = 2.5f;
 
+		[SerializeField]
+		[Tooltip("Decreases the main thread overload. Helps when working on complex meshes.")]
+		[Header("Experimental")]
+		private bool useJobsWithCoroutines = false;
+
 		/// <summary>
 		/// Gets the first SplineMesh editor configuration object found in the resources.
 		/// Caches the result so it's loaded from resources only once.
 		/// </summary>
-		public static SplineMeshEditorConfiguration Instance
+		public static SplineMeshConfiguration Instance
 		{
 			get
 			{
 				if (instance == null)
 				{
-					var loadedInstances = Resources.LoadAll<SplineMeshEditorConfiguration>(string.Empty);
+					var loadedInstances = Resources.LoadAll<SplineMeshConfiguration>(string.Empty);
 
 					if (loadedInstances.Length == 0)
 					{
@@ -53,6 +58,13 @@ namespace SplineEditor.MeshGenerator
 				return instance;
 			}
 		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether async Jobs awaiting should be used for mesh generation.
+		/// If set to true then a Coroutine that waits for job to be finish is created every time job is used for mesh generation.
+		/// Is serialized.
+		/// </summary>
+		public bool UseJobsWithCorotuines { get => useJobsWithCoroutines; set => useJobsWithCoroutines = value; }
 
 		/// <summary>
 		/// Gets or sets material used for visualizing mesh UV in editor.
