@@ -17,7 +17,7 @@ namespace SplineEditor.MeshGenerator.Editor
 
 		private static SplineMeshEditorState MeshEditorState => SplineMeshEditorState.instance;
 
-		private static SplineMeshEditorConfiguration MeshEditorConfiguration => SplineMeshEditorConfiguration.Instance;
+		private static SplineMeshConfiguration MeshEditorConfiguration => SplineMeshConfiguration.Instance;
 
 		private void OnEnable()
 		{

@@ -178,7 +178,7 @@ namespace SplineEditor
 			bezierSpline.GetEvenlySpacedPoints(pointsSpacing, cachedSplinePath, useWorldSpace: false);
 
 			var generatedPoints = cachedSplinePath.Points;
-			var generatedPointsLength = generatedPoints.Length;
+			var generatedPointsLength = generatedPoints.Count;
 
 			lineRenderer.positionCount = generatedPointsLength;
 
