@@ -6,6 +6,7 @@
 - [Introduction](#introduction)
 - [Features](#features)
 - [System Requirements](#system-requirements)
+- [Dependencies](#dependencies)
 - [Installation](#installation)
 - [Overview](#overview)
 	- [Spline Editor Window](#spline-editor-window)
@@ -42,6 +43,10 @@ The tool was written to bring cubic bezier splines to Unity. The tool let you do
 ## System Requirements <a name="system-requirements"></a>
 
 Unity 2020.1 or newer.
+
+## Dependencies <a name="dependencies"></a>
+
+[Burst](https://docs.unity3d.com/Packages/com.unity.burst@1.4/manual/index.html)
 
 ## Installation <a name="installation"></a>
 
