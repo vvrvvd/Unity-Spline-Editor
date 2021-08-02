@@ -349,6 +349,7 @@ namespace SplineEditor.MeshGenerator
 			}
 
 			bezierSpline.OnSplineChanged += GenerateMesh;
+			GenerateMesh();
 		}
 
 		private void OnDisable()
