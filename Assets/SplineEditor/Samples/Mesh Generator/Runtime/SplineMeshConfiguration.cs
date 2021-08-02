@@ -1,4 +1,4 @@
-// <copyright file="SplineMeshEditorConfiguration.cs" company="vvrvvd">
+// <copyright file="SplineMeshConfiguration.cs" company="vvrvvd">
 // Copyright (c) vvrvvd. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
@@ -61,7 +61,7 @@ namespace SplineEditor.MeshGenerator
 		}
 
 		/// <summary>
-		/// Should Async Jobs be used for mesh generation.
+		/// Gets or sets a value indicating whether async Jobs awaiting should be used for mesh generation.
 		/// If set to true then a Coroutine that waits for job to be finish is created every time job is used for mesh generation.
 		/// Is serialized.
 		/// </summary>

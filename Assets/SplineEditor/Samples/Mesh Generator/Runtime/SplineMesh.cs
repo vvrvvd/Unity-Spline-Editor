@@ -3,17 +3,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
-using System.Collections.Generic;
-using System;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 namespace SplineEditor.MeshGenerator
 {
-
 	/// <summary>
 	/// Component for generating flat mesh based on a bezier spline.
 	/// </summary>
@@ -245,20 +244,10 @@ namespace SplineEditor.MeshGenerator
 		/// Constructs and updates spline mesh using Unity Jobs.
 		/// </summary>
 		[ContextMenu("Generate Mesh")]
-		public void GenerateMesh() {
+		public void GenerateMesh()
+		{
 			var config = SplineMeshConfiguration.Instance;
 			GenerateMesh(!config.UseJobsWithCorotuines);
-		}
-
-		[ContextMenu("Generate Mesh Sync")]
-		public void GenerateMeshSync()
-		{
-			GenerateMesh(true);
-		}
-
-		[ContextMenu("Generate Mesh Async")]
-		public void GenerateMeshAsync() {
-			GenerateMesh(false);
 		}
 
 		/// <summary>
@@ -283,7 +272,7 @@ namespace SplineEditor.MeshGenerator
 				splinePath = new SplinePath();
 			}
 
-			if(generateMeshJobExecutor == null) 
+			if (generateMeshJobExecutor == null)
 			{
 				generateMeshJobExecutor = new MeshJobExecutor(this, splinePath);
 			}
@@ -309,8 +298,8 @@ namespace SplineEditor.MeshGenerator
 				bezierSpline = GetComponent<BezierSpline>();
 			}
 
-			if (splinePath == null) 
-			{ 
+			if (splinePath == null)
+			{
 				splinePath = new SplinePath();
 			}
 
@@ -337,7 +326,7 @@ namespace SplineEditor.MeshGenerator
 				bezierSpline = GetComponent<BezierSpline>();
 			}
 
-			if (splinePath == null) 
+			if (splinePath == null)
 			{
 				splinePath = new SplinePath();
 			}
@@ -364,7 +353,7 @@ namespace SplineEditor.MeshGenerator
 
 		private void OnDisable()
 		{
-			if (bezierSpline == null) 
+			if (bezierSpline == null)
 			{
 				return;
 			}

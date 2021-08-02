@@ -1,17 +1,23 @@
+// <copyright file="MeshJobExecutor.cs" company="vvrvvd">
+// Copyright (c) vvrvvd. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
+using System;
 using SplineEditor;
 using SplineEditor.MeshGenerator;
-using System;
-using Unity.Burst;
 using Unity.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Class for scheduling and executing mesh generation using Jobs system.
+/// </summary>
 public class MeshJobExecutor
 {
-
 	private const int JobBatchSize = 64;
 	private const float SplinePathPrecision = 0.001f;
 
-	public bool isJobScheduled = false;
+	private bool isJobScheduled = false;
 	private bool scheduleNextJob = false;
 
 	private Coroutine generateMeshCoroutine;
@@ -20,12 +26,24 @@ public class MeshJobExecutor
 	private SplineMesh splineMesh;
 	private SplinePath splinePath;
 
-	public MeshJobExecutor(SplineMesh splineMesh, SplinePath splinePath) 
+	/// <summary>
+	/// Initializes a new instance of the <see cref="MeshJobExecutor"/> class.
+	/// </summary>
+	/// <param name="splineMesh">SplineMesh component for getting parameters for mesh generation.</param>
+	/// <param name="splinePath">SplinePath object for keeping parameters for mesh generation.</param>
+	public MeshJobExecutor(SplineMesh splineMesh, SplinePath splinePath)
 	{
 		this.splineMesh = splineMesh;
 		this.splinePath = splinePath;
 	}
 
+	/// <summary>
+	/// Prepares and generates new mesh using Jobs system.
+	/// On mesh generation completion it is stored in the given mesh and onMeshGenerated action is invoked.
+	/// </summary>
+	/// <param name="mesh">Mesh to be generated.</param>
+	/// <param name="onMeshGenerated">Action invoked on mesh generation completion.</param>
+	/// <param name="immediate">Should mesh generation be forced to be executed in the same frame (on the main thread).</param>
 	public void GenerateMesh(Mesh mesh, Action<Mesh> onMeshGenerated, bool immediate)
 	{
 		if (isJobScheduled)
@@ -41,8 +59,9 @@ public class MeshJobExecutor
 		StartJob(generateMeshJob, splineMesh, mesh, onMeshGenerated, immediate);
 	}
 
-	private void StopJobCoroutine() {
-		if (coroutineContext==null || generateMeshCoroutine == null) 
+	private void StopJobCoroutine()
+	{
+		if (coroutineContext == null || generateMeshCoroutine == null)
 		{
 			return;
 		}
@@ -81,55 +100,59 @@ public class MeshJobExecutor
 
 		GenerateMeshJob generateMeshJob = new GenerateMeshJob()
 		{
-			//Input data
-			width = width,
-			usePointsScale = splineMesh.UsePointsScale,
-			useAsymetricWidthCurve = splineMesh.UseAsymetricWidthCurve,
-			uvMode = (int)splineMesh.UvMode,
-			mirrorUv = splineMesh.MirrorUV,
-			isLoop = bezierSpline.IsLoop,
-			scales = scales,
-			normals = normals,
-			tangents = tangents,
-			positions = positions,
-			leftScales = leftScale,
-			rightScales = rightScale,
+			// Input data
+			Width = width,
+			UsePointsScale = splineMesh.UsePointsScale,
+			UseAsymetricWidthCurve = splineMesh.UseAsymetricWidthCurve,
+			UvMode = (int)splineMesh.UvMode,
+			MirrorUv = splineMesh.MirrorUV,
+			IsLoop = bezierSpline.IsLoop,
+			Scales = scales,
+			Normals = normals,
+			Tangents = tangents,
+			Positions = positions,
+			LeftScales = leftScale,
+			RightScales = rightScale,
 
-			//Output data
-			indicesResult = indicesResult,
-			uvsResult = uvsResult,
-			vertsResult = vertsResult,
-			normalsResult = normalsResult,
+			// Output data
+			IndicesResult = indicesResult,
+			UvsResult = uvsResult,
+			VertsResult = vertsResult,
+			NormalsResult = normalsResult,
 		};
 
 		return generateMeshJob;
 	}
 
-	private void StartJob(GenerateMeshJob generateMeshJob, SplineMesh splineMesh, Mesh mesh, Action<Mesh> onMeshGenerated, bool immediate) 
+	private void StartJob(GenerateMeshJob generateMeshJob, SplineMesh splineMesh, Mesh mesh, Action<Mesh> onMeshGenerated, bool immediate)
 	{
-		if (immediate) {
-			generateMeshJob.ScheduleAndComplete(generateMeshJob.positions.Length, JobBatchSize,
+		if (immediate)
+		{
+			generateMeshJob.ScheduleAndComplete(generateMeshJob.Positions.Length, JobBatchSize,
 				(generateMeshJob) =>
 				{
 					OnJobCompleted(ref generateMeshJob, mesh);
 					onMeshGenerated?.Invoke(mesh);
 					isJobScheduled = false;
 				});
-		} else {
+		}
+		else
+		{
 			StartJobCoroutine(generateMeshJob, splineMesh, mesh, onMeshGenerated);
 		}
 	}
 
-	private void StartJobCoroutine(GenerateMeshJob generateMeshJob, SplineMesh splineMesh, Mesh mesh, Action<Mesh> onMeshGenerated) 
+	private void StartJobCoroutine(GenerateMeshJob generateMeshJob, SplineMesh splineMesh, Mesh mesh, Action<Mesh> onMeshGenerated)
 	{
-		generateMeshCoroutine = generateMeshJob.ScheduleAndCompleteAsync(generateMeshJob.positions.Length, JobBatchSize, splineMesh,
+		generateMeshCoroutine = generateMeshJob.ScheduleAndCompleteAsync(generateMeshJob.Positions.Length, JobBatchSize, splineMesh,
 			(generateMeshJob) =>
 			{
 				OnJobCompleted(ref generateMeshJob, mesh);
 				onMeshGenerated?.Invoke(mesh);
 				isJobScheduled = false;
 
-				if (scheduleNextJob) {
+				if (scheduleNextJob)
+				{
 					splineMesh.GenerateMesh();
 				}
 			});
@@ -138,9 +161,9 @@ public class MeshJobExecutor
 	private void OnJobCompleted(ref GenerateMeshJob generateMeshJob, Mesh mesh)
 	{
 		mesh.Clear();
-		mesh.SetVertices(generateMeshJob.vertsResult);
-		mesh.SetNormals(generateMeshJob.normalsResult);
-		mesh.SetUVs(0, generateMeshJob.uvsResult);
-		mesh.SetTriangles(generateMeshJob.indicesResult.ToArray(), 0);
+		mesh.SetVertices(generateMeshJob.VertsResult);
+		mesh.SetNormals(generateMeshJob.NormalsResult);
+		mesh.SetUVs(0, generateMeshJob.UvsResult);
+		mesh.SetTriangles(generateMeshJob.IndicesResult.ToArray(), 0);
 	}
 }
