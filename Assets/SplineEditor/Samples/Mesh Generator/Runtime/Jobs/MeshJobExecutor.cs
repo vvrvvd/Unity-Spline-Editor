@@ -7,6 +7,10 @@ using System;
 using SplineEditor;
 using SplineEditor.MeshGenerator;
 using Unity.Collections;
+using Unity.Jobs;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 /// <summary>
@@ -22,6 +26,8 @@ public class MeshJobExecutor
 
 	private Coroutine generateMeshCoroutine;
 	private MonoBehaviour coroutineContext;
+	private GenerateMeshJob ongoingJob;
+	private JobHandle ongoingJobHandle;
 
 	private SplineMesh splineMesh;
 	private SplinePath splinePath;
@@ -32,6 +38,11 @@ public class MeshJobExecutor
 	/// <param name="splineMesh">SplineMesh component for getting parameters for mesh generation.</param>
 	/// <param name="splinePath">SplinePath object for keeping parameters for mesh generation.</param>
 	public MeshJobExecutor(SplineMesh splineMesh, SplinePath splinePath)
+	{
+		Setup(splineMesh, splinePath);
+	}
+
+	public void Setup(SplineMesh splineMesh, SplinePath splinePath)
 	{
 		this.splineMesh = splineMesh;
 		this.splinePath = splinePath;
@@ -54,13 +65,18 @@ public class MeshJobExecutor
 
 		isJobScheduled = true;
 		scheduleNextJob = false;
-		StopJobCoroutine();
-		var generateMeshJob = PrepareGenerateMeshJob();
-		StartJob(generateMeshJob, splineMesh, mesh, onMeshGenerated, immediate);
+		StopOngoingJob();
+		ongoingJob = PrepareGenerateMeshJob();
+		StartJob(ongoingJob, splineMesh, mesh, onMeshGenerated, immediate);
 	}
 
-	private void StopJobCoroutine()
+	private void StopOngoingJob()
 	{
+		if(!ongoingJobHandle.IsCompleted) {
+			ongoingJobHandle.Complete();
+			ongoingJob.Dispose();
+		}
+
 		if (coroutineContext == null || generateMeshCoroutine == null)
 		{
 			return;
@@ -145,6 +161,10 @@ public class MeshJobExecutor
 	private void StartJobCoroutine(GenerateMeshJob generateMeshJob, SplineMesh splineMesh, Mesh mesh, Action<Mesh> onMeshGenerated)
 	{
 		generateMeshCoroutine = generateMeshJob.ScheduleAndCompleteAsync(generateMeshJob.Positions.Length, JobBatchSize, splineMesh,
+			(jobHandle) =>
+			{
+				ongoingJobHandle = jobHandle;
+			},
 			(generateMeshJob) =>
 			{
 				OnJobCompleted(ref generateMeshJob, mesh);
@@ -160,6 +180,9 @@ public class MeshJobExecutor
 
 	private void OnJobCompleted(ref GenerateMeshJob generateMeshJob, Mesh mesh)
 	{
+#if UNITY_EDITOR
+		Undo.RecordObject(splineMesh, "Generate Mesh");
+#endif
 		mesh.Clear();
 		mesh.SetVertices(generateMeshJob.VertsResult);
 		mesh.SetNormals(generateMeshJob.NormalsResult);

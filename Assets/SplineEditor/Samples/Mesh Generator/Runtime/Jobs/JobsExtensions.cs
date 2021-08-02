@@ -40,12 +40,14 @@ public static class JobsExtensions
 	/// <param name="arrayLength">The number of iterations the for loop will execute.</param>
 	/// <param name="interloopBatchCount">Granularity in which workstealing is performed. A value of 32, means the job queue will steal 32 iterations and then perform them in an efficient inner loop.</param>
 	/// <param name="context">MonoBehaviour to get coroutine run on.</param>
+	/// <param name="onJobScheduled">Action to be invoked when Job is scheduled.</param>
 	/// <param name="onJobCompleted">Action to be invoked on Job completion.</param>
 	/// <param name="dependsOn">Dependencies are used to ensure that a job executes on workerthreads after the dependency has completed execution. Making sure that two jobs reading or writing to same data do not run in parallel.</param>
 	/// <returns>Coroutine awaiting for the job to complete.</returns>
-	public static Coroutine ScheduleAndCompleteAsync<T>(this T jobData, int arrayLength, int interloopBatchCount, MonoBehaviour context, Action<T> onJobCompleted = null, JobHandle dependsOn = default) where T : struct, IDisposableJobParallelFor
+	public static Coroutine ScheduleAndCompleteAsync<T>(this T jobData, int arrayLength, int interloopBatchCount, MonoBehaviour context, Action<JobHandle> onJobScheduled = null, Action<T> onJobCompleted = null, JobHandle dependsOn = default) where T : struct, IDisposableJobParallelFor
 	{
 		var handle = jobData.Schedule(arrayLength, interloopBatchCount, dependsOn);
+		onJobScheduled?.Invoke(handle);
 		var coroutine = context.StartCoroutine(WaitForJobToFinish(handle, jobData, onJobCompleted));
 
 		return coroutine;

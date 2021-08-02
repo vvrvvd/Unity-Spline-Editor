@@ -277,6 +277,7 @@ namespace SplineEditor.MeshGenerator
 				generateMeshJobExecutor = new MeshJobExecutor(this, splinePath);
 			}
 
+			generateMeshJobExecutor.Setup(this, splinePath);
 			generateMeshJobExecutor.GenerateMesh(cachedMesh, onMeshGenerated, immediate);
 			meshFilter.sharedMesh = cachedMesh;
 		}
@@ -348,6 +349,7 @@ namespace SplineEditor.MeshGenerator
 				return;
 			}
 
+			bezierSpline.OnSplineChanged -= GenerateMesh;
 			bezierSpline.OnSplineChanged += GenerateMesh;
 			GenerateMesh();
 		}

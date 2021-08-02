@@ -17,12 +17,6 @@ namespace SplineEditor.MeshGenerator
 
 		[Header("General")]
 		[SerializeField]
-		[Tooltip("Should mesh jobs be used with coroutines that awaits for them to complete instead of forcing mesh generation in the same frame. Decreases the main thread overload.")]
-		private bool useJobsWithCoroutines = true;
-
-		[Space]
-
-		[SerializeField]
 		private Material uvMaterial = default;
 		[SerializeField]
 		private GUISkin guiSkin = default;
@@ -34,6 +28,11 @@ namespace SplineEditor.MeshGenerator
 		private Color normalsColor = Color.green;
 		[SerializeField]
 		private float normalVectorLength = 2.5f;
+
+		[SerializeField]
+		[Tooltip("Decreases the main thread overload. Helps when working on complex meshes.")]
+		[Header("Experimental")]
+		private bool useJobsWithCoroutines = false;
 
 		/// <summary>
 		/// Gets the first SplineMesh editor configuration object found in the resources.
