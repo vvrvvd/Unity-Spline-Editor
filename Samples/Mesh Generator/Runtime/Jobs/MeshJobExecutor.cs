@@ -42,6 +42,9 @@ public class MeshJobExecutor
 		Setup(splineMesh, splinePath);
 	}
 
+	/// <summary>
+	/// Setups source SplineMesh and destined SplinePath components for mesh generation.
+	/// </summary>
 	public void Setup(SplineMesh splineMesh, SplinePath splinePath)
 	{
 		this.splineMesh = splineMesh;
