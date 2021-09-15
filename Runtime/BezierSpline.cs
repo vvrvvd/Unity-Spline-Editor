@@ -754,7 +754,14 @@ namespace SplineEditor
 			parametersT.Add(0f);
 
 			var lastRotationAxis = (FlipNormals ? -1 : 1) * Vector3.forward;
-			var normalVector = Vector3.Cross(lastRotationAxis, tangents[0]).normalized;
+
+			var normalVector =  Vector3.Cross(lastRotationAxis, tangents[0]).normalized;
+
+			if (normalVector == Vector3.zero) {
+				lastRotationAxis = (FlipNormals ? -1 : 1) * Vector3.left;
+				normalVector = Vector3.Cross(lastRotationAxis, tangents[0]).normalized;
+			}
+
 			var rotatedNormalVector = GetRotatedNormal(normalVector, 0f);
 			normals.Add(rotatedNormalVector);
 			for (var i = 1; i < segmentsCount || t < 1; i++)
