@@ -1,0 +1,21 @@
+name: UPM
+
+on:
+  push:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: split upm branch
+        run: |
+          git subtree split -P "$PKG_ROOT" -b upm
+          git push -u origin upm
+        env:
+          PKG_ROOT: 'Assets/SimpleInput'
